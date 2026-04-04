@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Imerso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-base:        #151222;
+      --bg-surface:     #1C1830;
+      --bg-card:        #252038;
+      --bg-hover:       #2E2848;
+      --bg-subtle:      #3D3560;
+      --border-subtle:  #2A2540;
+      --accent:         #6D28D9;
+      --accent-light:   #682AF3;
+      --accent-muted:   #8B5CF6;
+      --accent-subtle:  #EDE9FE;
+      --text-primary:   #FFFFFF;
+      --text-secondary: #A09CB8;
+      --text-disabled:  #6B6882;
+      --danger:         #E05252;
+      --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
+      --font: 'DM Sans', sans-serif;
+      --t: 150ms ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg-base); color: var(--text-primary); min-height: 100dvh; -webkit-font-smoothing: antialiased; }
+    button { font-family: var(--font); cursor: pointer; border: none; background: none; color: inherit; }
+    input  { font-family: var(--font); outline: none; }
+
+
+    /* ── SVG Icons ──────────────────────────────────────────────*/
+    .icon { flex-shrink: 0; display: inline-block; vertical-align: middle; }
+    .dd-action .icon { color: var(--text-secondary); }
+    .dd-action:hover .icon { color: var(--text-primary); }
+    .dd-action--add .icon { color: #A78BFA; }
+    .dd-action--add:hover .icon { color: #C4B5FD; }
+    .sessions-add-btn .icon { flex-shrink: 0; }
+    .lang-trigger__chevron { transition: transform var(--t); display: inline-block; vertical-align: middle; flex-shrink: 0; }
+    .lang-trigger.active .lang-trigger__chevron { transform: rotate(180deg); }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-disabled); pointer-events: none; display: flex; align-items: center; }
+
+    /* ── App shell ──────────────────────────────────────────────*/
+    #app { display: flex; flex-direction: column; min-height: 100dvh; }
+
+    /* ── Topbar ─────────────────────────────────────────────────*/
+    .topbar {
+      height: 56px; padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-base); position: sticky; top: 0; z-index: 50;
+    }
+    .topbar__logo { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+
+    /* ── Lang trigger ───────────────────────────────────────────*/
+    .lang-wrap { position: relative; }
+    .lang-trigger {
+      display: flex; align-items: center; gap: 7px;
+      padding: 7px 11px; background: var(--bg-card);
+      border: 1px solid var(--border-subtle); border-radius: var(--r-sm);
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      transition: background var(--t), border-color var(--t);
+    }
+    .lang-trigger:hover  { background: var(--bg-hover); }
+    .lang-trigger.active { border-color: var(--accent-muted); }
+    .lang-trigger__flag  { font-size: 17px; line-height: 1; }
+    .lang-trigger__chevron {
+      color: var(--text-secondary); font-size: 18px;
+      width: 18px; height: 18px; transition: transform var(--t);
+    }
+    .lang-trigger.active .lang-trigger__chevron { transform: rotate(180deg); }
+
+    /* ── Dropdown ───────────────────────────────────────────────*/
+    .lang-dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0; width: 256px;
+      background: var(--bg-surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--r-lg); box-shadow: 0 20px 48px rgba(0,0,0,0.55);
+      z-index: 200; overflow: hidden;
+      opacity: 0; transform: translateY(-6px) scale(0.97); pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease; transform-origin: top right;
+    }
+    .lang-dropdown.open { opacity: 1; transform: none; pointer-events: all; }
+    .dd-list { padding: 6px 6px 10px; max-height: 272px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--bg-subtle) transparent; }
+    .dd-list::-webkit-scrollbar { width: 4px; }
+    .dd-list::-webkit-scrollbar-thumb { background: var(--bg-subtle); border-radius: 99px; }
+    .dd-empty { padding: 14px 10px; font-size: 13px; color: var(--text-disabled); }
+    .dd-row { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--r-sm); cursor: pointer; transition: background var(--t); user-select: none; }
+    .dd-row:hover, .dd-row.active { background: var(--bg-hover); }
+    .dd-row__flag { font-size: 19px; line-height: 1; flex-shrink: 0; }
+    .dd-row__name { font-size: 14px; font-weight: 500; flex: 1; }
+    .dd-row__check { color: var(--accent-muted); }
+    .dd-footer { border-top: 1px solid var(--border-subtle); padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+    .dd-action { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--r-sm); font-size: 14px; font-weight: 500; color: var(--text-secondary); width: 100%; text-align: left; transition: background var(--t), color var(--t); }
+    .dd-action:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .dd-action:hover .mi { color: var(--text-primary); }
+    .dd-action .mi { color: var(--text-secondary); }
+    .dd-action--add { color: #A78BFA; }
+    .dd-action--add .mi { color: #A78BFA; }
+    .dd-action--add:hover { background: rgba(167,139,250,.12); color: #C4B5FD; }
+    .dd-action--add:hover .mi { color: #C4B5FD; }
+
+    /* ── Main ───────────────────────────────────────────────────*/
+    .main { flex: 1; padding: 20px 20px 100px; }
+
+    /* ── Empty state ────────────────────────────────────────────*/
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 60vh; text-align: center; }
+    .empty-state__icon  { font-size: 44px; opacity: .25; line-height: 1; }
+    .empty-state__title { font-size: 16px; font-weight: 600; color: var(--text-secondary); }
+    .empty-state__sub   { font-size: 13px; color: var(--text-disabled); max-width: 240px; line-height: 1.55; }
+    .btn-add-first { display: inline-flex; align-items: center; gap: 7px; padding: 11px 20px; background: var(--accent); border-radius: var(--r-md); font-size: 14px; font-weight: 600; color: #fff; margin-top: 4px; transition: background var(--t); }
+    .btn-add-first:hover { background: var(--accent-light); }
+
+    /* ── Library ────────────────────────────────────────────────*/
+    .library { display: none; flex-direction: column; gap: 16px; }
+    .library.visible { display: flex; }
+
+    .stats-bar { display: flex; gap: 8px; }
+    .stat-chip { flex: 1; background: transparent; border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+    .stat-chip__val   { font-size: 20px; font-weight: 600; letter-spacing: -0.4px; line-height: 1.1; }
+    .stat-chip__label { font-size: 12px; color: var(--text-secondary); }
+    .stat-chip--streak { position: relative; }
+    .stat-chip--streak .stat-chip__val { display: inline; }
+    .stat-chip__streak-row { display: flex; align-items: baseline; gap: 4px; }
+    .stat-chip__streak-icon { font-size: 16px; line-height: 1; }
+
+    .lib-toolbar { display: flex; gap: 8px; align-items: center; }
+    .search-wrap { flex: 1; position: relative; }
+    .search-wrap .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-disabled); pointer-events: none; }
+    .search-input { width: 100%; height: 38px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--r-sm); color: var(--text-primary); font-size: 14px; padding: 0 12px 0 38px; transition: border-color var(--t); }
+    .search-input::placeholder { color: var(--text-disabled); }
+    .search-input:focus { border-color: var(--accent-muted); }
+
+    .filter-btn { height: 38px; padding: 0 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--r-sm); display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: background var(--t), border-color var(--t), color var(--t); white-space: nowrap; }
+    .filter-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .filter-btn.active { border-color: var(--accent-muted); color: var(--accent-subtle); }
+
+    .type-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .type-chip { padding: 5px 12px; border-radius: 99px; border: 1px solid var(--border-subtle); background: var(--bg-card); font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: background var(--t), border-color var(--t), color var(--t); }
+    .type-chip:hover  { background: var(--bg-hover); color: var(--text-primary); }
+    .type-chip.active { background: rgba(109,40,217,.18); border-color: var(--accent-muted); color: var(--accent-subtle); }
+
+    .content-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .content-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: background var(--t), border-color var(--t); -webkit-tap-highlight-color: transparent; }
+    .content-card:hover { background: var(--bg-hover); border-color: var(--bg-subtle); }
+    .content-card__left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+    .content-card__top  { display: flex; align-items: center; gap: 8px; }
+
+    .type-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; flex-shrink: 0; }
+    .type-badge .mi { font-size: 13px; width: 14px; height: 14px; }
+    .type-badge--youtube  { background: rgba(239,68,68,.15);  color: #FCA5A5; }
+    .type-badge--serie    { background: rgba(234,179,8,.13);  color: #FDE68A; }
+    .type-badge--podcast  { background: rgba(20,184,166,.13); color: #99F6E4; }
+    .type-badge--livro    { background: rgba(251,191,36,.13); color: #FDE68A; }
+    .type-badge--website  { background: rgba(59,130,246,.13); color: #BAE6FD; }
+    .type-badge--outro    { background: rgba(160,156,184,.13);color: var(--text-secondary); }
+
+    .content-card__title { font-size: 14px; font-weight: 500; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .content-card__meta  { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); }
+    .content-card__meta-item { display: flex; align-items: center; gap: 4px; }
+    .content-card__meta-item .mi { font-size: 14px; width: 14px; height: 14px; }
+    .content-card__chevron { color: var(--text-disabled); flex-shrink: 0; align-self: center; }
+
+    .lib-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 20px; text-align: center; }
+    .lib-empty__icon { font-size: 36px; opacity: .2; }
+    .lib-empty__text { font-size: 14px; color: var(--text-secondary); }
+    .lib-empty__sub  { font-size: 14px; color: var(--text-disabled); }
+
+    /* ── FAB ────────────────────────────────────────────────────*/
+    .fab { position: fixed; bottom: 24px; right: 20px; z-index: 40; height: 48px; padding: 0 20px 0 14px; background: var(--accent); border-radius: 99px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 20px rgba(109,40,217,.5); transition: background var(--t), transform var(--t); }
+    .fab:hover  { background: var(--accent-light); }
+    .fab:active { transform: scale(.97); }
+    .fab .mi    { font-size: 22px; width: 22px; height: 22px; color: #fff; font-variation-settings: 'opsz' 22, 'wght' 300, 'FILL' 0, 'GRAD' 0; }
+    .fab__label { font-size: 15px; font-weight: 600; color: #fff; }
+
+    /* ── Overlay / sheet ────────────────────────────────────────*/
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(3px); z-index: 100; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 200ms ease; }
+    #sessionFormModal { z-index: 110; }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .sheet { background: var(--bg-surface); border-radius: var(--r-xl) var(--r-xl) 0 0; width: 100%; max-width: 480px; max-height: 90dvh; display: flex; flex-direction: column; transform: translateY(20px); transition: transform 200ms ease; overflow: hidden; }
+    .overlay.open .sheet { transform: translateY(0); }
+
+    @media (min-width: 640px) {
+      .overlay { align-items: center; padding: 20px; }
+      .sheet { border-radius: var(--r-xl); width: 400px; max-width: 400px; max-height: 80dvh; transform: translateY(10px) scale(.98); transform-origin: center; }
+      .overlay.open .sheet { transform: none; }
+      .sheet__handle { display: none; }
+    }
+
+    .sheet__handle { width: 32px; height: 3px; background: var(--bg-subtle); border-radius: 99px; margin: 12px auto 0; flex-shrink: 0; }
+    .sheet__header { padding: 18px 20px 12px; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+    .sheet__back   { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--r-sm); color: var(--text-secondary); transition: background var(--t), color var(--t); flex-shrink: 0; }
+    .sheet__back:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .sheet__title  { font-size: 18px; font-weight: 600; flex: 1; }
+    .sheet__action { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--r-sm); color: var(--text-secondary); transition: background var(--t), color var(--t); flex-shrink: 0; }
+    .sheet__action:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .sheet__action--danger { color: var(--text-disabled); }
+    .sheet__action--danger:hover { background: rgba(224,82,82,.12); color: var(--danger); }
+    .sheet__body { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--bg-subtle) transparent; }
+    .sheet__body::-webkit-scrollbar { width: 4px; }
+    .sheet__body::-webkit-scrollbar-thumb { background: var(--bg-subtle); border-radius: 99px; }
+    .sheet__footer { padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; border-top: 1px solid var(--border-subtle); }
+
+    /* ── Detail page (full-screen slide) ───────────────────────*/
+    .detail-page {
+      position: fixed; inset: 0; z-index: 100;
+      background: var(--bg-base);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 260ms cubic-bezier(0.4,0,0.2,1);
+      overflow: hidden;
+    }
+    .detail-page.open { transform: translateX(0); }
+    .detail-page__header {
+      height: 56px; padding: 0 8px 0 4px;
+      display: flex; align-items: center; gap: 4px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+      flex-shrink: 0;
+    }
+    .detail-page__title {
+      flex: 1; font-size: 16px; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      padding: 0 4px;
+    }
+    .detail-page__body {
+      flex: 1; overflow-y: auto;
+      scrollbar-width: thin; scrollbar-color: var(--bg-subtle) transparent;
+    }
+    .detail-page__body::-webkit-scrollbar { width: 4px; }
+    .detail-page__body::-webkit-scrollbar-thumb { background: var(--bg-subtle); border-radius: 99px; }
+
+    /* ── Buttons ────────────────────────────────────────────────*/
+    .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 16px; border-radius: var(--r-md); font-size: 15px; font-weight: 600; width: 100%; transition: background var(--t), opacity var(--t); }
+    .btn-primary        { background: var(--accent); color: #fff; }
+    .btn-primary:hover  { background: var(--accent-light); }
+    .btn-primary:active { opacity: .85; }
+    .btn-ghost          { background: none; color: var(--text-secondary); font-weight: 500; border: 1px solid transparent; }
+    .btn-ghost:hover    { background: var(--bg-card); border-color: var(--border-subtle); color: var(--text-primary); }
+
+    /* ── Card list wrapper ──────────────────────────────────────*/
+    .list-card { background: var(--bg-card); border-radius: var(--r-md); overflow: hidden; margin: 0 20px 20px; }
+
+    /* ── Switch rows ────────────────────────────────────────────*/
+    .sw-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); cursor: pointer; transition: background var(--t); user-select: none; }
+    .sw-row:last-child { border-bottom: none; }
+    .sw-row:hover      { background: var(--bg-hover); }
+    .sw-row.active     { background: rgba(109,40,217,.12); }
+    .sw-row__flag  { font-size: 22px; line-height: 1; flex-shrink: 0; }
+    .sw-row__name  { font-size: 15px; font-weight: 500; flex: 1; }
+    .sw-row__check { color: var(--accent-muted); }
+    .sw-footer-actions { display: flex; gap: 8px; padding: 12px 20px 20px; border-top: 1px solid var(--border-subtle); }
+    .sw-action { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 12px; border-radius: var(--r-md); font-size: 14px; font-weight: 600; transition: background var(--t), color var(--t); }
+    .sw-action--add { background: var(--accent); color: #fff; }
+    .sw-action--add:hover { background: var(--accent-light); }
+    .sw-action--manage { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+    .sw-action--manage:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    /* ── Manage rows ────────────────────────────────────────────*/
+    .mg-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); }
+    .mg-row:last-child { border-bottom: none; }
+    .mg-row__drag { color: var(--text-disabled); cursor: grab; display: flex; align-items: center; width: 24px; height: 24px; flex-shrink: 0; touch-action: none; border-radius: 4px; transition: color var(--t); }
+    .mg-row__drag:hover { color: var(--text-secondary); }
+    .mg-row__drag:active { cursor: grabbing; }
+    .mg-row__flag { font-size: 22px; line-height: 1; flex-shrink: 0; }
+    .mg-row__name { font-size: 15px; font-weight: 500; flex: 1; }
+    .mg-row__delete { color: var(--danger); display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: var(--r-sm); flex-shrink: 0; transition: background var(--t); }
+    .mg-row__delete:hover { background: rgba(224,82,82,.12); }
+    .mg-row.drag-over { border-top: 2px solid var(--accent-muted); }
+
+    /* ── Add rows ───────────────────────────────────────────────*/
+    .al-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); cursor: pointer; transition: background var(--t); user-select: none; }
+    .al-row:last-child { border-bottom: none; }
+    .al-row:hover:not(.added) { background: var(--bg-hover); }
+    .al-row.added { cursor: default; }
+    .al-row.added:hover { background: rgba(255,255,255,.03); cursor: pointer; }
+    .al-row__flag { font-size: 22px; line-height: 1; flex-shrink: 0; }
+    .al-row__name { font-size: 15px; font-weight: 500; flex: 1; }
+    .al-row.added .al-row__name { color: var(--text-disabled); }
+    .al-row__badge { font-size: 12px; font-weight: 600; color: var(--text-disabled); letter-spacing: 0.04em; flex-shrink: 0; }
+    .add-modal-manage { display: flex; align-items: center; gap: 8px; padding: 14px 16px; font-size: 14px; font-weight: 500; color: #A78BFA; border-top: 1px solid var(--border-subtle); cursor: pointer; transition: background var(--t), color var(--t); width: 100%; text-align: left; border-radius: 0 0 var(--r-md) var(--r-md); }
+    .add-modal-manage:hover { background: rgba(167,139,250,.1); color: #C4B5FD; }
+
+    /* ── Toast ──────────────────────────────────────────────────*/
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px); background: var(--bg-hover); border: 1px solid var(--bg-subtle); color: var(--text-primary); font-size: 14px; font-weight: 500; padding: 10px 18px; border-radius: 99px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 200ms ease, transform 200ms ease; z-index: 300; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Confirm dialog ─────────────────────────────────────────*/
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+    .confirm-overlay.open { opacity: 1; pointer-events: all; }
+    .confirm-dialog { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-xl); width: 100%; max-width: 320px; padding: 24px 20px 20px; display: flex; flex-direction: column; gap: 6px; transform: scale(.95); transition: transform 160ms ease; }
+    .confirm-overlay.open .confirm-dialog { transform: scale(1); }
+    .confirm-dialog__title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .confirm-dialog__body  { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px; }
+    .confirm-dialog__actions { display: flex; gap: 8px; margin-top: 4px; }
+    .confirm-btn { flex: 1; padding: 11px 12px; border-radius: var(--r-md); font-size: 14px; font-weight: 600; transition: background var(--t), opacity var(--t); }
+    .confirm-btn--cancel { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+    .confirm-btn--cancel:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .confirm-btn--danger { background: var(--danger); color: #fff; }
+    .confirm-btn--danger:hover { background: #c94444; }
+
+    /* ════════════════════════════════════════════════════════════
+       CONTENT FORM
+    ════════════════════════════════════════════════════════════ */
+    .form-body { display: flex; flex-direction: column; }
+    .form-section { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); }
+    .form-section:last-child { border-bottom: none; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: block; }
+    .form-label-row { display: flex; align-items: center; justify-content: space-between; }
+
+    .type-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .type-pill { padding: 6px 14px; border-radius: 99px; border: 1px solid var(--border-subtle); background: var(--bg-card); font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: background var(--t), border-color var(--t), color var(--t); }
+    .type-pill:hover  { background: var(--bg-hover); color: var(--text-primary); }
+    .type-pill.active { background: rgba(109,40,217,.2); border-color: var(--accent-muted); color: var(--accent-subtle); }
+
+    .field-wrap { position: relative; }
+    .field-wrap .icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-disabled); pointer-events: none; }
+    .text-field { width: 100%; height: 44px; background: var(--bg-base); border: 1px solid var(--bg-subtle); border-radius: var(--r-sm); color: var(--text-primary); font-size: 14px; padding: 0 40px 0 14px; transition: border-color var(--t); }
+    .text-field::placeholder { color: var(--text-disabled); }
+    /* ── Paste button ────────────────────────────────────────────*/
+    .field-wrap--link { display: flex; align-items: center; gap: 0; }
+    .field-icon-left { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-disabled); pointer-events: none; display:flex; align-items:center; }
+    .text-field--link { padding-left: 40px; padding-right: 44px; border-radius: var(--r-sm) 0 0 var(--r-sm); border-right: none; flex: 1; }
+    .text-field--link:focus { border-color: var(--accent-muted); }
+    .paste-btn { height: 44px; padding: 0 12px; background: var(--bg-subtle); border: 1px solid var(--bg-subtle); border-radius: 0 var(--r-sm) var(--r-sm) 0; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: background var(--t), color var(--t); flex-shrink: 0; }
+    .paste-btn:hover { background: var(--bg-subtle); color: var(--text-primary); }
+    .paste-btn:active { opacity: .75; }
+    .text-field:focus { border-color: var(--accent-muted); }
+
+    .sessions-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .sessions-add-btn { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; color: #A78BFA; transition: color var(--t); }
+    .sessions-add-btn:hover { color: #C4B5FD; }
+
+    .sessions-empty { background: var(--bg-card); border-radius: var(--r-sm); padding: 16px; font-size: 13px; color: var(--text-disabled); display: flex; align-items: center; justify-content: space-between; }
+
+    .session-item { background: var(--bg-card); border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 6px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .session-item:last-child { margin-bottom: 0; }
+    .session-item__left { flex: 1; min-width: 0; }
+    .session-item__time { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .session-item__meta { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+    .session-item__edit { color: var(--text-disabled); display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--r-sm); transition: background var(--t), color var(--t); flex-shrink: 0; }
+    .session-item__edit:hover { background: var(--bg-hover); color: var(--text-secondary); }
+
+    .session-date-group { font-size: 12px; color: var(--text-disabled); margin-bottom: 6px; margin-top: 8px; }
+    .session-date-group:first-child { margin-top: 0; }
+
+    /* ════════════════════════════════════════════════════════════
+       SESSION FORM
+    ════════════════════════════════════════════════════════════ */
+    .segmented { display: flex; background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: var(--r-sm); padding: 3px; gap: 3px; }
+    .segmented__btn { flex: 1; padding: 9px 12px; border-radius: calc(var(--r-sm) - 2px); font-size: 14px; font-weight: 500; color: var(--text-disabled); transition: background var(--t), color var(--t); text-align: center; }
+    .segmented__btn.active { background: var(--bg-hover); color: var(--text-primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+
+    .cat-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cat-pill { padding: 6px 14px; border-radius: 99px; border: 1px solid var(--border-subtle); background: var(--bg-card); font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: background var(--t), border-color var(--t), color var(--t); }
+    .cat-pill:hover  { background: var(--bg-hover); color: var(--text-primary); }
+    .cat-pill.active { background: rgba(109,40,217,.2); border-color: var(--accent-muted); color: var(--accent-subtle); }
+
+    .time-fields { display: flex; gap: 8px; }
+    .time-field-wrap { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .time-field-label { font-size: 12px; color: var(--text-secondary); }
+    .time-field { width: 100%; height: 44px; background: var(--bg-base); border: 1px solid var(--bg-subtle); border-radius: var(--r-sm); color: var(--text-primary); font-size: 15px; font-weight: 500; padding: 0 14px; text-align: center; transition: border-color var(--t); }
+    .time-field::placeholder { color: var(--text-disabled); font-weight: 400; }
+    .time-field:focus { border-color: var(--accent-muted); }
+
+    .duration-inputs { display: flex; align-items: center; gap: 8px; }
+    .duration-field-wrap { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .duration-field { width: 100%; height: 52px; background: var(--bg-base); border: 1px solid var(--bg-subtle); border-radius: var(--r-sm); color: var(--text-primary); font-size: 22px; font-weight: 600; padding: 0 14px; text-align: center; transition: border-color var(--t); -moz-appearance: textfield; }
+    .duration-field::placeholder { color: var(--text-disabled); font-weight: 400; }
+    .duration-field::-webkit-inner-spin-button, .duration-field::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .duration-field:focus { border-color: var(--accent-muted); }
+    .duration-field-label { font-size: 11px; color: var(--text-disabled); text-align: center; }
+    .duration-sep { font-size: 22px; font-weight: 600; color: var(--text-disabled); padding-bottom: 20px; }
+
+    .quick-chips { display: flex; gap: 6px; margin-top: 10px; }
+    .quick-chip { flex: 1; padding: 8px 0; border-radius: var(--r-sm); border: 1px solid var(--border-subtle); background: var(--bg-card); font-size: 13px; font-weight: 500; color: var(--text-secondary); text-align: center; transition: background var(--t), border-color var(--t), color var(--t); }
+    .quick-chip:hover  { background: var(--bg-hover); color: var(--text-primary); }
+    .quick-chip.active { background: rgba(109,40,217,.2); border-color: var(--accent-muted); color: var(--accent-subtle); }
+
+    /* ════════════════════════════════════════════════════════════
+       DETAIL VIEW
+    ════════════════════════════════════════════════════════════ */
+    .detail-hero { padding: 16px 20px 20px; border-bottom: 1px solid var(--border-subtle); }
+    .detail-type-badge { margin-bottom: 10px; }
+    .detail-title { font-size: 20px; font-weight: 600; line-height: 1.3; letter-spacing: -0.2px; }
+    .detail-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--accent-muted); margin-top: 8px; text-decoration: none; transition: color var(--t); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .detail-link:hover { color: var(--accent-subtle); }
+
+
+    .detail-stats { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); }
+    .detail-stats__label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: 12px; }
+    .detail-stats__total { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
+    .detail-stats__total-val      { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; color: var(--accent-subtle); }
+    .detail-stats__total-sessions { font-size: 13px; color: var(--text-secondary); }
+    .detail-stats__breakdown      { display: flex; flex-direction: column; gap: 6px; }
+    .detail-stat-row { display: flex; align-items: center; justify-content: space-between; }
+    .detail-stat-row__label { font-size: 13px; color: var(--text-secondary); }
+    .detail-stat-row__val   { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+
+    .detail-sessions { padding: 16px 20px; }
+    .detail-sessions__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .detail-sessions__label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <header class="topbar">
+    <span class="topbar__logo">Imerso</span>
+    <div class="lang-wrap">
+      <button class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Trocar idioma">
+        <span class="lang-trigger__flag" id="currentFlag">🌐</span>
+        <span id="currentName">Idioma</span>
+        <svg class="icon lang-trigger__chevron" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+      </button>
+      <div class="lang-dropdown" id="langDropdown" role="listbox">
+        <div class="dd-list" id="ddList"></div>
+        <div class="dd-footer">
+          <button class="dd-action dd-action--add" id="ddAddBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Adicionar idiomas</button>
+          <button class="dd-action" id="ddManageBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Gerenciar idiomas</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main" id="mainArea">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state__icon">📚</div>
+      <p class="empty-state__title">Nenhum idioma adicionado</p>
+      <p class="empty-state__sub">Adicione um idioma para começar a registrar sua imersão.</p>
+      <button class="btn-add-first" id="emptyAddBtn">
+        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Adicionar idioma
+      </button>
+    </div>
+
+    <div class="library" id="libraryView">
+      <div class="stats-bar">
+        <div class="stat-chip"><span class="stat-chip__val" id="statTotal">0m</span><span class="stat-chip__label">total</span></div>
+        <div class="stat-chip"><span class="stat-chip__val" id="statWeek">0m</span><span class="stat-chip__label">esta semana</span></div>
+        <div class="stat-chip stat-chip--streak"><div class="stat-chip__streak-row"><span class="stat-chip__val" id="statStreak">0</span><span class="stat-chip__streak-icon">🔥</span></div><span class="stat-chip__label">streak</span></div>
+      </div>
+
+      <div class="lib-toolbar">
+        <div class="search-wrap">
+          <span class="search-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+          <input type="search" class="search-input" id="searchInput" placeholder="Buscar..." autocomplete="off" />
+        </div>
+        <button class="filter-btn" id="filterBtn">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+          <span id="filterLabel">Tipo</span>
+        </button>
+      </div>
+
+      <div class="type-chips" id="typeChips" style="display:none;">
+        <button class="type-chip active" data-type="">Todos</button>
+        <button class="type-chip" data-type="youtube">YouTube</button>
+        <button class="type-chip" data-type="serie">Série</button>
+        <button class="type-chip" data-type="podcast">Podcast</button>
+        <button class="type-chip" data-type="livro">Livro</button>
+        <button class="type-chip" data-type="website">Website</button>
+        <button class="type-chip" data-type="outro">Outro</button>
+      </div>
+
+      <div class="content-list" id="contentList"></div>
+    </div>
+  </main>
+
+  <button class="fab" id="fabBtn" style="display:none;" aria-label="Adicionar conteúdo">
+    <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    <span class="fab__label">Adicionar</span>
+  </button>
+</div>
+
+<!-- ── Lang modals ──────────────────────────────────────────────────── -->
+<div class="overlay" id="switchModal" role="dialog" aria-modal="true" aria-labelledby="switchTitle">
+  <div class="sheet" style="padding-bottom:0;">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <div class="sheet__header"><h2 class="sheet__title" id="switchTitle">Trocar idioma</h2></div>
+    <div class="sheet__body"><div class="list-card" id="switchList"></div></div>
+    <div class="sw-footer-actions">
+      <button class="sw-action sw-action--add" id="switchAddBtn"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Adicionar</button>
+      <button class="sw-action sw-action--manage" id="switchManageBtn"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Gerenciar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="manageModal" role="dialog" aria-modal="true" aria-labelledby="manageTitle">
+  <div class="sheet">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <div class="sheet__header"><h2 class="sheet__title" id="manageTitle">Gerenciar idiomas</h2></div>
+    <div class="sheet__body"><div class="list-card" id="manageList"></div></div>
+    <div class="sheet__footer"><button class="btn btn-primary" id="manageDoneBtn">Concluir</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="addModal" role="dialog" aria-modal="true" aria-labelledby="addTitle">
+  <div class="sheet">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <div class="sheet__header"><h2 class="sheet__title" id="addTitle">Adicionar idioma</h2></div>
+    <div class="sheet__body">
+      <div class="list-card" id="addList"></div>
+      <div class="list-card" style="margin-top:0;border-radius:0 0 var(--r-md) var(--r-md);margin:0 20px 20px;overflow:hidden;">
+        <button class="add-modal-manage" id="addModalManageBtn"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Gerenciar idiomas</button>
+      </div>
+    </div>
+    <div class="sheet__footer"><button class="btn btn-ghost" id="addCloseBtn">Fechar</button></div>
+  </div>
+</div>
+
+<!-- ── Content form modal ───────────────────────────────────────────── -->
+<div class="overlay" id="contentFormModal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <div class="sheet__header">
+      <button class="sheet__back" id="contentFormBack" aria-label="Fechar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <h2 class="sheet__title" id="contentFormTitle">Novo conteúdo</h2>
+      <button class="sheet__action" id="contentFormSave" aria-label="Salvar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <div class="form-body">
+        <div class="form-section">
+          <label class="form-label" for="cfLink">Link</label>
+          <div class="field-wrap">
+            <input type="text" class="text-field" id="cfLink" placeholder="Cole o link aqui" autocomplete="off" inputmode="url" style="padding-left:14px;padding-right:14px;" />
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label-row">
+            <label class="form-label" for="cfTitle" style="margin-bottom:0;">Título</label>
+          </div>
+          <div class="field-wrap" style="margin-top:10px;">
+            <input type="text" class="text-field" id="cfTitle" placeholder="Nome do conteúdo" autocomplete="off" />
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          </div>
+        </div>
+        <div class="form-section">
+          <label class="form-label">Tipo</label>
+          <div class="type-pills" id="cfTypePills">
+            <button class="type-pill active" data-type="youtube">YouTube</button>
+            <button class="type-pill" data-type="serie">Série</button>
+            <button class="type-pill" data-type="podcast">Podcast</button>
+            <button class="type-pill" data-type="website">Website</button>
+            <button class="type-pill" data-type="livro">Livro</button>
+            <button class="type-pill" data-type="outro">Outro</button>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="sessions-header">
+            <label class="form-label" style="margin-bottom:0;">Sessões</label>
+            <button class="sessions-add-btn" id="cfAddSessionBtn"><svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Adicionar</button>
+          </div>
+          <div id="cfSessionsList"></div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn-primary" id="contentFormSaveBtn">Salvar</button>
+      <button class="btn btn-ghost" id="contentFormCancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Session form modal ───────────────────────────────────────────── -->
+<div class="overlay" id="sessionFormModal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <div class="sheet__header">
+      <button class="sheet__back" id="sessionFormBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <h2 class="sheet__title" id="sessionFormTitle">Nova sessão</h2>
+    </div>
+    <div class="sheet__body">
+      <div class="form-body">
+        <div class="form-section">
+          <label class="form-label">Categoria</label>
+          <div class="cat-pills" id="sfCatPills">
+            <button class="cat-pill active" data-cat="imersao">Imersão</button>
+            <button class="cat-pill" data-cat="interativa">Imersão interativa</button>
+          </div>
+        </div>
+        <div class="form-section">
+          <label class="form-label">Subcategoria</label>
+          <div class="cat-pills" id="sfSubPills">
+            <button class="cat-pill active" data-sub="escuta-leitura">Simultâneo</button>
+            <button class="cat-pill" data-sub="escuta">Escuta</button>
+            <button class="cat-pill" data-sub="leitura">Leitura</button>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="segmented" id="sfSegmented">
+            <button class="segmented__btn" data-mode="horario">Horário</button>
+            <button class="segmented__btn active" data-mode="duracao">Duração</button>
+          </div>
+        </div>
+        <div class="form-section" id="sfHorarioSection" style="display:none;">
+          <div class="time-fields">
+            <div class="time-field-wrap">
+              <label class="time-field-label" for="sfStart">Início</label>
+              <input type="time" class="time-field" id="sfStart" />
+            </div>
+            <div class="time-field-wrap">
+              <label class="time-field-label" for="sfEnd">Fim</label>
+              <input type="time" class="time-field" id="sfEnd" />
+            </div>
+          </div>
+        </div>
+        <div class="form-section" id="sfDuracaoSection">
+          <div class="duration-inputs">
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="sfHoras" min="0" max="23" placeholder="0" />
+              <span class="duration-field-label">Horas</span>
+            </div>
+            <span class="duration-sep">:</span>
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="sfMinutos" min="0" max="59" placeholder="00" />
+              <span class="duration-field-label">Min</span>
+            </div>
+            <span class="duration-sep">:</span>
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="sfSegundos" min="0" max="59" placeholder="00" />
+              <span class="duration-field-label">Seg</span>
+            </div>
+          </div>
+          <div class="quick-chips" id="sfQuickChips">
+            <button class="quick-chip" data-min="15">15m</button>
+            <button class="quick-chip" data-min="30">30m</button>
+            <button class="quick-chip" data-min="45">45m</button>
+            <button class="quick-chip" data-min="60">1h</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet__footer">
+      <button class="btn btn-primary" id="sfSaveBtn">Salvar sessão</button>
+      <button class="btn btn-ghost" id="sfCancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Content detail page ──────────────────────────────────────────── -->
+<div class="detail-page" id="contentDetailModal" role="main" aria-label="Detalhe do conteúdo">
+  <div class="detail-page__header">
+    <button class="sheet__back" id="detailBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <h2 class="detail-page__title" id="detailTitle"></h2>
+    <button class="sheet__action" id="detailEditBtn" aria-label="Editar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+    <button class="sheet__action sheet__action--danger" id="detailDeleteBtn" aria-label="Excluir conteúdo"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+  </div>
+  <div class="detail-page__body" id="detailBody"></div>
+</div>
+
+<!-- ── Confirm dialog ───────────────────────────────────────────────── -->
+<div class="confirm-overlay" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="confirm-dialog">
+    <p class="confirm-dialog__title" id="confirmTitle">Remover</p>
+    <p class="confirm-dialog__body" id="confirmBody"></p>
+    <div class="confirm-dialog__actions">
+      <button class="confirm-btn confirm-btn--cancel" id="confirmCancelBtn">Cancelar</button>
+      <button class="confirm-btn confirm-btn--danger" id="confirmDeleteBtn">Remover</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   CONSTANTS
+════════════════════════════════════════════════════════════ */
+const ALL_LANGUAGES = [
+  {id:'en',flag:'🇺🇸',name:'Inglês'},{id:'es',flag:'🇪🇸',name:'Espanhol'},
+  {id:'fr',flag:'🇫🇷',name:'Francês'},{id:'de',flag:'🇩🇪',name:'Alemão'},
+  {id:'it',flag:'🇮🇹',name:'Italiano'},{id:'pt',flag:'🇧🇷',name:'Português'},
+  {id:'ja',flag:'🇯🇵',name:'Japonês'},{id:'zh',flag:'🇨🇳',name:'Mandarim'},
+  {id:'ko',flag:'🇰🇷',name:'Coreano'},{id:'ru',flag:'🇷🇺',name:'Russo'},
+  {id:'ar',flag:'🇸🇦',name:'Árabe'},{id:'nl',flag:'🇳🇱',name:'Holandês'},
+  {id:'pl',flag:'🇵🇱',name:'Polonês'},{id:'sv',flag:'🇸🇪',name:'Sueco'},
+  {id:'no',flag:'🇳🇴',name:'Norueguês'},{id:'da',flag:'🇩🇰',name:'Dinamarquês'},
+  {id:'fi',flag:'🇫🇮',name:'Finlandês'},{id:'tr',flag:'🇹🇷',name:'Turco'},
+  {id:'hi',flag:'🇮🇳',name:'Hindi'},{id:'vi',flag:'🇻🇳',name:'Vietnamita'},
+  {id:'th',flag:'🇹🇭',name:'Tailandês'},{id:'id',flag:'🇮🇩',name:'Indonésio'},
+  {id:'cs',flag:'🇨🇿',name:'Tcheco'},{id:'el',flag:'🇬🇷',name:'Grego'},
+  {id:'he',flag:'🇮🇱',name:'Hebraico'},
+];
+
+const TYPE_META = {
+  youtube: {label:'YouTube', icon:'play_circle', cls:'type-badge--youtube'},
+  serie:   {label:'Série',   icon:'tv',          cls:'type-badge--serie'},
+  podcast: {label:'Podcast', icon:'mic',         cls:'type-badge--podcast'},
+  livro:   {label:'Livro',   icon:'book',        cls:'type-badge--livro'},
+  website: {label:'Website', icon:'language',    cls:'type-badge--website'},
+  outro:   {label:'Outro',   icon:'category',    cls:'type-badge--outro'},
+};
+
+const CAT_LABELS = {imersao:'Imersão', interativa:'Imersão interativa'};
+const SUB_LABELS = {'escuta-leitura':'Simultâneo', escuta:'Escuta', leitura:'Leitura'};
+
+/* ════════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════════ */
+function loadState() {
+  try {
+    const r = localStorage.getItem('imerso_v2');
+    if (r) { const s = JSON.parse(r); if (!s.contents) s.contents={}; return s; }
+  } catch {}
+  return {userLanguages:[], activeLanguage:null, contents:{}};
+}
+function save() { localStorage.setItem('imerso_v2', JSON.stringify(state)); }
+let state = loadState();
+
+/* ════════════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════════════ */
+const desktop = () => window.innerWidth >= 640;
+const getLang  = id => state.userLanguages.find(l=>l.id===id) || ALL_LANGUAGES.find(l=>l.id===id);
+const uid      = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const esc      = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 2400);
+}
+
+function fmtMin(min) {
+  // Always convert to seconds for accurate display
+  return fmtSec(Math.round((min||0) * 60));
+}
+
+function fmtSec(totalSec) {
+  if (!totalSec || totalSec<=0) return '0m';
+  const h = Math.floor(totalSec/3600);
+  const m = Math.floor((totalSec%3600)/60);
+  const s = totalSec%60;
+  let parts = [];
+  if (h>0) parts.push(`${h}h`);
+  if (m>0) parts.push(`${m}m`);
+  if (s>0) parts.push(`${s}s`);
+  return parts.length ? parts.join(' ') : '0m';
+}
+
+function getWeekStart() {
+  const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-d.getDay()); return d;
+}
+
+function getLangContents() {
+  const id = state.activeLanguage; if (!id) return [];
+  if (!state.contents[id]) state.contents[id]=[];
+  return state.contents[id];
+}
+
+function contentTotalMin(item) {
+  return (item.sessions||[]).reduce((a,s)=>a+(s.durationMin||0),0);
+}
+
+function typeBadgeHtml(type) {
+  const m = TYPE_META[type]||TYPE_META.outro;
+  const svgMap={play_circle:'<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>',tv:'<path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/>',mic:'<path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>',book:'<path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>',language:'<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.9 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/>',category:'<path d="m12 2-5.5 9h11zm0 3.84L14.6 9h-5.2zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5S15.01 22 17.5 22s4.5-2.01 4.5-4.5S19.99 13 17.5 13zm0 7c-1.38 0-2.5-1.12-2.5-2.5S16.12 15 17.5 15s2.5 1.12 2.5 2.5S18.88 20 17.5 20zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/>'};
+  const iconSvg=`<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle">${svgMap[m.icon]||''}</svg>`;
+  return `<span class="type-badge ${m.cls}">${iconSvg}${m.label}</span>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   TOPBAR
+════════════════════════════════════════════════════════════ */
+function syncTopbar() {
+  const lang = state.activeLanguage ? getLang(state.activeLanguage) : null;
+  document.getElementById('currentFlag').textContent = lang ? lang.flag : '🌐';
+  document.getElementById('currentName').textContent = lang ? lang.name : 'Idioma';
+  const has = state.userLanguages.length>0;
+  document.getElementById('emptyState').style.display = has ? 'none' : 'flex';
+  document.getElementById('libraryView').classList.toggle('visible', has);
+  document.getElementById('fabBtn').style.display = has ? 'flex' : 'none';
+  if (has) renderLibrary();
+}
+
+/* ════════════════════════════════════════════════════════════
+   LIBRARY
+════════════════════════════════════════════════════════════ */
+let activeTypeFilter='', searchQuery='';
+
+function computeStreak() {
+  const contents = getLangContents();
+  // Collect all unique session dates (local date strings)
+  const days = new Set();
+  contents.forEach(c=>(c.sessions||[]).forEach(s=>{
+    const d = new Date(s.createdAt);
+    days.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+  }));
+  // Walk back from today counting consecutive days
+  let streak = 0;
+  const now = new Date();
+  for (let i=0; i<365; i++) {
+    const d = new Date(now); d.setDate(d.getDate()-i);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    if (days.has(key)) { streak++; }
+    else if (i===0) { /* today can be missing, check yesterday next */ continue; }
+    else break;
+  }
+  return streak;
+}
+
+function renderLibrary() {
+  const contents = getLangContents();
+  const weekStart = getWeekStart();
+  let total=0, week=0;
+  contents.forEach(c=>{
+    (c.sessions||[]).forEach(s=>{
+      total += s.durationMin||0;
+      if (new Date(s.createdAt)>=weekStart) week += s.durationMin||0;
+    });
+  });
+  const streak = computeStreak();
+  document.getElementById('statTotal').textContent  = fmtMin(total);
+  document.getElementById('statWeek').textContent   = fmtMin(week);
+  // Streak chip: show number + fire emoji inline
+  const streakEl = document.getElementById('statStreak');
+  streakEl.textContent = streak;
+  // Dim fire if no streak
+  const fireEl = document.querySelector('.stat-chip__streak-icon');
+  if (fireEl) fireEl.style.opacity = streak > 0 ? '1' : '0.3';
+  renderContentList();
+}
+
+function renderContentList() {
+  const el = document.getElementById('contentList');
+  let list = getLangContents();
+  if (activeTypeFilter) list = list.filter(c=>c.type===activeTypeFilter);
+  if (searchQuery) { const q=searchQuery.toLowerCase(); list=list.filter(c=>(c.title||'').toLowerCase().includes(q)); }
+  list = [...list].sort((a,b)=>{
+    const la = a.sessions?.length ? Math.max(...a.sessions.map(s=>new Date(s.createdAt))) : new Date(a.createdAt);
+    const lb = b.sessions?.length ? Math.max(...b.sessions.map(s=>new Date(s.createdAt))) : new Date(b.createdAt);
+    return lb-la;
+  });
+  if (!list.length) {
+    const filtered = activeTypeFilter||searchQuery;
+    el.innerHTML = `<div class="lib-empty"><div class="lib-empty__icon">${filtered?'🔍':'📭'}</div><div class="lib-empty__text">${filtered?'Nenhum resultado':'Nenhum conteúdo ainda'}</div><div class="lib-empty__sub">${filtered?'Tente outros filtros':'Toque no + para adicionar'}</div></div>`;
+    return;
+  }
+  el.innerHTML = list.map(item=>{
+    const totalMin = contentTotalMin(item), sess = item.sessions?.length||0;
+    return `<div class="content-card" data-id="${item.id}" role="button" tabindex="0">
+      <div class="content-card__left">
+        <div class="content-card__top">${typeBadgeHtml(item.type)}</div>
+        <div class="content-card__title">${esc(item.title||'Sem título')}</div>
+        <div class="content-card__meta">
+          ${totalMin>0?`<span class="content-card__meta-item"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>${fmtMin(totalMin)}</span>`:''}
+          ${sess>0?`<span class="content-card__meta-item"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 10h11v2H3zm0-4h11v2H3zm0 8h7v2H3zm13-1v8l6-4z"/></svg>${sess} ${sess===1?'sessão':'sessões'}</span>`:''}
+          ${totalMin===0&&sess===0?`<span style="color:var(--text-disabled);font-size:12px;">Sem sessões</span>`:''}
+        </div>
+      </div>
+      <svg class="icon content-card__chevron" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.content-card').forEach(c=>{
+    c.addEventListener('click',()=>openDetail(c.dataset.id));
+    c.addEventListener('keydown',e=>{if(e.key==='Enter')openDetail(c.dataset.id);});
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input',e=>{
+  searchQuery=e.target.value.trim(); renderContentList();
+});
+
+document.getElementById('filterBtn').addEventListener('click',()=>{
+  const chips=document.getElementById('typeChips'), btn=document.getElementById('filterBtn');
+  const open=chips.style.display==='none';
+  chips.style.display=open?'flex':'none'; btn.classList.toggle('active',open);
+});
+
+document.getElementById('typeChips').querySelectorAll('.type-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.type-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active'); activeTypeFilter=chip.dataset.type;
+    const label=chip.dataset.type?(TYPE_META[chip.dataset.type]?.label||chip.dataset.type):'Tipo';
+    document.getElementById('filterLabel').textContent=label; renderContentList();
+  });
+});
+
+/* ════════════════════════════════════════════════════════════
+   CONTENT FORM
+════════════════════════════════════════════════════════════ */
+let editingContentId=null, pendingSessionDraft=[];
+
+function openContentForm(id=null) {
+  editingContentId=id; pendingSessionDraft=[];
+  if (id) {
+    const item=getLangContents().find(c=>c.id===id); if(!item)return;
+    document.getElementById('contentFormTitle').textContent='Editar conteúdo';
+    document.getElementById('cfLink').value=item.link||'';
+    document.getElementById('cfTitle').value=item.title||'';
+    document.querySelectorAll('#cfTypePills .type-pill').forEach(p=>p.classList.toggle('active',p.dataset.type===item.type));
+    pendingSessionDraft=(item.sessions||[]).map(s=>({...s}));
+  } else {
+    document.getElementById('contentFormTitle').textContent='Novo conteúdo';
+    document.getElementById('cfLink').value='';
+    document.getElementById('cfTitle').value='';
+    document.querySelectorAll('#cfTypePills .type-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+  }
+  renderCfSessions(); openModal('contentFormModal');
+}
+
+document.getElementById('cfTypePills').querySelectorAll('.type-pill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    document.querySelectorAll('#cfTypePills .type-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+  });
+});
+
+function sessionItemHtml(s) {
+  const catLabel=CAT_LABELS[s.cat]||s.cat||'', subLabel=SUB_LABELS[s.sub]||s.sub||'';
+  let timeStr='';
+  if (s.mode==='horario'&&s.start) timeStr=s.end?`${s.start} — ${s.end}`:`${s.start} — em andamento`;
+  else timeStr=fmtSec(Math.round((s.durationMin||0)*60));
+  return `<div class="session-item">
+    <div class="session-item__left">
+      <div class="session-item__time">${timeStr}</div>
+      <div class="session-item__meta">${catLabel}${subLabel?' • '+subLabel:''}</div>
+    </div>
+    <button class="session-item__edit" data-sid="${s.id}" aria-label="Editar sessão"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+  </div>`;
+}
+
+function renderCfSessions() {
+  const el=document.getElementById('cfSessionsList');
+  if (!pendingSessionDraft.length) {
+    el.innerHTML=`<div class="sessions-empty"><span>Nenhuma sessão ainda</span></div>`;
+    return;
+  }
+  const groups={};
+  pendingSessionDraft.forEach(s=>{ const d=new Date(s.createdAt).toDateString(); if(!groups[d])groups[d]=[]; groups[d].push(s); });
+  el.innerHTML=Object.entries(groups).map(([d,sessions])=>{
+    const label=new Date(d).toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+    return `<div class="session-date-group">${label}</div>${sessions.map(s=>sessionItemHtml(s)).join('')}`;
+  }).join('');
+  el.querySelectorAll('.session-item__edit').forEach(btn=>{
+    btn.addEventListener('click',()=>openSessionForm(btn.dataset.sid, false));
+  });
+}
+
+document.getElementById('cfAddSessionBtn').addEventListener('click',()=>openSessionForm(null, false));
+
+function saveContentForm() {
+  const title=document.getElementById('cfTitle').value.trim();
+  const link=document.getElementById('cfLink').value.trim();
+  const type=document.querySelector('#cfTypePills .type-pill.active')?.dataset.type||'youtube';
+  if (!title) { toast('Adicione um título'); document.getElementById('cfTitle').focus(); return; }
+  const langId=state.activeLanguage;
+  if (!state.contents[langId]) state.contents[langId]=[];
+  if (editingContentId) {
+    const idx=state.contents[langId].findIndex(c=>c.id===editingContentId);
+    if (idx>-1) state.contents[langId][idx]={...state.contents[langId][idx],title,link,type,sessions:pendingSessionDraft,updatedAt:new Date().toISOString()};
+    save(); closeModal('contentFormModal'); renderLibrary(); toast('Conteúdo atualizado');
+  } else {
+    state.contents[langId].unshift({id:uid(),title,link,type,sessions:pendingSessionDraft,createdAt:new Date().toISOString()});
+    save(); closeModal('contentFormModal'); renderLibrary(); toast('Conteúdo adicionado');
+  }
+}
+
+document.getElementById('contentFormSave').addEventListener('click',saveContentForm);
+
+// ── Link: auto-detect YouTube and select type ────────────────
+function extractYtId(url) {
+  try {
+    const u = new URL(url.trim());
+    if (u.hostname === 'youtu.be') return u.pathname.slice(1).split('?')[0];
+    if (!u.hostname.includes('youtube.com')) return null;
+    const shorts = u.pathname.match(/\/shorts\/([^/?]+)/);
+    if (shorts) return shorts[1];
+    return u.searchParams.get('v');
+  } catch {}
+  return null;
+}
+
+function onLinkChange() {
+  const url = document.getElementById('cfLink').value.trim();
+  const ytId = extractYtId(url);
+  if (!ytId) return;
+  // Auto-select YouTube type pill
+  document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.type === 'youtube')
+  );
+}
+
+const cfLinkEl = document.getElementById('cfLink');
+let _linkPrev = '', _linkPollTimer = null;
+function _pollLink() { const c=cfLinkEl.value; if(c!==_linkPrev){_linkPrev=c;onLinkChange();} }
+cfLinkEl.addEventListener('input',  () => { _linkPrev=cfLinkEl.value; onLinkChange(); });
+cfLinkEl.addEventListener('paste',  () => setTimeout(()=>{ _linkPrev=cfLinkEl.value; onLinkChange(); }, 100));
+cfLinkEl.addEventListener('change', () => { _linkPrev=cfLinkEl.value; onLinkChange(); });
+cfLinkEl.addEventListener('focus',  () => { _linkPollTimer=setInterval(_pollLink,400); });
+cfLinkEl.addEventListener('blur',   () => { clearInterval(_linkPollTimer); _pollLink(); });
+document.getElementById('contentFormSaveBtn').addEventListener('click',saveContentForm);
+document.getElementById('contentFormBack').addEventListener('click',()=>closeModal('contentFormModal'));
+document.getElementById('contentFormCancelBtn').addEventListener('click',()=>closeModal('contentFormModal'));
+document.getElementById('fabBtn').addEventListener('click',()=>openContentForm());
+
+
+/* ════════════════════════════════════════════════════════════
+   SESSION FORM
+   detailMode=true → saves directly to content in state
+   detailMode=false → adds to pendingSessionDraft
+════════════════════════════════════════════════════════════ */
+let editingSessionId=null, sessionDetailMode=false;
+
+function openSessionForm(sessionId=null, detailMode=false) {
+  editingSessionId=sessionId; sessionDetailMode=detailMode;
+  document.getElementById('sessionFormTitle').textContent=sessionId?'Editar sessão':'Nova sessão';
+
+  if (sessionId) {
+    const pool = detailMode
+      ? (getLangContents().find(c=>c.id===currentDetailId)?.sessions||[])
+      : pendingSessionDraft;
+    const s=pool.find(x=>x.id===sessionId); if(!s)return;
+    document.querySelectorAll('#sfCatPills .cat-pill').forEach(p=>p.classList.toggle('active',p.dataset.cat===s.cat));
+    document.querySelectorAll('#sfSubPills .cat-pill').forEach(p=>p.classList.toggle('active',p.dataset.sub===s.sub));
+    setSessionMode(s.mode||'horario');
+    if (s.mode==='horario') { document.getElementById('sfStart').value=s.start||''; document.getElementById('sfEnd').value=s.end||''; }
+    else { const _totalSec=Math.round((s.durationMin||0)*60); document.getElementById('sfHoras').value=Math.floor(_totalSec/3600); document.getElementById('sfMinutos').value=Math.floor((_totalSec%3600)/60); document.getElementById('sfSegundos').value=_totalSec%60; }
+  } else {
+    document.querySelectorAll('#sfCatPills .cat-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+    document.querySelectorAll('#sfSubPills .cat-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+    setSessionMode('duracao');
+    const now=new Date();
+    document.getElementById('sfStart').value=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('sfEnd').value='';
+    document.getElementById('sfHoras').value=''; document.getElementById('sfMinutos').value=''; document.getElementById('sfSegundos').value='';
+    document.querySelectorAll('.quick-chip').forEach(c=>c.classList.remove('active'));
+  }
+  openModal('sessionFormModal');
+}
+
+function setSessionMode(mode) {
+  document.querySelectorAll('#sfSegmented .segmented__btn').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  document.getElementById('sfHorarioSection').style.display=mode==='horario'?'':'none';
+  document.getElementById('sfDuracaoSection').style.display=mode==='duracao'?'':'none';
+}
+
+document.getElementById('sfSegmented').querySelectorAll('.segmented__btn').forEach(btn=>{
+  btn.addEventListener('click',()=>setSessionMode(btn.dataset.mode));
+});
+
+document.getElementById('sfCatPills').querySelectorAll('.cat-pill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    document.querySelectorAll('#sfCatPills .cat-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+  });
+});
+
+document.getElementById('sfSubPills').querySelectorAll('.cat-pill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    document.querySelectorAll('#sfSubPills .cat-pill').forEach(p=>p.classList.remove('active'));
+    pill.classList.add('active');
+  });
+});
+
+document.getElementById('sfQuickChips').querySelectorAll('.quick-chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    document.querySelectorAll('.quick-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    const min=+chip.dataset.min;
+    const _h=Math.floor(min/60), _m=min%60;
+    document.getElementById('sfHoras').value=_h||'';
+    document.getElementById('sfMinutos').value=_m||'';
+    document.getElementById('sfSegundos').value='';
+  });
+});
+
+['sfHoras','sfMinutos','sfSegundos'].forEach(id=>{
+  const el = document.getElementById(id);
+  const max = id==='sfHoras' ? 23 : 59;
+
+  el.addEventListener('input', ()=>{
+    document.querySelectorAll('.quick-chip').forEach(c=>c.classList.remove('active'));
+  });
+
+  el.addEventListener('blur', ()=>{
+    let v = parseInt(el.value);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > max) {
+      // e.g. 055 → 55, 99 min → 59
+      const str = String(v);
+      const parsed = parseInt(str.replace(/^0+/, '') || '0');
+      v = Math.min(parsed > max ? max : parsed, max);
+    }
+    el.value = v === 0 ? '' : v;
+  });
+
+  // Scroll into view on focus (duration section can be off-screen on mobile)
+  el.addEventListener('focus', ()=>{
+    setTimeout(()=>el.scrollIntoView({behavior:'smooth', block:'center'}), 150);
+  });
+});
+
+document.getElementById('sfSaveBtn').addEventListener('click',()=>{
+  const mode=document.querySelector('#sfSegmented .segmented__btn.active').dataset.mode;
+  const cat=document.querySelector('#sfCatPills .cat-pill.active')?.dataset.cat||'imersao';
+  const sub=document.querySelector('#sfSubPills .cat-pill.active')?.dataset.sub||'escuta-leitura';
+  let durationMin=0, start='', end='';
+  if (mode==='horario') {
+    start=document.getElementById('sfStart').value; end=document.getElementById('sfEnd').value;
+    if (start&&end) {
+      const [sh,sm]=start.split(':').map(Number), [eh,em]=end.split(':').map(Number);
+      durationMin=(eh*60+em)-(sh*60+sm); if(durationMin<0)durationMin+=24*60;
+    }
+  } else {
+    const _h=(parseInt(document.getElementById('sfHoras').value)||0);
+    const _m=(parseInt(document.getElementById('sfMinutos').value)||0);
+    const _s=(parseInt(document.getElementById('sfSegundos').value)||0);
+    durationMin=(_h*3600+_m*60+_s)/60; // exact fraction, fmtSec(min*60) will be integer
+  }
+
+  if (sessionDetailMode) {
+    // Save directly to content
+    const langId=state.activeLanguage;
+    const idx=state.contents[langId].findIndex(c=>c.id===currentDetailId);
+    if (idx>-1) {
+      if (!state.contents[langId][idx].sessions) state.contents[langId][idx].sessions=[];
+      if (editingSessionId) {
+        const si=state.contents[langId][idx].sessions.findIndex(s=>s.id===editingSessionId);
+        if (si>-1) state.contents[langId][idx].sessions[si]={...state.contents[langId][idx].sessions[si],mode,cat,sub,start,end,durationMin};
+      } else {
+        state.contents[langId][idx].sessions.push({id:uid(),mode,cat,sub,start,end,durationMin,createdAt:new Date().toISOString()});
+      }
+      save(); closeModal('sessionFormModal'); renderDetail(currentDetailId); renderLibrary();
+      toast(editingSessionId?'Sessão atualizada':'Sessão adicionada');
+    }
+  } else {
+    // Save to draft
+    if (editingSessionId) {
+      const si=pendingSessionDraft.findIndex(s=>s.id===editingSessionId);
+      if (si>-1) pendingSessionDraft[si]={...pendingSessionDraft[si],mode,cat,sub,start,end,durationMin};
+    } else {
+      pendingSessionDraft.push({id:uid(),mode,cat,sub,start,end,durationMin,createdAt:new Date().toISOString()});
+    }
+    closeModal('sessionFormModal'); renderCfSessions();
+    toast(editingSessionId?'Sessão atualizada':'Sessão adicionada');
+  }
+});
+
+document.getElementById('sfCancelBtn').addEventListener('click',()=>closeModal('sessionFormModal'));
+document.getElementById('sessionFormBack').addEventListener('click',()=>closeModal('sessionFormModal'));
+
+/* ════════════════════════════════════════════════════════════
+   CONTENT DETAIL
+════════════════════════════════════════════════════════════ */
+let currentDetailId=null;
+
+function openDetail(id) {
+  currentDetailId=id; renderDetail(id);
+  document.getElementById('contentDetailModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function renderDetail(id) {
+  const item=getLangContents().find(c=>c.id===id); if(!item)return;
+  document.getElementById('detailTitle').textContent=item.title||'Sem título';
+  const sessions=item.sessions||[], totalMin=contentTotalMin(item), sessCount=sessions.length;
+
+  const breakdown={'escuta-leitura':0, 'escuta':0, 'leitura':0};
+  sessions.forEach(s=>{ const k=s.sub||'escuta-leitura'; breakdown[k]=(breakdown[k]||0)+(s.durationMin||0); });
+
+  const groups={};
+  [...sessions].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(s=>{
+    const d=new Date(s.createdAt).toDateString(); if(!groups[d])groups[d]=[]; groups[d].push(s);
+  });
+
+  const BREAKDOWN_ORDER = ['escuta-leitura','escuta','leitura'];
+  const breakdownHtml=BREAKDOWN_ORDER.map(k=>`
+    <div class="detail-stat-row">
+      <span class="detail-stat-row__label">${SUB_LABELS[k]||k}</span>
+      <span class="detail-stat-row__val">${fmtMin(breakdown[k]||0)}</span>
+    </div>`).join('');
+
+  const sessionsListHtml=Object.entries(groups).map(([d,list])=>{
+    const label=new Date(d).toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+    return `<div class="session-date-group">${label}</div>${list.map(s=>{
+      const catLabel=CAT_LABELS[s.cat]||'', subLabel=SUB_LABELS[s.sub]||'';
+      let timeStr='';
+      if (s.mode==='horario'&&s.start) timeStr=s.end?`${s.start} — ${s.end}`:`${s.start} — em andamento`;
+      else timeStr=fmtSec(Math.round((s.durationMin||0)*60));
+      return `<div class="session-item">
+        <div class="session-item__left">
+          <div class="session-item__time">${timeStr}</div>
+          <div class="session-item__meta">${catLabel}${subLabel?' • '+subLabel:''}</div>
+        </div>
+        <button class="session-item__edit" data-sid="${s.id}" aria-label="Editar sessão"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+      </div>`;
+    }).join('')}`;
+  }).join('');
+
+  document.getElementById('detailBody').innerHTML=`
+    <div class="detail-hero">
+      <div class="detail-type-badge">${typeBadgeHtml(item.type)}</div>
+      <h1 class="detail-title">${esc(item.title||'Sem título')}</h1>
+      ${item.link?`<a class="detail-link" href="${esc(item.link)}" target="_blank" rel="noopener"><svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>${esc(item.link.replace(/^https?:\/\//,'').slice(0,48))}</a>`:''}
+    </div>
+    <div class="detail-stats">
+      <div class="detail-stats__label">Estatísticas</div>
+      <div class="detail-stats__total">
+        <span class="detail-stats__total-val">${fmtMin(totalMin)}</span>
+        <span class="detail-stats__total-sessions">${sessCount} ${sessCount===1?'sessão':'sessões'}</span>
+      </div>
+      <div class="detail-stats__breakdown">${breakdownHtml}</div>
+    </div>
+    <div class="detail-sessions">
+      <div class="detail-sessions__header">
+        <span class="detail-sessions__label">Sessões</span>
+        <button class="sessions-add-btn" id="detailAddSessionBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Adicionar</button>
+      </div>
+      ${sessCount===0?`<div class="sessions-empty"><span>Nenhuma sessão ainda</span></div>`:sessionsListHtml}
+    </div>`;
+
+  document.getElementById('detailAddSessionBtn').addEventListener('click',()=>openSessionForm(null,true));
+  document.querySelectorAll('#detailBody .session-item__edit').forEach(btn=>{
+    btn.addEventListener('click',()=>openSessionForm(btn.dataset.sid,true));
+  });
+}
+
+document.getElementById('detailEditBtn').addEventListener('click',()=>{
+  if(!currentDetailId)return;
+  const item=getLangContents().find(c=>c.id===currentDetailId);
+  if(item) pendingSessionDraft=[...(item.sessions||[])];
+  document.getElementById('contentDetailModal').classList.remove('open'); document.body.style.overflow=''; openContentForm(currentDetailId);
+});
+
+document.getElementById('detailBack').addEventListener('click',()=>{
+  document.getElementById('contentDetailModal').classList.remove('open');
+  document.body.style.overflow='';
+});
+
+document.getElementById('detailDeleteBtn').addEventListener('click',()=>{
+  if(!currentDetailId)return;
+  const item=getLangContents().find(c=>c.id===currentDetailId);
+  if(!item)return;
+  pendingDeleteId='__content__'+currentDetailId;
+  document.getElementById('confirmTitle').textContent='Excluir conteúdo?';
+  document.getElementById('confirmBody').textContent=`"${item.title||'Sem título'}" e todas as suas sessões serão removidos. Essa ação não pode ser desfeita.`;
+  document.getElementById('confirmModal').classList.add('open');
+});
+
+/* ════════════════════════════════════════════════════════════
+   MODALS
+════════════════════════════════════════════════════════════ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); if(!document.querySelector('.overlay.open,.confirm-overlay.open'))document.body.style.overflow=''; }
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
+
+/* ════════════════════════════════════════════════════════════
+   LANG — DROPDOWN
+════════════════════════════════════════════════════════════ */
+let ddOpen=false;
+
+function renderDD() {
+  const list=document.getElementById('ddList');
+  if (!state.userLanguages.length) { list.innerHTML='<div class="dd-empty">Nenhum idioma adicionado ainda.</div>'; return; }
+  list.innerHTML=state.userLanguages.map(l=>`
+    <div class="dd-row ${l.id===state.activeLanguage?'active':''}" data-id="${l.id}" role="option" aria-selected="${l.id===state.activeLanguage}" tabindex="0">
+      <span class="dd-row__flag">${l.flag}</span>
+      <span class="dd-row__name">${l.name}</span>
+      ${l.id===state.activeLanguage?'<svg class="icon dd-row__check" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>':''}
+    </div>`).join('');
+  list.querySelectorAll('.dd-row').forEach(el=>el.addEventListener('click',()=>{pickLang(el.dataset.id);closeDD();}));
+}
+
+function openDD()  { renderDD(); document.getElementById('langDropdown').classList.add('open'); document.getElementById('langTrigger').classList.add('active'); document.getElementById('langTrigger').setAttribute('aria-expanded','true'); ddOpen=true; }
+function closeDD() { document.getElementById('langDropdown').classList.remove('open'); document.getElementById('langTrigger').classList.remove('active'); document.getElementById('langTrigger').setAttribute('aria-expanded','false'); ddOpen=false; }
+
+document.getElementById('langTrigger').addEventListener('click',()=>{
+  if(desktop()) { ddOpen?closeDD():openDD(); }
+  else { if(!state.userLanguages.length){renderAdd();openModal('addModal');}else{renderSwitch();openModal('switchModal');} }
+});
+document.addEventListener('click',e=>{if(!document.querySelector('.lang-wrap').contains(e.target))closeDD();});
+document.getElementById('ddAddBtn').addEventListener('click',()=>{closeDD();renderAdd();openModal('addModal');});
+document.getElementById('ddManageBtn').addEventListener('click',()=>{closeDD();renderManage();openModal('manageModal');});
+
+function pickLang(id) {
+  state.activeLanguage=id; save(); syncTopbar();
+  const l=getLang(id); toast(`${l.flag} ${l.name} selecionado`);
+}
+
+/* ════════════════════════════════════════════════════════════
+   LANG — SWITCH
+════════════════════════════════════════════════════════════ */
+function renderSwitch() {
+  document.getElementById('switchList').innerHTML=state.userLanguages.map(l=>`
+    <div class="sw-row ${l.id===state.activeLanguage?'active':''}" data-id="${l.id}" tabindex="0" role="option" aria-selected="${l.id===state.activeLanguage}">
+      <span class="sw-row__flag">${l.flag}</span><span class="sw-row__name">${l.name}</span>
+      ${l.id===state.activeLanguage?'<svg class="icon sw-row__check" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>':''}
+    </div>`).join('');
+  document.querySelectorAll('.sw-row').forEach(el=>el.addEventListener('click',()=>{pickLang(el.dataset.id);closeModal('switchModal');}));
+}
+document.getElementById('switchAddBtn').addEventListener('click',()=>{closeModal('switchModal');renderAdd();openModal('addModal');});
+document.getElementById('switchManageBtn').addEventListener('click',()=>{closeModal('switchModal');renderManage();openModal('manageModal');});
+
+/* ════════════════════════════════════════════════════════════
+   LANG — CONFIRM DELETE
+════════════════════════════════════════════════════════════ */
+let pendingDeleteId=null;
+function askDelete(id,name) {
+  pendingDeleteId=id;
+  document.getElementById('confirmTitle').textContent=`Remover ${name}?`;
+  document.getElementById('confirmBody').textContent=`Você perderá todos os dados de "${name}". Essa ação não pode ser desfeita.`;
+  document.getElementById('confirmModal').classList.add('open');
+}
+document.getElementById('confirmCancelBtn').addEventListener('click',()=>{ pendingDeleteId=null; document.getElementById('confirmModal').classList.remove('open'); });
+document.getElementById('confirmDeleteBtn').addEventListener('click',()=>{
+  if(!pendingDeleteId)return;
+  if(String(pendingDeleteId).startsWith('__content__')) {
+    const cid=pendingDeleteId.replace('__content__','');
+    const langId=state.activeLanguage;
+    const item=state.contents[langId]?.find(c=>c.id===cid);
+    state.contents[langId]=(state.contents[langId]||[]).filter(c=>c.id!==cid);
+    pendingDeleteId=null; document.getElementById('confirmModal').classList.remove('open');
+    document.getElementById('contentDetailModal').classList.remove('open'); document.body.style.overflow=''; save(); renderLibrary();
+    toast(item?`"${item.title||'Conteúdo'}" removido`:'Conteúdo removido');
+    return;
+  }
+  const l=getLang(pendingDeleteId);
+  state.userLanguages=state.userLanguages.filter(x=>x.id!==pendingDeleteId);
+  if(state.activeLanguage===pendingDeleteId) state.activeLanguage=state.userLanguages[0]?.id||null;
+  pendingDeleteId=null; document.getElementById('confirmModal').classList.remove('open');
+  save(); syncTopbar(); renderManage(); renderDD();
+  toast(`${l.flag} ${l.name} removido`);
+});
+
+/* ════════════════════════════════════════════════════════════
+   LANG — MANAGE
+════════════════════════════════════════════════════════════ */
+let dragSrc=null;
+function renderManage() {
+  const el=document.getElementById('manageList');
+  if (!state.userLanguages.length) { el.innerHTML='<div style="padding:16px;font-size:14px;color:var(--text-secondary);">Nenhum idioma adicionado.</div>'; return; }
+  el.innerHTML=state.userLanguages.map((l,i)=>`
+    <div class="mg-row" draggable="true" data-idx="${i}" data-id="${l.id}">
+      <span class="mg-row__drag"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg></span>
+      <span class="mg-row__flag">${l.flag}</span>
+      <span class="mg-row__name">${l.name}</span>
+      <button class="mg-row__delete" data-id="${l.id}" aria-label="Remover ${l.name}"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+    </div>`).join('');
+  el.querySelectorAll('.mg-row__delete').forEach(btn=>btn.addEventListener('click',()=>{ const l=getLang(btn.dataset.id); askDelete(btn.dataset.id,l.name); }));
+  el.querySelectorAll('.mg-row').forEach(row=>{
+    row.addEventListener('dragstart',e=>{ dragSrc=+row.dataset.idx; e.dataTransfer.effectAllowed='move'; setTimeout(()=>row.style.opacity='.4',0); });
+    row.addEventListener('dragend',()=>{ row.style.opacity=''; el.querySelectorAll('.mg-row').forEach(r=>r.classList.remove('drag-over')); });
+    row.addEventListener('dragover',e=>{ e.preventDefault(); el.querySelectorAll('.mg-row').forEach(r=>r.classList.remove('drag-over')); row.classList.add('drag-over'); });
+    row.addEventListener('drop',e=>{ e.preventDefault(); const ti=+row.dataset.idx; if(dragSrc===null||dragSrc===ti)return; const[m]=state.userLanguages.splice(dragSrc,1); state.userLanguages.splice(ti,0,m); dragSrc=null; save(); renderManage(); });
+  });
+}
+document.getElementById('manageDoneBtn').addEventListener('click',()=>{closeModal('manageModal');renderDD();});
+
+/* ════════════════════════════════════════════════════════════
+   LANG — ADD
+════════════════════════════════════════════════════════════ */
+function renderAdd() {
+  const added=new Set(state.userLanguages.map(l=>l.id));
+  document.getElementById('addList').innerHTML=ALL_LANGUAGES.map(l=>`
+    <div class="al-row ${added.has(l.id)?'added':''}" data-id="${l.id}" role="option" aria-selected="${added.has(l.id)}" tabindex="0">
+      <span class="al-row__flag">${l.flag}</span><span class="al-row__name">${l.name}</span>
+      ${added.has(l.id)?'<span class="al-row__badge">Adicionado</span>':''}
+    </div>`).join('');
+  document.querySelectorAll('.al-row:not(.added)').forEach(el=>{
+    el.addEventListener('click',()=>addLang(el.dataset.id));
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')addLang(el.dataset.id);});
+  });
+  document.querySelectorAll('.al-row.added').forEach(el=>{
+    el.addEventListener('click',()=>{closeModal('addModal');renderManage();openModal('manageModal');});
+    el.title='Ir para Gerenciar idiomas para remover';
+  });
+}
+document.getElementById('addModalManageBtn').addEventListener('click',()=>{closeModal('addModal');renderManage();openModal('manageModal');});
+function addLang(id) {
+  const l=ALL_LANGUAGES.find(x=>x.id===id);
+  if(!l||state.userLanguages.find(x=>x.id===id))return;
+  state.userLanguages.push({...l}); if(!state.activeLanguage)state.activeLanguage=id;
+  save(); syncTopbar(); renderAdd(); renderDD(); toast(`${l.flag} ${l.name} adicionado`);
+}
+document.getElementById('addCloseBtn').addEventListener('click',()=>closeModal('addModal'));
+document.getElementById('emptyAddBtn').addEventListener('click',()=>{renderAdd();openModal('addModal');});
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════ */
+syncTopbar();
+if (!state.userLanguages.length) setTimeout(()=>{renderAdd();openModal('addModal');},250);
+</script>
+</body>
+</html>
