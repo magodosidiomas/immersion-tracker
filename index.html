@@ -178,6 +178,35 @@
 
     .dash-divider { height: 1px; background: var(--border-subtle); margin: 0 20px; }
 
+    /* ── Calendar ───────────────────────────────────────────────*/
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-month  { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .cal-nav    { display: flex; gap: 4px; }
+    .cal-nav-btn {
+      width: 32px; height: 32px; border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-secondary); transition: background var(--t), color var(--t);
+    }
+    .cal-nav-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .cal-nav-btn:disabled { opacity: .25; pointer-events: none; }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-dow {
+      font-size: 12px; font-weight: 600; color: var(--text-disabled);
+      text-align: center; padding-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .cal-day {
+      aspect-ratio: 1; border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: var(--text-secondary);
+      transition: background var(--t);
+    }
+    .cal-day--empty { pointer-events: none; }
+    .cal-day--today { color: var(--text-primary); font-weight: 600; outline: 1px solid var(--bg-subtle); outline-offset: -1px; }
+    .cal-day--active { background: var(--accent); color: #fff; font-weight: 600; }
+    .cal-day--active.cal-day--today { outline-color: var(--accent-muted); }
+
     /* ── Empty state ────────────────────────────────────────────*/
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 60vh; text-align: center; }
     .empty-state__icon  { font-size: 44px; opacity: .25; line-height: 1; }
@@ -409,6 +438,10 @@
     .paste-btn:hover { background: var(--bg-subtle); color: var(--text-primary); }
     .paste-btn:active { opacity: .75; }
     .text-field:focus { border-color: var(--accent-muted); }
+    .text-field--error { border-color: var(--danger) !important; }
+    .text-field--error:focus { border-color: var(--danger) !important; }
+    .field-error-msg { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
+    .field-error-msg.visible { display: block; }
 
     .sessions-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .sessions-add-btn { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; color: #A78BFA; transition: color var(--t); }
@@ -584,6 +617,27 @@
           </div>
         </div>
 
+        <!-- Calendar card -->
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <span class="dash-card__title">Atividade</span>
+          </div>
+          <div class="dash-card__body" style="gap:0;">
+            <div class="cal-header">
+              <span class="cal-month" id="calMonthLabel"></span>
+              <div class="cal-nav">
+                <button class="cal-nav-btn" id="calPrev" aria-label="Mês anterior">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                </button>
+                <button class="cal-nav-btn" id="calNext" aria-label="Próximo mês">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -658,6 +712,7 @@
           <input type="text" class="text-field" id="cfTitle" placeholder="Nome do conteúdo" autocomplete="off" />
           <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
         </div>
+        <p class="field-error-msg" id="cfTitleError">Adicione um título para continuar</p>
       </div>
       <div class="form-section form-section--divider-after">
         <label class="form-label">Tipo</label>
@@ -1115,7 +1170,13 @@ function saveContentForm() {
   const title=document.getElementById('cfTitle').value.trim();
   const link=document.getElementById('cfLink').value.trim();
   const type=document.querySelector('#cfTypePills .type-pill.active')?.dataset.type||'youtube';
-  if (!title) { toast('Adicione um título'); document.getElementById('cfTitle').focus(); return; }
+  if (!title) {
+    const el = document.getElementById('cfTitle');
+    el.classList.add('text-field--error');
+    document.getElementById('cfTitleError').classList.add('visible');
+    el.focus();
+    return;
+  }
   const langId=state.activeLanguage;
   if (!state.contents[langId]) state.contents[langId]=[];
   if (editingContentId) {
@@ -1127,6 +1188,11 @@ function saveContentForm() {
     save(); closeContentForm(); renderLibrary(); toast('Conteúdo adicionado');
   }
 }
+
+document.getElementById('cfTitle').addEventListener('input', () => {
+  document.getElementById('cfTitle').classList.remove('text-field--error');
+  document.getElementById('cfTitleError').classList.remove('visible');
+});
 
 document.getElementById('contentFormSave').addEventListener('click',saveContentForm);
 
@@ -1721,6 +1787,8 @@ function renderDashboard() {
       animation: { duration: 300 },
     }
   });
+
+  renderCalendar();
 }
 
 document.getElementById('dashSegmented').querySelectorAll('.segmented__btn').forEach(btn => {
@@ -1735,8 +1803,84 @@ document.getElementById('dashSegmented').querySelectorAll('.segmented__btn').for
 
 
 /* ════════════════════════════════════════════════════════════
-   INIT
+   CALENDAR
 ════════════════════════════════════════════════════════════ */
+const DOW_LABELS = ['D','S','T','Q','Q','S','S'];
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+function getActiveDays() {
+  const days = new Set();
+  getLangContents().forEach(c => {
+    (c.sessions || []).forEach(s => {
+      const d = s.date || new Date(s.createdAt).toISOString().slice(0,10);
+      days.add(d);
+    });
+  });
+  return days;
+}
+
+function renderCalendar() {
+  const activeDays = getActiveDays();
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0,10);
+  const now = new Date();
+
+  const label = new Date(calYear, calMonth, 1)
+    .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  document.getElementById('calMonthLabel').textContent =
+    label.charAt(0).toUpperCase() + label.slice(1);
+
+  // Disable next if we're already at current month
+  const isCurrentMonth = calYear === now.getFullYear() && calMonth === now.getMonth();
+  document.getElementById('calNext').disabled = isCurrentMonth;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
+  let html = DOW_LABELS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  // Empty cells before first day
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day cal-day--empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday  = dateStr === todayStr;
+    const isActive = activeDays.has(dateStr);
+    let cls = 'cal-day';
+    if (isActive) cls += ' cal-day--active';
+    if (isToday)  cls += ' cal-day--today';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+document.getElementById('calPrev').addEventListener('click', () => {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+});
+document.getElementById('calNext').addEventListener('click', () => {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+});
+
+// Swipe support
+(function() {
+  const el = document.getElementById('calGrid');
+  let startX = 0;
+  el.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0) document.getElementById('calNext').click();
+    else         document.getElementById('calPrev').click();
+  }, { passive: true });
+})();
+
+
 syncTopbar();
 if (!state.userLanguages.length) setTimeout(()=>{renderAdd();openModal('addModal');},250);
 </script>
