@@ -47,6 +47,7 @@
 
     /* ── App shell ──────────────────────────────────────────────*/
     #app { display: flex; flex-direction: column; min-height: 100dvh; }
+    .page-wrap { width: 100%; max-width: 680px; margin: 0 auto; }
 
     /* ── Topbar ─────────────────────────────────────────────────*/
     .topbar {
@@ -55,6 +56,7 @@
       border-bottom: 1px solid var(--border-subtle);
       background: var(--bg-base); position: sticky; top: 0; z-index: 50;
     }
+    .topbar__inner { width: 100%; max-width: 680px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
     .topbar__logo { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
 
     /* ── Lang trigger ───────────────────────────────────────────*/
@@ -106,6 +108,7 @@
 
     /* ── Main ───────────────────────────────────────────────────*/
     .main { flex: 1; padding: 20px 20px 100px; }
+    .main > .page-wrap { padding: 0; }
 
     /* ── Empty state ────────────────────────────────────────────*/
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 60vh; text-align: center; }
@@ -146,9 +149,11 @@
 
     .content-list { display: flex; flex-direction: column; gap: 8px; }
 
-    .content-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: background var(--t), border-color var(--t); -webkit-tap-highlight-color: transparent; }
+    .content-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--r-md); display: flex; align-items: stretch; gap: 0; cursor: pointer; transition: background var(--t), border-color var(--t); -webkit-tap-highlight-color: transparent; overflow: hidden; }
     .content-card:hover { background: var(--bg-hover); border-color: var(--bg-subtle); }
-    .content-card__left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+    .content-card__thumb { width: 120px; flex-shrink: 0; position: relative; background: var(--bg-base); aspect-ratio: 16/9; align-self: stretch; }
+    .content-card__thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .content-card__left { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 14px 12px 14px 16px; }
     .content-card__top  { display: flex; align-items: center; gap: 8px; }
 
     .type-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; flex-shrink: 0; }
@@ -223,6 +228,10 @@
       background: var(--bg-base);
       flex-shrink: 0;
     }
+    .detail-page__header-inner {
+      width: 100%; max-width: 680px; margin: 0 auto;
+      display: flex; align-items: center; gap: 4px;
+    }
     .detail-page__title {
       flex: 1; font-size: 16px; font-weight: 600;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -234,6 +243,7 @@
     }
     .detail-page__body::-webkit-scrollbar { width: 4px; }
     .detail-page__body::-webkit-scrollbar-thumb { background: var(--bg-subtle); border-radius: 99px; }
+    .detail-page__body > * { max-width: 680px; margin-left: auto; margin-right: auto; }
 
     /* ── Buttons ────────────────────────────────────────────────*/
     .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 16px; border-radius: var(--r-md); font-size: 15px; font-weight: 600; width: 100%; transition: background var(--t), opacity var(--t); }
@@ -254,10 +264,10 @@
     .sw-row__flag  { font-size: 22px; line-height: 1; flex-shrink: 0; }
     .sw-row__name  { font-size: 15px; font-weight: 500; flex: 1; }
     .sw-row__check { color: var(--accent-muted); }
-    .sw-footer-actions { display: flex; gap: 8px; padding: 12px 20px 20px; border-top: 1px solid var(--border-subtle); }
+    .sw-footer-actions { display: flex; flex-direction: column; gap: 8px; padding: 12px 20px 20px; border-top: 1px solid var(--border-subtle); }
     .sw-action { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 12px; border-radius: var(--r-md); font-size: 14px; font-weight: 600; transition: background var(--t), color var(--t); }
-    .sw-action--add { background: var(--accent); color: #fff; }
-    .sw-action--add:hover { background: var(--accent-light); }
+    .sw-action--add { background: transparent; border: 1px solid var(--accent-muted); color: var(--accent-subtle); }
+    .sw-action--add:hover { background: rgba(109,40,217,.12); }
     .sw-action--manage { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
     .sw-action--manage:hover { background: var(--bg-hover); color: var(--text-primary); }
 
@@ -283,7 +293,7 @@
     .al-row__name { font-size: 15px; font-weight: 500; flex: 1; }
     .al-row.added .al-row__name { color: var(--text-disabled); }
     .al-row__badge { font-size: 12px; font-weight: 600; color: var(--text-disabled); letter-spacing: 0.04em; flex-shrink: 0; }
-    .add-modal-manage { display: flex; align-items: center; gap: 8px; padding: 14px 16px; font-size: 14px; font-weight: 500; color: #A78BFA; border-top: 1px solid var(--border-subtle); cursor: pointer; transition: background var(--t), color var(--t); width: 100%; text-align: left; border-radius: 0 0 var(--r-md) var(--r-md); }
+    .add-modal-manage { display: flex; align-items: center; gap: 8px; padding: 14px 16px; font-size: 14px; font-weight: 500; color: #A78BFA; border-top: 1px solid var(--border-subtle); cursor: pointer; transition: background var(--t), color var(--t); width: 100%; text-align: left; outline: none; }
     .add-modal-manage:hover { background: rgba(167,139,250,.1); color: #C4B5FD; }
 
     /* ── Toast ──────────────────────────────────────────────────*/
@@ -308,8 +318,8 @@
        CONTENT FORM
     ════════════════════════════════════════════════════════════ */
     .form-body { display: flex; flex-direction: column; }
-    .form-section { padding: 16px 20px; border-bottom: 1px solid var(--border-subtle); }
-    .form-section:last-child { border-bottom: none; }
+    .form-section { padding: 16px 20px; }
+    .form-section--divider-after { border-bottom: 1px solid var(--border-subtle); }
     .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: block; }
     .form-label-row { display: flex; align-items: center; justify-content: space-between; }
 
@@ -338,16 +348,17 @@
 
     .sessions-empty { background: var(--bg-card); border-radius: var(--r-sm); padding: 16px; font-size: 13px; color: var(--text-disabled); display: flex; align-items: center; justify-content: space-between; }
 
-    .session-item { background: var(--bg-card); border-radius: var(--r-sm); padding: 12px 14px; margin-bottom: 6px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .session-item:last-child { margin-bottom: 0; }
+    .session-day-group { margin-bottom: 16px; }
+    .session-day-group:last-child { margin-bottom: 0; }
+    .session-day-label { font-size: 12px; color: var(--text-disabled); margin-bottom: 6px; }
+    .session-day-card { background: var(--bg-card); border-radius: var(--r-sm); overflow: hidden; }
+    .session-item { padding: 12px 14px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border-subtle); }
+    .session-item:last-child { border-bottom: none; }
     .session-item__left { flex: 1; min-width: 0; }
     .session-item__time { font-size: 14px; font-weight: 500; color: var(--text-primary); }
     .session-item__meta { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
     .session-item__edit { color: var(--text-disabled); display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: var(--r-sm); transition: background var(--t), color var(--t); flex-shrink: 0; }
     .session-item__edit:hover { background: var(--bg-hover); color: var(--text-secondary); }
-
-    .session-date-group { font-size: 12px; color: var(--text-disabled); margin-bottom: 6px; margin-top: 8px; }
-    .session-date-group:first-child { margin-top: 0; }
 
     /* ════════════════════════════════════════════════════════════
        SESSION FORM
@@ -411,62 +422,66 @@
 <div id="app">
 
   <header class="topbar">
-    <span class="topbar__logo">Imerso</span>
-    <div class="lang-wrap">
-      <button class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Trocar idioma">
-        <span class="lang-trigger__flag" id="currentFlag">🌐</span>
-        <span id="currentName">Idioma</span>
-        <svg class="icon lang-trigger__chevron" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
-      </button>
-      <div class="lang-dropdown" id="langDropdown" role="listbox">
-        <div class="dd-list" id="ddList"></div>
-        <div class="dd-footer">
-          <button class="dd-action dd-action--add" id="ddAddBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Adicionar idiomas</button>
-          <button class="dd-action" id="ddManageBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Gerenciar idiomas</button>
+    <div class="topbar__inner">
+      <span class="topbar__logo">Imerso</span>
+      <div class="lang-wrap">
+        <button class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Trocar idioma">
+          <span class="lang-trigger__flag" id="currentFlag">🌐</span>
+          <span id="currentName">Idioma</span>
+          <svg class="icon lang-trigger__chevron" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+        </button>
+        <div class="lang-dropdown" id="langDropdown" role="listbox">
+          <div class="dd-list" id="ddList"></div>
+          <div class="dd-footer">
+            <button class="dd-action dd-action--add" id="ddAddBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Adicionar idiomas</button>
+            <button class="dd-action" id="ddManageBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Gerenciar idiomas</button>
+          </div>
         </div>
       </div>
     </div>
   </header>
 
   <main class="main" id="mainArea">
-    <div class="empty-state" id="emptyState">
-      <div class="empty-state__icon">📚</div>
-      <p class="empty-state__title">Nenhum idioma adicionado</p>
-      <p class="empty-state__sub">Adicione um idioma para começar a registrar sua imersão.</p>
-      <button class="btn-add-first" id="emptyAddBtn">
-        <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Adicionar idioma
-      </button>
-    </div>
-
-    <div class="library" id="libraryView">
-      <div class="stats-bar">
-        <div class="stat-chip"><span class="stat-chip__val" id="statTotal">0m</span><span class="stat-chip__label">total</span></div>
-        <div class="stat-chip"><span class="stat-chip__val" id="statWeek">0m</span><span class="stat-chip__label">esta semana</span></div>
-        <div class="stat-chip stat-chip--streak"><div class="stat-chip__streak-row"><span class="stat-chip__val" id="statStreak">0</span><span class="stat-chip__streak-icon">🔥</span></div><span class="stat-chip__label">streak</span></div>
-      </div>
-
-      <div class="lib-toolbar">
-        <div class="search-wrap">
-          <span class="search-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
-          <input type="search" class="search-input" id="searchInput" placeholder="Buscar..." autocomplete="off" />
-        </div>
-        <button class="filter-btn" id="filterBtn">
-          <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-          <span id="filterLabel">Tipo</span>
+    <div class="page-wrap">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-state__icon">📚</div>
+        <p class="empty-state__title">Nenhum idioma adicionado</p>
+        <p class="empty-state__sub">Adicione um idioma para começar a registrar sua imersão.</p>
+        <button class="btn-add-first" id="emptyAddBtn">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Adicionar idioma
         </button>
       </div>
 
-      <div class="type-chips" id="typeChips" style="display:none;">
-        <button class="type-chip active" data-type="">Todos</button>
-        <button class="type-chip" data-type="youtube">YouTube</button>
-        <button class="type-chip" data-type="serie">Série</button>
-        <button class="type-chip" data-type="podcast">Podcast</button>
-        <button class="type-chip" data-type="livro">Livro</button>
-        <button class="type-chip" data-type="website">Website</button>
-        <button class="type-chip" data-type="outro">Outro</button>
-      </div>
+      <div class="library" id="libraryView">
+        <div class="stats-bar">
+          <div class="stat-chip"><span class="stat-chip__val" id="statTotal">0m</span><span class="stat-chip__label">total</span></div>
+          <div class="stat-chip"><span class="stat-chip__val" id="statWeek">0m</span><span class="stat-chip__label">esta semana</span></div>
+          <div class="stat-chip stat-chip--streak"><div class="stat-chip__streak-row"><span class="stat-chip__val" id="statStreak">0</span><span class="stat-chip__streak-icon">🔥</span></div><span class="stat-chip__label">streak</span></div>
+        </div>
 
-      <div class="content-list" id="contentList"></div>
+        <div class="lib-toolbar">
+          <div class="search-wrap">
+            <span class="search-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></span>
+            <input type="search" class="search-input" id="searchInput" placeholder="Buscar..." autocomplete="off" />
+          </div>
+          <button class="filter-btn" id="filterBtn">
+            <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+            <span id="filterLabel">Tipo</span>
+          </button>
+        </div>
+
+        <div class="type-chips" id="typeChips" style="display:none;">
+          <button class="type-chip active" data-type="">Todos</button>
+          <button class="type-chip" data-type="youtube">YouTube</button>
+          <button class="type-chip" data-type="serie">Série</button>
+          <button class="type-chip" data-type="podcast">Podcast</button>
+          <button class="type-chip" data-type="livro">Livro</button>
+          <button class="type-chip" data-type="website">Website</button>
+          <button class="type-chip" data-type="outro">Outro</button>
+        </div>
+
+        <div class="content-list" id="contentList"></div>
+      </div>
     </div>
   </main>
 
@@ -504,7 +519,7 @@
     <div class="sheet__header"><h2 class="sheet__title" id="addTitle">Adicionar idioma</h2></div>
     <div class="sheet__body">
       <div class="list-card" id="addList"></div>
-      <div class="list-card" style="margin-top:0;border-radius:0 0 var(--r-md) var(--r-md);margin:0 20px 20px;overflow:hidden;">
+      <div class="list-card" style="margin:0 20px 20px;overflow:hidden;border-top:none;border-radius:0 0 var(--r-md) var(--r-md)">
         <button class="add-modal-manage" id="addModalManageBtn"><svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Gerenciar idiomas</button>
       </div>
     </div>
@@ -515,9 +530,11 @@
 <!-- ── Content form page ─────────────────────────────────────────────── -->
 <div class="detail-page" id="contentFormModal" role="main" aria-label="Formulário de conteúdo">
   <div class="detail-page__header">
-    <button class="sheet__back" id="contentFormBack" aria-label="Fechar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-    <h2 class="detail-page__title" id="contentFormTitle">Novo conteúdo</h2>
-    <button class="sheet__action" id="contentFormSave" aria-label="Salvar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
+    <div class="detail-page__header-inner">
+      <button class="sheet__back" id="contentFormBack" aria-label="Fechar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <h2 class="detail-page__title" id="contentFormTitle">Novo conteúdo</h2>
+      <button class="sheet__action" id="contentFormSave" aria-label="Salvar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
+    </div>
   </div>
   <div class="detail-page__body">
     <div class="form-body">
@@ -526,6 +543,9 @@
         <div class="field-wrap">
           <input type="text" class="text-field" id="cfLink" placeholder="Cole o link aqui" autocomplete="off" inputmode="url" style="padding-left:14px;padding-right:14px;" />
         </div>
+      </div>
+      <div id="cfThumbSection" style="display:none;padding:0 20px 4px;">
+        <img id="cfThumbImg" src="" alt="" style="width:160px;height:90px;object-fit:cover;border-radius:var(--r-md);display:block;border:1px solid var(--border-subtle);" />
       </div>
       <div class="form-section">
         <div class="form-label-row">
@@ -536,7 +556,7 @@
           <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
         </div>
       </div>
-      <div class="form-section">
+      <div class="form-section form-section--divider-after">
         <label class="form-label">Tipo</label>
         <div class="type-pills" id="cfTypePills">
           <button class="type-pill active" data-type="youtube">YouTube</button>
@@ -565,8 +585,10 @@
 <!-- ── Session form page ─────────────────────────────────────────────── -->
 <div class="detail-page" id="sessionFormModal" role="main" aria-label="Formulário de sessão">
   <div class="detail-page__header">
-    <button class="sheet__back" id="sessionFormBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-    <h2 class="detail-page__title" id="sessionFormTitle">Nova sessão</h2>
+    <div class="detail-page__header-inner">
+      <button class="sheet__back" id="sessionFormBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <h2 class="detail-page__title" id="sessionFormTitle">Nova sessão</h2>
+    </div>
   </div>
   <div class="detail-page__body">
     <div class="form-body">
@@ -585,55 +607,55 @@
           <button class="cat-pill" data-sub="leitura">Leitura</button>
         </div>
       </div>
-      <div class="form-section">
+      <div class="form-section" style="border-top:1px solid var(--border-subtle); padding-top:20px;">
         <div class="segmented" id="sfSegmented">
           <button class="segmented__btn" data-mode="horario">Horário</button>
           <button class="segmented__btn active" data-mode="duracao">Duração</button>
         </div>
-      </div>
-      <div class="form-section" id="sfHorarioSection" style="display:none;">
-        <div class="time-fields">
-          <div class="time-field-wrap">
-            <label class="time-field-label" for="sfStart">Início</label>
-            <input type="time" class="time-field" id="sfStart" />
+        <div id="sfHorarioSection" style="display:none; padding-top:20px;">
+          <div class="time-fields">
+            <div class="time-field-wrap">
+              <label class="time-field-label" for="sfStart">Início</label>
+              <input type="time" class="time-field" id="sfStart" />
+            </div>
+            <div class="time-field-wrap">
+              <label class="time-field-label" for="sfEnd">Fim</label>
+              <input type="time" class="time-field" id="sfEnd" />
+            </div>
           </div>
-          <div class="time-field-wrap">
-            <label class="time-field-label" for="sfEnd">Fim</label>
-            <input type="time" class="time-field" id="sfEnd" />
+        </div>
+        <div id="sfDuracaoSection" style="padding-top:20px;">
+          <div class="duration-inputs">
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="sfHoras" min="0" max="23" placeholder="0" />
+              <span class="duration-field-label">Horas</span>
+            </div>
+            <span class="duration-sep">:</span>
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="sfMinutos" min="0" max="59" placeholder="00" />
+              <span class="duration-field-label">Min</span>
+            </div>
+            <span class="duration-sep">:</span>
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="sfSegundos" min="0" max="59" placeholder="00" />
+              <span class="duration-field-label">Seg</span>
+            </div>
+          </div>
+          <div class="quick-chips" id="sfQuickChips">
+            <button class="quick-chip" data-min="15">15m</button>
+            <button class="quick-chip" data-min="30">30m</button>
+            <button class="quick-chip" data-min="45">45m</button>
+            <button class="quick-chip" data-min="60">1h</button>
           </div>
         </div>
       </div>
-      <div class="form-section" id="sfDuracaoSection">
-        <div class="duration-inputs">
-          <div class="duration-field-wrap">
-            <input type="number" class="duration-field" id="sfHoras" min="0" max="23" placeholder="0" />
-            <span class="duration-field-label">Horas</span>
-          </div>
-          <span class="duration-sep">:</span>
-          <div class="duration-field-wrap">
-            <input type="number" class="duration-field" id="sfMinutos" min="0" max="59" placeholder="00" />
-            <span class="duration-field-label">Min</span>
-          </div>
-          <span class="duration-sep">:</span>
-          <div class="duration-field-wrap">
-            <input type="number" class="duration-field" id="sfSegundos" min="0" max="59" placeholder="00" />
-            <span class="duration-field-label">Seg</span>
-          </div>
-        </div>
-        <div class="quick-chips" id="sfQuickChips">
-          <button class="quick-chip" data-min="15">15m</button>
-          <button class="quick-chip" data-min="30">30m</button>
-          <button class="quick-chip" data-min="45">45m</button>
-          <button class="quick-chip" data-min="60">1h</button>
-        </div>
-      </div>
-      <div class="form-section">
+      <div class="form-section" style="border-top:1px solid var(--border-subtle);">
         <label class="form-label" for="sfDate">Data</label>
         <input type="date" class="text-field" id="sfDate" style="padding:0 14px;" />
       </div>
     </div>
     <div style="padding:12px 20px 40px;display:flex;flex-direction:column;gap:8px;">
-      <button class="btn btn-primary" id="sfSaveBtn">Salvar sessão</button>
+      <button class="btn btn-primary" id="sfSaveBtn">Adicionar sessão</button>
       <button class="btn btn-ghost" id="sfCancelBtn">Cancelar</button>
     </div>
   </div>
@@ -642,10 +664,12 @@
 <!-- ── Content detail page ──────────────────────────────────────────── -->
 <div class="detail-page" id="contentDetailModal" role="main" aria-label="Detalhe do conteúdo">
   <div class="detail-page__header">
-    <button class="sheet__back" id="detailBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-    <h2 class="detail-page__title" id="detailTitle"></h2>
-    <button class="sheet__action" id="detailEditBtn" aria-label="Editar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
-    <button class="sheet__action sheet__action--danger" id="detailDeleteBtn" aria-label="Excluir conteúdo"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+    <div class="detail-page__header-inner">
+      <button class="sheet__back" id="detailBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <h2 class="detail-page__title" id="detailTitle"></h2>
+      <button class="sheet__action" id="detailEditBtn" aria-label="Editar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
+      <button class="sheet__action sheet__action--danger" id="detailDeleteBtn" aria-label="Excluir conteúdo"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+    </div>
   </div>
   <div class="detail-page__body" id="detailBody"></div>
 </div>
@@ -852,7 +876,12 @@ function renderContentList() {
   }
   el.innerHTML = list.map(item=>{
     const totalMin = contentTotalMin(item), sess = item.sessions?.length||0;
+    const hasThumb = !!item.thumbnail;
+    const thumbHtml = hasThumb
+      ? `<div class="content-card__thumb"><img src="${esc(item.thumbnail)}" alt="" loading="lazy" /></div>`
+      : '';
     return `<div class="content-card" data-id="${item.id}" role="button" tabindex="0">
+      ${thumbHtml}
       <div class="content-card__left">
         <div class="content-card__top">${typeBadgeHtml(item.type)}</div>
         <div class="content-card__title">${esc(item.title||'Sem título')}</div>
@@ -862,7 +891,7 @@ function renderContentList() {
           ${totalMin===0&&sess===0?`<span style="color:var(--text-disabled);font-size:12px;">Sem sessões</span>`:''}
         </div>
       </div>
-      <svg class="icon content-card__chevron" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      <svg class="icon content-card__chevron" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle;align-self:center;margin-right:12px;"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
     </div>`;
   }).join('');
   el.querySelectorAll('.content-card').forEach(c=>{
@@ -896,7 +925,7 @@ document.getElementById('typeChips').querySelectorAll('.type-chip').forEach(chip
 let editingContentId=null, pendingSessionDraft=[];
 
 function openContentForm(id=null) {
-  editingContentId=id; pendingSessionDraft=[];
+  editingContentId=id; pendingSessionDraft=[]; _pendingThumbnail='';
   if (id) {
     const item=getLangContents().find(c=>c.id===id); if(!item)return;
     document.getElementById('contentFormTitle').textContent='Editar conteúdo';
@@ -904,11 +933,14 @@ function openContentForm(id=null) {
     document.getElementById('cfTitle').value=item.title||'';
     document.querySelectorAll('#cfTypePills .type-pill').forEach(p=>p.classList.toggle('active',p.dataset.type===item.type));
     pendingSessionDraft=(item.sessions||[]).map(s=>({...s}));
+    _pendingThumbnail=item.thumbnail||'';
+    setFormThumb(_pendingThumbnail);
   } else {
     document.getElementById('contentFormTitle').textContent='Novo conteúdo';
     document.getElementById('cfLink').value='';
     document.getElementById('cfTitle').value='';
     document.querySelectorAll('#cfTypePills .type-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+    setFormThumb('');
   }
   renderCfSessions();
   document.getElementById('contentFormModal').classList.add('open');
@@ -936,18 +968,25 @@ function sessionItemHtml(s) {
   </div>`;
 }
 
+function sessionsGroupedHtml(sessions) {
+  const groups={};
+  sessions.forEach(s=>{ const d=s.date||new Date(s.createdAt).toISOString().slice(0,10); if(!groups[d])groups[d]=[]; groups[d].push(s); });
+  return Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0])).map(([d,list])=>{
+    const label=new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+    return `<div class="session-day-group">
+      <div class="session-day-label">${label}</div>
+      <div class="session-day-card">${list.map(s=>sessionItemHtml(s)).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
 function renderCfSessions() {
   const el=document.getElementById('cfSessionsList');
   if (!pendingSessionDraft.length) {
     el.innerHTML=`<div class="sessions-empty"><span>Nenhuma sessão ainda</span></div>`;
     return;
   }
-  const groups={};
-  pendingSessionDraft.forEach(s=>{ const d=s.date||new Date(s.createdAt).toISOString().slice(0,10); if(!groups[d])groups[d]=[]; groups[d].push(s); });
-  el.innerHTML=Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0])).map(([d,sessions])=>{
-    const label=new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
-    return `<div class="session-date-group">${label}</div>${sessions.map(s=>sessionItemHtml(s)).join('')}`;
-  }).join('');
+  el.innerHTML=sessionsGroupedHtml(pendingSessionDraft);
   el.querySelectorAll('.session-item__edit').forEach(btn=>{
     btn.addEventListener('click',()=>openSessionForm(btn.dataset.sid, false));
   });
@@ -969,10 +1008,10 @@ function saveContentForm() {
   if (!state.contents[langId]) state.contents[langId]=[];
   if (editingContentId) {
     const idx=state.contents[langId].findIndex(c=>c.id===editingContentId);
-    if (idx>-1) state.contents[langId][idx]={...state.contents[langId][idx],title,link,type,sessions:pendingSessionDraft,updatedAt:new Date().toISOString()};
+    if (idx>-1) state.contents[langId][idx]={...state.contents[langId][idx],title,link,type,thumbnail:_pendingThumbnail,sessions:pendingSessionDraft,updatedAt:new Date().toISOString()};
     save(); closeContentForm(); renderLibrary(); toast('Conteúdo atualizado');
   } else {
-    state.contents[langId].unshift({id:uid(),title,link,type,sessions:pendingSessionDraft,createdAt:new Date().toISOString()});
+    state.contents[langId].unshift({id:uid(),title,link,type,thumbnail:_pendingThumbnail,sessions:pendingSessionDraft,createdAt:new Date().toISOString()});
     save(); closeContentForm(); renderLibrary(); toast('Conteúdo adicionado');
   }
 }
@@ -992,42 +1031,45 @@ function extractYtId(url) {
   return null;
 }
 
+function setFormThumb(url) {
+  const section = document.getElementById('cfThumbSection');
+  const img = document.getElementById('cfThumbImg');
+  if (url) { img.src = url; section.style.display = 'block'; }
+  else { img.src = ''; section.style.display = 'none'; }
+}
+
 let _ytFetchController = null;
+let _pendingThumbnail = '';
 
 function onLinkChange() {
   const url = document.getElementById('cfLink').value.trim();
   const ytId = extractYtId(url);
-  if (!ytId) return;
+  if (!ytId) { _pendingThumbnail = ''; setFormThumb(''); return; }
 
-  // Auto-select YouTube type pill
   document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
     p.classList.toggle('active', p.dataset.type === 'youtube')
   );
 
-  // Only fetch title if field is empty
-  const titleEl = document.getElementById('cfTitle');
-  if (titleEl.value.trim()) return;
+  _pendingThumbnail = '';
+  setFormThumb('');
 
-  // Abort any in-flight request
   if (_ytFetchController) _ytFetchController.abort();
   _ytFetchController = new AbortController();
 
-  titleEl.placeholder = 'Buscando título...';
+  const titleEl = document.getElementById('cfTitle');
+  if (!titleEl.value.trim()) titleEl.placeholder = 'Buscando título...';
 
   fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, {
     signal: _ytFetchController.signal
   })
     .then(r => { if (!r.ok) throw new Error('oembed failed'); return r.json(); })
     .then(data => {
-      if (data.title && !titleEl.value.trim()) {
-        titleEl.value = data.title;
-      }
+      if (data.title && !titleEl.value.trim()) titleEl.value = data.title;
+      if (data.thumbnail_url) { _pendingThumbnail = data.thumbnail_url; setFormThumb(data.thumbnail_url); }
       titleEl.placeholder = 'Nome do conteúdo';
     })
     .catch(err => {
-      if (err.name !== 'AbortError') {
-        titleEl.placeholder = 'Nome do conteúdo';
-      }
+      if (err.name !== 'AbortError') titleEl.placeholder = 'Nome do conteúdo';
     });
 }
 
@@ -1123,7 +1165,7 @@ document.getElementById('sfQuickChips').querySelectorAll('.quick-chip').forEach(
   });
 });
 
-['sfHoras','sfMinutos','sfSegundos'].forEach(id=>{
+['sfHoras','sfMinutos','sfSegundos'].forEach((id, idx, arr)=>{
   const el = document.getElementById(id);
   const max = id==='sfHoras' ? 23 : 59;
 
@@ -1131,11 +1173,19 @@ document.getElementById('sfQuickChips').querySelectorAll('.quick-chip').forEach(
     document.querySelectorAll('.quick-chip').forEach(c=>c.classList.remove('active'));
   });
 
+  el.addEventListener('keydown', e=>{
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const next = arr[idx+1];
+      if (next) document.getElementById(next).focus();
+      else document.getElementById('sfSaveBtn').focus();
+    }
+  });
+
   el.addEventListener('blur', ()=>{
     let v = parseInt(el.value);
     if (isNaN(v) || v < 0) v = 0;
     if (v > max) {
-      // e.g. 055 → 55, 99 min → 59
       const str = String(v);
       const parsed = parseInt(str.replace(/^0+/, '') || '0');
       v = Math.min(parsed > max ? max : parsed, max);
@@ -1143,7 +1193,6 @@ document.getElementById('sfQuickChips').querySelectorAll('.quick-chip').forEach(
     el.value = v === 0 ? '' : v;
   });
 
-  // Scroll into view on focus (duration section can be off-screen on mobile)
   el.addEventListener('focus', ()=>{
     setTimeout(()=>el.scrollIntoView({behavior:'smooth', block:'center'}), 150);
   });
@@ -1218,11 +1267,6 @@ function renderDetail(id) {
   const breakdown={'escuta-leitura':0, 'escuta':0, 'leitura':0};
   sessions.forEach(s=>{ const k=s.sub||'escuta-leitura'; breakdown[k]=(breakdown[k]||0)+(s.durationMin||0); });
 
-  const groups={};
-  [...sessions].sort((a,b)=>(b.date||b.createdAt).localeCompare(a.date||a.createdAt)).forEach(s=>{
-    const d=s.date||new Date(s.createdAt).toISOString().slice(0,10); if(!groups[d])groups[d]=[]; groups[d].push(s);
-  });
-
   const BREAKDOWN_ORDER = ['escuta-leitura','escuta','leitura'];
   const breakdownHtml=BREAKDOWN_ORDER.map(k=>`
     <div class="detail-stat-row">
@@ -1230,22 +1274,7 @@ function renderDetail(id) {
       <span class="detail-stat-row__val">${fmtMin(breakdown[k]||0)}</span>
     </div>`).join('');
 
-  const sessionsListHtml=Object.entries(groups).map(([d,list])=>{
-    const label=new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
-    return `<div class="session-date-group">${label}</div>${list.map(s=>{
-      const catLabel=CAT_LABELS[s.cat]||'', subLabel=SUB_LABELS[s.sub]||'';
-      let timeStr='';
-      if (s.mode==='horario'&&s.start) timeStr=s.end?`${s.start} — ${s.end}`:`${s.start} — em andamento`;
-      else timeStr=fmtSec(Math.round((s.durationMin||0)*60));
-      return `<div class="session-item">
-        <div class="session-item__left">
-          <div class="session-item__time">${timeStr}</div>
-          <div class="session-item__meta">${catLabel}${subLabel?' • '+subLabel:''}</div>
-        </div>
-        <button class="session-item__edit" data-sid="${s.id}" aria-label="Editar sessão"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></button>
-      </div>`;
-    }).join('')}`;
-  }).join('');
+  const sessionsListHtml = sessionsGroupedHtml(sessions);
 
   document.getElementById('detailBody').innerHTML=`
     <div class="detail-hero">
