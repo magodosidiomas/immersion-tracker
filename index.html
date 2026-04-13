@@ -512,129 +512,127 @@
   </div>
 </div>
 
-<!-- ── Content form modal ───────────────────────────────────────────── -->
-<div class="overlay" id="contentFormModal" role="dialog" aria-modal="true">
-  <div class="sheet">
-    <div class="sheet__handle" aria-hidden="true"></div>
-    <div class="sheet__header">
-      <button class="sheet__back" id="contentFormBack" aria-label="Fechar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-      <h2 class="sheet__title" id="contentFormTitle">Novo conteúdo</h2>
-      <button class="sheet__action" id="contentFormSave" aria-label="Salvar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
-    </div>
-    <div class="sheet__body">
-      <div class="form-body">
-        <div class="form-section">
-          <label class="form-label" for="cfLink">Link</label>
-          <div class="field-wrap">
-            <input type="text" class="text-field" id="cfLink" placeholder="Cole o link aqui" autocomplete="off" inputmode="url" style="padding-left:14px;padding-right:14px;" />
-          </div>
-        </div>
-        <div class="form-section">
-          <div class="form-label-row">
-            <label class="form-label" for="cfTitle" style="margin-bottom:0;">Título</label>
-          </div>
-          <div class="field-wrap" style="margin-top:10px;">
-            <input type="text" class="text-field" id="cfTitle" placeholder="Nome do conteúdo" autocomplete="off" />
-            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-          </div>
-        </div>
-        <div class="form-section">
-          <label class="form-label">Tipo</label>
-          <div class="type-pills" id="cfTypePills">
-            <button class="type-pill active" data-type="youtube">YouTube</button>
-            <button class="type-pill" data-type="serie">Série</button>
-            <button class="type-pill" data-type="podcast">Podcast</button>
-            <button class="type-pill" data-type="website">Website</button>
-            <button class="type-pill" data-type="livro">Livro</button>
-            <button class="type-pill" data-type="outro">Outro</button>
-          </div>
-        </div>
-        <div class="form-section">
-          <div class="sessions-header">
-            <label class="form-label" style="margin-bottom:0;">Sessões</label>
-            <button class="sessions-add-btn" id="cfAddSessionBtn"><svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Adicionar</button>
-          </div>
-          <div id="cfSessionsList"></div>
+<!-- ── Content form page ─────────────────────────────────────────────── -->
+<div class="detail-page" id="contentFormModal" role="main" aria-label="Formulário de conteúdo">
+  <div class="detail-page__header">
+    <button class="sheet__back" id="contentFormBack" aria-label="Fechar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <h2 class="detail-page__title" id="contentFormTitle">Novo conteúdo</h2>
+    <button class="sheet__action" id="contentFormSave" aria-label="Salvar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
+  </div>
+  <div class="detail-page__body">
+    <div class="form-body">
+      <div class="form-section">
+        <label class="form-label" for="cfLink">Link</label>
+        <div class="field-wrap">
+          <input type="text" class="text-field" id="cfLink" placeholder="Cole o link aqui" autocomplete="off" inputmode="url" style="padding-left:14px;padding-right:14px;" />
         </div>
       </div>
+      <div class="form-section">
+        <div class="form-label-row">
+          <label class="form-label" for="cfTitle" style="margin-bottom:0;">Título</label>
+        </div>
+        <div class="field-wrap" style="margin-top:10px;">
+          <input type="text" class="text-field" id="cfTitle" placeholder="Nome do conteúdo" autocomplete="off" />
+          <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </div>
+      </div>
+      <div class="form-section">
+        <label class="form-label">Tipo</label>
+        <div class="type-pills" id="cfTypePills">
+          <button class="type-pill active" data-type="youtube">YouTube</button>
+          <button class="type-pill" data-type="serie">Série</button>
+          <button class="type-pill" data-type="podcast">Podcast</button>
+          <button class="type-pill" data-type="website">Website</button>
+          <button class="type-pill" data-type="livro">Livro</button>
+          <button class="type-pill" data-type="outro">Outro</button>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="sessions-header">
+          <label class="form-label" style="margin-bottom:0;">Sessões</label>
+          <button class="sessions-add-btn" id="cfAddSessionBtn"><svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Adicionar</button>
+        </div>
+        <div id="cfSessionsList"></div>
+      </div>
     </div>
-    <div class="sheet__footer">
+    <div style="padding:12px 20px 40px;display:flex;flex-direction:column;gap:8px;">
       <button class="btn btn-primary" id="contentFormSaveBtn">Salvar</button>
       <button class="btn btn-ghost" id="contentFormCancelBtn">Cancelar</button>
     </div>
   </div>
 </div>
 
-<!-- ── Session form modal ───────────────────────────────────────────── -->
-<div class="overlay" id="sessionFormModal" role="dialog" aria-modal="true">
-  <div class="sheet">
-    <div class="sheet__handle" aria-hidden="true"></div>
-    <div class="sheet__header">
-      <button class="sheet__back" id="sessionFormBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
-      <h2 class="sheet__title" id="sessionFormTitle">Nova sessão</h2>
-    </div>
-    <div class="sheet__body">
-      <div class="form-body">
-        <div class="form-section">
-          <label class="form-label">Categoria</label>
-          <div class="cat-pills" id="sfCatPills">
-            <button class="cat-pill active" data-cat="imersao">Imersão</button>
-            <button class="cat-pill" data-cat="interativa">Imersão interativa</button>
-          </div>
+<!-- ── Session form page ─────────────────────────────────────────────── -->
+<div class="detail-page" id="sessionFormModal" role="main" aria-label="Formulário de sessão">
+  <div class="detail-page__header">
+    <button class="sheet__back" id="sessionFormBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+    <h2 class="detail-page__title" id="sessionFormTitle">Nova sessão</h2>
+  </div>
+  <div class="detail-page__body">
+    <div class="form-body">
+      <div class="form-section">
+        <label class="form-label">Categoria</label>
+        <div class="cat-pills" id="sfCatPills">
+          <button class="cat-pill active" data-cat="imersao">Imersão</button>
+          <button class="cat-pill" data-cat="interativa">Imersão interativa</button>
         </div>
-        <div class="form-section">
-          <label class="form-label">Subcategoria</label>
-          <div class="cat-pills" id="sfSubPills">
-            <button class="cat-pill active" data-sub="escuta-leitura">Simultâneo</button>
-            <button class="cat-pill" data-sub="escuta">Escuta</button>
-            <button class="cat-pill" data-sub="leitura">Leitura</button>
-          </div>
+      </div>
+      <div class="form-section">
+        <label class="form-label">Subcategoria</label>
+        <div class="cat-pills" id="sfSubPills">
+          <button class="cat-pill active" data-sub="escuta-leitura">Simultâneo</button>
+          <button class="cat-pill" data-sub="escuta">Escuta</button>
+          <button class="cat-pill" data-sub="leitura">Leitura</button>
         </div>
-        <div class="form-section">
-          <div class="segmented" id="sfSegmented">
-            <button class="segmented__btn" data-mode="horario">Horário</button>
-            <button class="segmented__btn active" data-mode="duracao">Duração</button>
-          </div>
+      </div>
+      <div class="form-section">
+        <div class="segmented" id="sfSegmented">
+          <button class="segmented__btn" data-mode="horario">Horário</button>
+          <button class="segmented__btn active" data-mode="duracao">Duração</button>
         </div>
-        <div class="form-section" id="sfHorarioSection" style="display:none;">
-          <div class="time-fields">
-            <div class="time-field-wrap">
-              <label class="time-field-label" for="sfStart">Início</label>
-              <input type="time" class="time-field" id="sfStart" />
-            </div>
-            <div class="time-field-wrap">
-              <label class="time-field-label" for="sfEnd">Fim</label>
-              <input type="time" class="time-field" id="sfEnd" />
-            </div>
+      </div>
+      <div class="form-section" id="sfHorarioSection" style="display:none;">
+        <div class="time-fields">
+          <div class="time-field-wrap">
+            <label class="time-field-label" for="sfStart">Início</label>
+            <input type="time" class="time-field" id="sfStart" />
           </div>
-        </div>
-        <div class="form-section" id="sfDuracaoSection">
-          <div class="duration-inputs">
-            <div class="duration-field-wrap">
-              <input type="number" class="duration-field" id="sfHoras" min="0" max="23" placeholder="0" />
-              <span class="duration-field-label">Horas</span>
-            </div>
-            <span class="duration-sep">:</span>
-            <div class="duration-field-wrap">
-              <input type="number" class="duration-field" id="sfMinutos" min="0" max="59" placeholder="00" />
-              <span class="duration-field-label">Min</span>
-            </div>
-            <span class="duration-sep">:</span>
-            <div class="duration-field-wrap">
-              <input type="number" class="duration-field" id="sfSegundos" min="0" max="59" placeholder="00" />
-              <span class="duration-field-label">Seg</span>
-            </div>
-          </div>
-          <div class="quick-chips" id="sfQuickChips">
-            <button class="quick-chip" data-min="15">15m</button>
-            <button class="quick-chip" data-min="30">30m</button>
-            <button class="quick-chip" data-min="45">45m</button>
-            <button class="quick-chip" data-min="60">1h</button>
+          <div class="time-field-wrap">
+            <label class="time-field-label" for="sfEnd">Fim</label>
+            <input type="time" class="time-field" id="sfEnd" />
           </div>
         </div>
       </div>
+      <div class="form-section" id="sfDuracaoSection">
+        <div class="duration-inputs">
+          <div class="duration-field-wrap">
+            <input type="number" class="duration-field" id="sfHoras" min="0" max="23" placeholder="0" />
+            <span class="duration-field-label">Horas</span>
+          </div>
+          <span class="duration-sep">:</span>
+          <div class="duration-field-wrap">
+            <input type="number" class="duration-field" id="sfMinutos" min="0" max="59" placeholder="00" />
+            <span class="duration-field-label">Min</span>
+          </div>
+          <span class="duration-sep">:</span>
+          <div class="duration-field-wrap">
+            <input type="number" class="duration-field" id="sfSegundos" min="0" max="59" placeholder="00" />
+            <span class="duration-field-label">Seg</span>
+          </div>
+        </div>
+        <div class="quick-chips" id="sfQuickChips">
+          <button class="quick-chip" data-min="15">15m</button>
+          <button class="quick-chip" data-min="30">30m</button>
+          <button class="quick-chip" data-min="45">45m</button>
+          <button class="quick-chip" data-min="60">1h</button>
+        </div>
+      </div>
+      <div class="form-section">
+        <label class="form-label" for="sfDate">Data</label>
+        <input type="date" class="text-field" id="sfDate" style="padding:0 14px;" />
+      </div>
     </div>
-    <div class="sheet__footer">
+    <div style="padding:12px 20px 40px;display:flex;flex-direction:column;gap:8px;">
       <button class="btn btn-primary" id="sfSaveBtn">Salvar sessão</button>
       <button class="btn btn-ghost" id="sfCancelBtn">Cancelar</button>
     </div>
@@ -730,6 +728,18 @@ function fmtMin(min) {
   return fmtSec(Math.round((min||0) * 60));
 }
 
+function fmtMinNoSec(min) {
+  // Like fmtMin but omits seconds — used for homepage stat chips
+  const totalSec = Math.round((min||0) * 60);
+  if (!totalSec || totalSec<=0) return '0m';
+  const h = Math.floor(totalSec/3600);
+  const m = Math.floor((totalSec%3600)/60);
+  let parts = [];
+  if (h>0) parts.push(`${h}h`);
+  if (m>0) parts.push(`${m}m`);
+  return parts.length ? parts.join(' ') : (h===0 ? '<1m' : `${h}h`);
+}
+
 function fmtSec(totalSec) {
   if (!totalSec || totalSec<=0) return '0m';
   const h = Math.floor(totalSec/3600);
@@ -814,8 +824,8 @@ function renderLibrary() {
     });
   });
   const streak = computeStreak();
-  document.getElementById('statTotal').textContent  = fmtMin(total);
-  document.getElementById('statWeek').textContent   = fmtMin(week);
+  document.getElementById('statTotal').textContent  = fmtMinNoSec(total);
+  document.getElementById('statWeek').textContent   = fmtMinNoSec(week);
   // Streak chip: show number + fire emoji inline
   const streakEl = document.getElementById('statStreak');
   streakEl.textContent = streak;
@@ -900,7 +910,9 @@ function openContentForm(id=null) {
     document.getElementById('cfTitle').value='';
     document.querySelectorAll('#cfTypePills .type-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
   }
-  renderCfSessions(); openModal('contentFormModal');
+  renderCfSessions();
+  document.getElementById('contentFormModal').classList.add('open');
+  document.body.style.overflow='hidden';
 }
 
 document.getElementById('cfTypePills').querySelectorAll('.type-pill').forEach(pill=>{
@@ -931,9 +943,9 @@ function renderCfSessions() {
     return;
   }
   const groups={};
-  pendingSessionDraft.forEach(s=>{ const d=new Date(s.createdAt).toDateString(); if(!groups[d])groups[d]=[]; groups[d].push(s); });
-  el.innerHTML=Object.entries(groups).map(([d,sessions])=>{
-    const label=new Date(d).toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+  pendingSessionDraft.forEach(s=>{ const d=s.date||new Date(s.createdAt).toISOString().slice(0,10); if(!groups[d])groups[d]=[]; groups[d].push(s); });
+  el.innerHTML=Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0])).map(([d,sessions])=>{
+    const label=new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
     return `<div class="session-date-group">${label}</div>${sessions.map(s=>sessionItemHtml(s)).join('')}`;
   }).join('');
   el.querySelectorAll('.session-item__edit').forEach(btn=>{
@@ -942,6 +954,11 @@ function renderCfSessions() {
 }
 
 document.getElementById('cfAddSessionBtn').addEventListener('click',()=>openSessionForm(null, false));
+
+function closeContentForm() {
+  document.getElementById('contentFormModal').classList.remove('open');
+  document.body.style.overflow='';
+}
 
 function saveContentForm() {
   const title=document.getElementById('cfTitle').value.trim();
@@ -953,10 +970,10 @@ function saveContentForm() {
   if (editingContentId) {
     const idx=state.contents[langId].findIndex(c=>c.id===editingContentId);
     if (idx>-1) state.contents[langId][idx]={...state.contents[langId][idx],title,link,type,sessions:pendingSessionDraft,updatedAt:new Date().toISOString()};
-    save(); closeModal('contentFormModal'); renderLibrary(); toast('Conteúdo atualizado');
+    save(); closeContentForm(); renderLibrary(); toast('Conteúdo atualizado');
   } else {
     state.contents[langId].unshift({id:uid(),title,link,type,sessions:pendingSessionDraft,createdAt:new Date().toISOString()});
-    save(); closeModal('contentFormModal'); renderLibrary(); toast('Conteúdo adicionado');
+    save(); closeContentForm(); renderLibrary(); toast('Conteúdo adicionado');
   }
 }
 
@@ -975,14 +992,43 @@ function extractYtId(url) {
   return null;
 }
 
+let _ytFetchController = null;
+
 function onLinkChange() {
   const url = document.getElementById('cfLink').value.trim();
   const ytId = extractYtId(url);
   if (!ytId) return;
+
   // Auto-select YouTube type pill
   document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
     p.classList.toggle('active', p.dataset.type === 'youtube')
   );
+
+  // Only fetch title if field is empty
+  const titleEl = document.getElementById('cfTitle');
+  if (titleEl.value.trim()) return;
+
+  // Abort any in-flight request
+  if (_ytFetchController) _ytFetchController.abort();
+  _ytFetchController = new AbortController();
+
+  titleEl.placeholder = 'Buscando título...';
+
+  fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, {
+    signal: _ytFetchController.signal
+  })
+    .then(r => { if (!r.ok) throw new Error('oembed failed'); return r.json(); })
+    .then(data => {
+      if (data.title && !titleEl.value.trim()) {
+        titleEl.value = data.title;
+      }
+      titleEl.placeholder = 'Nome do conteúdo';
+    })
+    .catch(err => {
+      if (err.name !== 'AbortError') {
+        titleEl.placeholder = 'Nome do conteúdo';
+      }
+    });
 }
 
 const cfLinkEl = document.getElementById('cfLink');
@@ -994,8 +1040,8 @@ cfLinkEl.addEventListener('change', () => { _linkPrev=cfLinkEl.value; onLinkChan
 cfLinkEl.addEventListener('focus',  () => { _linkPollTimer=setInterval(_pollLink,400); });
 cfLinkEl.addEventListener('blur',   () => { clearInterval(_linkPollTimer); _pollLink(); });
 document.getElementById('contentFormSaveBtn').addEventListener('click',saveContentForm);
-document.getElementById('contentFormBack').addEventListener('click',()=>closeModal('contentFormModal'));
-document.getElementById('contentFormCancelBtn').addEventListener('click',()=>closeModal('contentFormModal'));
+document.getElementById('contentFormBack').addEventListener('click',closeContentForm);
+document.getElementById('contentFormCancelBtn').addEventListener('click',closeContentForm);
 document.getElementById('fabBtn').addEventListener('click',()=>openContentForm());
 
 
@@ -1015,12 +1061,14 @@ function openSessionForm(sessionId=null, detailMode=false) {
       ? (getLangContents().find(c=>c.id===currentDetailId)?.sessions||[])
       : pendingSessionDraft;
     const s=pool.find(x=>x.id===sessionId); if(!s)return;
+    document.getElementById('sfDate').value=s.date||new Date().toISOString().slice(0,10);
     document.querySelectorAll('#sfCatPills .cat-pill').forEach(p=>p.classList.toggle('active',p.dataset.cat===s.cat));
     document.querySelectorAll('#sfSubPills .cat-pill').forEach(p=>p.classList.toggle('active',p.dataset.sub===s.sub));
     setSessionMode(s.mode||'horario');
     if (s.mode==='horario') { document.getElementById('sfStart').value=s.start||''; document.getElementById('sfEnd').value=s.end||''; }
     else { const _totalSec=Math.round((s.durationMin||0)*60); document.getElementById('sfHoras').value=Math.floor(_totalSec/3600); document.getElementById('sfMinutos').value=Math.floor((_totalSec%3600)/60); document.getElementById('sfSegundos').value=_totalSec%60; }
   } else {
+    document.getElementById('sfDate').value=new Date().toISOString().slice(0,10);
     document.querySelectorAll('#sfCatPills .cat-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
     document.querySelectorAll('#sfSubPills .cat-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
     setSessionMode('duracao');
@@ -1030,7 +1078,13 @@ function openSessionForm(sessionId=null, detailMode=false) {
     document.getElementById('sfHoras').value=''; document.getElementById('sfMinutos').value=''; document.getElementById('sfSegundos').value='';
     document.querySelectorAll('.quick-chip').forEach(c=>c.classList.remove('active'));
   }
-  openModal('sessionFormModal');
+  document.getElementById('sessionFormModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeSessionForm() {
+  document.getElementById('sessionFormModal').classList.remove('open');
+  if (!document.querySelector('.overlay.open,.confirm-overlay.open')) document.body.style.overflow='';
 }
 
 function setSessionMode(mode) {
@@ -1099,6 +1153,7 @@ document.getElementById('sfSaveBtn').addEventListener('click',()=>{
   const mode=document.querySelector('#sfSegmented .segmented__btn.active').dataset.mode;
   const cat=document.querySelector('#sfCatPills .cat-pill.active')?.dataset.cat||'imersao';
   const sub=document.querySelector('#sfSubPills .cat-pill.active')?.dataset.sub||'escuta-leitura';
+  const date=document.getElementById('sfDate').value||new Date().toISOString().slice(0,10);
   let durationMin=0, start='', end='';
   if (mode==='horario') {
     start=document.getElementById('sfStart').value; end=document.getElementById('sfEnd').value;
@@ -1121,28 +1176,28 @@ document.getElementById('sfSaveBtn').addEventListener('click',()=>{
       if (!state.contents[langId][idx].sessions) state.contents[langId][idx].sessions=[];
       if (editingSessionId) {
         const si=state.contents[langId][idx].sessions.findIndex(s=>s.id===editingSessionId);
-        if (si>-1) state.contents[langId][idx].sessions[si]={...state.contents[langId][idx].sessions[si],mode,cat,sub,start,end,durationMin};
+        if (si>-1) state.contents[langId][idx].sessions[si]={...state.contents[langId][idx].sessions[si],mode,cat,sub,start,end,durationMin,date};
       } else {
-        state.contents[langId][idx].sessions.push({id:uid(),mode,cat,sub,start,end,durationMin,createdAt:new Date().toISOString()});
+        state.contents[langId][idx].sessions.push({id:uid(),mode,cat,sub,start,end,durationMin,date,createdAt:new Date().toISOString()});
       }
-      save(); closeModal('sessionFormModal'); renderDetail(currentDetailId); renderLibrary();
+      save(); closeSessionForm(); renderDetail(currentDetailId); renderLibrary();
       toast(editingSessionId?'Sessão atualizada':'Sessão adicionada');
     }
   } else {
     // Save to draft
     if (editingSessionId) {
       const si=pendingSessionDraft.findIndex(s=>s.id===editingSessionId);
-      if (si>-1) pendingSessionDraft[si]={...pendingSessionDraft[si],mode,cat,sub,start,end,durationMin};
+      if (si>-1) pendingSessionDraft[si]={...pendingSessionDraft[si],mode,cat,sub,start,end,durationMin,date};
     } else {
-      pendingSessionDraft.push({id:uid(),mode,cat,sub,start,end,durationMin,createdAt:new Date().toISOString()});
+      pendingSessionDraft.push({id:uid(),mode,cat,sub,start,end,durationMin,date,createdAt:new Date().toISOString()});
     }
-    closeModal('sessionFormModal'); renderCfSessions();
+    closeSessionForm(); renderCfSessions();
     toast(editingSessionId?'Sessão atualizada':'Sessão adicionada');
   }
 });
 
-document.getElementById('sfCancelBtn').addEventListener('click',()=>closeModal('sessionFormModal'));
-document.getElementById('sessionFormBack').addEventListener('click',()=>closeModal('sessionFormModal'));
+document.getElementById('sfCancelBtn').addEventListener('click', closeSessionForm);
+document.getElementById('sessionFormBack').addEventListener('click', closeSessionForm);
 
 /* ════════════════════════════════════════════════════════════
    CONTENT DETAIL
@@ -1164,8 +1219,8 @@ function renderDetail(id) {
   sessions.forEach(s=>{ const k=s.sub||'escuta-leitura'; breakdown[k]=(breakdown[k]||0)+(s.durationMin||0); });
 
   const groups={};
-  [...sessions].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).forEach(s=>{
-    const d=new Date(s.createdAt).toDateString(); if(!groups[d])groups[d]=[]; groups[d].push(s);
+  [...sessions].sort((a,b)=>(b.date||b.createdAt).localeCompare(a.date||a.createdAt)).forEach(s=>{
+    const d=s.date||new Date(s.createdAt).toISOString().slice(0,10); if(!groups[d])groups[d]=[]; groups[d].push(s);
   });
 
   const BREAKDOWN_ORDER = ['escuta-leitura','escuta','leitura'];
@@ -1176,7 +1231,7 @@ function renderDetail(id) {
     </div>`).join('');
 
   const sessionsListHtml=Object.entries(groups).map(([d,list])=>{
-    const label=new Date(d).toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+    const label=new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
     return `<div class="session-date-group">${label}</div>${list.map(s=>{
       const catLabel=CAT_LABELS[s.cat]||'', subLabel=SUB_LABELS[s.sub]||'';
       let timeStr='';
@@ -1224,7 +1279,9 @@ document.getElementById('detailEditBtn').addEventListener('click',()=>{
   if(!currentDetailId)return;
   const item=getLangContents().find(c=>c.id===currentDetailId);
   if(item) pendingSessionDraft=[...(item.sessions||[])];
-  document.getElementById('contentDetailModal').classList.remove('open'); document.body.style.overflow=''; openContentForm(currentDetailId);
+  document.getElementById('contentDetailModal').classList.remove('open');
+  document.body.style.overflow='';
+  openContentForm(currentDetailId);
 });
 
 document.getElementById('detailBack').addEventListener('click',()=>{
