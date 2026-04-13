@@ -53,7 +53,6 @@
     .topbar {
       height: 56px; padding: 0 20px;
       display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
       background: var(--bg-base); position: sticky; top: 0; z-index: 50;
     }
     .topbar__inner { width: 100%; max-width: 680px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
@@ -106,9 +105,78 @@
     .dd-action--add:hover { background: rgba(167,139,250,.12); color: #C4B5FD; }
     .dd-action--add:hover .mi { color: #C4B5FD; }
 
+    /* ── Tab bar ────────────────────────────────────────────────*/
+    .tabbar {
+      display: none; align-items: flex-end;
+      padding: 0 20px; gap: 0;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+      position: sticky; top: 56px; z-index: 49;
+    }
+    .tabbar.visible { display: flex; }
+    .tabbar__inner { width: 100%; max-width: 680px; margin: 0 auto; display: flex; }
+    .tab-btn {
+      padding: 0 16px; height: 48px;
+      font-size: 15px; font-weight: 500; color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      transition: color var(--t), border-color var(--t);
+      display: flex; align-items: center;
+    }
+    .tab-btn:hover { color: var(--text-primary); }
+    .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--accent-muted); }
+
     /* ── Main ───────────────────────────────────────────────────*/
     .main { flex: 1; padding: 20px 20px 100px; }
     .main > .page-wrap { padding: 0; }
+
+    /* ── Dashboard view ─────────────────────────────────────────*/
+    .dashboard { display: none; flex-direction: column; gap: 16px; }
+    .dashboard.visible { display: flex; }
+
+    .dash-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+      overflow: hidden;
+    }
+    .dash-card__header {
+      padding: 20px 20px 16px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .dash-card__title {
+      font-size: 12px; font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .dash-card__body { padding: 0 20px 24px; display: flex; flex-direction: column; gap: 24px; }
+
+    .donut-wrap {
+      position: relative;
+      width: 160px; height: 160px;
+      margin: 16px auto;
+    }
+    .donut-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .donut-center__val { font-size: 18px; font-weight: 600; color: var(--text-primary); line-height: 1.1; }
+    .donut-center__lbl { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+
+    .donut-legend { display: flex; flex-direction: column; gap: 2px; }
+    .legend-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .legend-row:last-child { border-bottom: none; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { font-size: 15px; color: var(--text-primary); flex: 1; }
+    .legend-val { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+    .legend-pct { font-size: 13px; color: var(--text-disabled); min-width: 36px; text-align: right; }
+
+    .dash-divider { height: 1px; background: var(--border-subtle); margin: 0 20px; }
 
     /* ── Empty state ────────────────────────────────────────────*/
     .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 60vh; text-align: center; }
@@ -122,8 +190,8 @@
     .library { display: none; flex-direction: column; gap: 16px; }
     .library.visible { display: flex; }
 
-    .stats-bar { display: flex; gap: 8px; }
-    .stat-chip { flex: 1; background: transparent; border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
+    .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-chip { background: transparent; border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; }
     .stat-chip__val   { font-size: 20px; font-weight: 600; letter-spacing: -0.4px; line-height: 1.1; }
     .stat-chip__label { font-size: 12px; color: var(--text-secondary); }
     .stat-chip--streak { position: relative; }
@@ -441,6 +509,13 @@
     </div>
   </header>
 
+  <nav class="tabbar" id="tabbar" aria-label="Navegação principal">
+    <div class="tabbar__inner">
+      <button class="tab-btn active" id="tabLibrary" aria-selected="true">Biblioteca</button>
+      <button class="tab-btn" id="tabDashboard" aria-selected="false">Dashboard</button>
+    </div>
+  </nav>
+
   <main class="main" id="mainArea">
     <div class="page-wrap">
       <div class="empty-state" id="emptyState">
@@ -454,8 +529,9 @@
 
       <div class="library" id="libraryView">
         <div class="stats-bar">
-          <div class="stat-chip"><span class="stat-chip__val" id="statTotal">0m</span><span class="stat-chip__label">total</span></div>
+          <div class="stat-chip"><span class="stat-chip__val" id="statToday">0m</span><span class="stat-chip__label">hoje</span></div>
           <div class="stat-chip"><span class="stat-chip__val" id="statWeek">0m</span><span class="stat-chip__label">esta semana</span></div>
+          <div class="stat-chip"><span class="stat-chip__val" id="statTotal">0m</span><span class="stat-chip__label">total</span></div>
           <div class="stat-chip stat-chip--streak"><div class="stat-chip__streak-row"><span class="stat-chip__val" id="statStreak">0</span><span class="stat-chip__streak-icon">🔥</span></div><span class="stat-chip__label">streak</span></div>
         </div>
 
@@ -481,6 +557,33 @@
         </div>
 
         <div class="content-list" id="contentList"></div>
+      </div>
+
+      <!-- ── Dashboard ─────────────────────────────────────────── -->
+      <div class="dashboard" id="dashboardView">
+
+        <!-- Donut card -->
+        <div class="dash-card">
+          <div class="dash-card__header">
+            <span class="dash-card__title">Tempo por</span>
+            <div class="segmented" id="dashSegmented">
+              <button class="segmented__btn active" data-mode="categoria">Categoria</button>
+              <button class="segmented__btn" data-mode="subcategoria">Subcategoria</button>
+              <button class="segmented__btn" data-mode="tipo">Tipo</button>
+            </div>
+          </div>
+          <div class="dash-card__body">
+            <div class="donut-wrap">
+              <canvas id="dashDonut" role="img" aria-label="Gráfico de distribuição de tempo"></canvas>
+              <div class="donut-center">
+                <span class="donut-center__val" id="donutTotal">—</span>
+                <span class="donut-center__lbl">total</span>
+              </div>
+            </div>
+            <div class="donut-legend" id="donutLegend"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>
@@ -688,6 +791,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 /* ════════════════════════════════════════════════════════════
    CONSTANTS
@@ -806,9 +910,14 @@ function syncTopbar() {
   document.getElementById('currentName').textContent = lang ? lang.name : 'Idioma';
   const has = state.userLanguages.length>0;
   document.getElementById('emptyState').style.display = has ? 'none' : 'flex';
-  document.getElementById('libraryView').classList.toggle('visible', has);
-  document.getElementById('fabBtn').style.display = has ? 'flex' : 'none';
-  if (has) renderLibrary();
+  document.getElementById('tabbar').classList.toggle('visible', has);
+  document.getElementById('libraryView').classList.toggle('visible', has && activeTab === 'library');
+  document.getElementById('dashboardView').classList.toggle('visible', has && activeTab === 'dashboard');
+  document.getElementById('fabBtn').style.display = (has && activeTab === 'library') ? 'flex' : 'none';
+  if (has) {
+    if (activeTab === 'library') renderLibrary();
+    else renderDashboard();
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -840,20 +949,23 @@ function computeStreak() {
 function renderLibrary() {
   const contents = getLangContents();
   const weekStart = getWeekStart();
-  let total=0, week=0;
+  const todayStr = new Date().toISOString().slice(0, 10);
+  let total=0, week=0, today=0;
   contents.forEach(c=>{
     (c.sessions||[]).forEach(s=>{
-      total += s.durationMin||0;
-      if (new Date(s.createdAt)>=weekStart) week += s.durationMin||0;
+      const min = s.durationMin||0;
+      total += min;
+      if (new Date(s.createdAt)>=weekStart) week += min;
+      const sDate = s.date || new Date(s.createdAt).toISOString().slice(0,10);
+      if (sDate === todayStr) today += min;
     });
   });
   const streak = computeStreak();
   document.getElementById('statTotal').textContent  = fmtMinNoSec(total);
   document.getElementById('statWeek').textContent   = fmtMinNoSec(week);
-  // Streak chip: show number + fire emoji inline
+  document.getElementById('statToday').textContent  = fmtMinNoSec(today);
   const streakEl = document.getElementById('statStreak');
   streakEl.textContent = streak;
-  // Dim fire if no streak
   const fireEl = document.querySelector('.stat-chip__streak-icon');
   if (fireEl) fireEl.style.opacity = streak > 0 ? '1' : '0.3';
   renderContentList();
@@ -1465,6 +1577,162 @@ function addLang(id) {
 }
 document.getElementById('addCloseBtn').addEventListener('click',()=>closeModal('addModal'));
 document.getElementById('emptyAddBtn').addEventListener('click',()=>{renderAdd();openModal('addModal');});
+
+/* ════════════════════════════════════════════════════════════
+   TABS
+════════════════════════════════════════════════════════════ */
+let activeTab = 'library';
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabLibrary').classList.toggle('active', tab === 'library');
+  document.getElementById('tabDashboard').classList.toggle('active', tab === 'dashboard');
+  document.getElementById('tabLibrary').setAttribute('aria-selected', tab === 'library');
+  document.getElementById('tabDashboard').setAttribute('aria-selected', tab === 'dashboard');
+  document.getElementById('libraryView').classList.toggle('visible', tab === 'library');
+  document.getElementById('dashboardView').classList.toggle('visible', tab === 'dashboard');
+  document.getElementById('fabBtn').style.display = (tab === 'library' && state.userLanguages.length) ? 'flex' : 'none';
+  if (tab === 'dashboard') renderDashboard();
+}
+
+document.getElementById('tabLibrary').addEventListener('click', () => switchTab('library'));
+document.getElementById('tabDashboard').addEventListener('click', () => switchTab('dashboard'));
+
+/* ════════════════════════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════════════════════════ */
+
+// Register outside positioner for donut tooltips
+Chart.Tooltip.positioners.donutOutside = function(elements) {
+  if (!elements.length) return false;
+  const el = elements[0];
+  const arc = el.element;
+  const angle = (arc.startAngle + arc.endAngle) / 2;
+  const r = arc.outerRadius + 16;
+  return { x: arc.x + Math.cos(angle) * r, y: arc.y + Math.sin(angle) * r };
+};
+const DASH_COLORS = {
+  imersao:          '#7F77DD',
+  interativa:       '#5DCAA5',
+  'escuta-leitura': '#7F77DD',
+  escuta:           '#AFA9EC',
+  leitura:          '#CECBF6',
+  youtube:  '#FCA5A5',
+  serie:    '#FDE68A',
+  podcast:  '#99F6E4',
+  livro:    '#FDE68A',
+  website:  '#BAE6FD',
+  outro:    '#A09CB8',
+};
+const DASH_LABELS = {
+  imersao:          'Imersão',
+  interativa:       'Imersão interativa',
+  'escuta-leitura': 'Simultâneo',
+  escuta:           'Escuta',
+  leitura:          'Leitura',
+  youtube:  'YouTube',
+  serie:    'Série',
+  podcast:  'Podcast',
+  livro:    'Livro',
+  website:  'Website',
+  outro:    'Outro',
+};
+
+let dashMode = 'categoria';
+let _dashChart = null;
+
+function renderDashboard() {
+  if (!state.userLanguages.length) return;
+  const contents = getLangContents();
+  const totals = {};
+
+  contents.forEach(c => {
+    (c.sessions || []).forEach(s => {
+      let key;
+      if (dashMode === 'categoria')    key = s.cat  || 'imersao';
+      else if (dashMode === 'subcategoria') key = s.sub  || 'escuta-leitura';
+      else                             key = c.type || 'outro';
+      totals[key] = (totals[key] || 0) + (s.durationMin || 0);
+    });
+  });
+
+  let order;
+  if (dashMode === 'categoria')    order = ['imersao', 'interativa'];
+  else if (dashMode === 'subcategoria') order = ['escuta-leitura', 'escuta', 'leitura'];
+  else order = ['youtube','serie','podcast','livro','website','outro'];
+
+  // For tipo: only show keys that have data
+  if (dashMode === 'tipo') order = order.filter(k => (totals[k] || 0) > 0);
+  if (!order.length && dashMode === 'tipo') order = ['outro'];
+
+  const labels   = order.map(k => DASH_LABELS[k] || k);
+  const data     = order.map(k => totals[k] || 0);
+  const colors   = order.map(k => DASH_COLORS[k] || '#6B6882');
+  const totalMin = data.reduce((a, b) => a + b, 0);
+
+  document.getElementById('donutTotal').textContent = totalMin > 0 ? fmtMinNoSec(totalMin) : '—';
+
+  document.getElementById('donutLegend').innerHTML = order.map((k, i) => {
+    const pct = totalMin > 0 ? Math.round((data[i] / totalMin) * 100) : 0;
+    return `<div class="legend-row">
+      <div class="legend-dot" style="background:${colors[i]}"></div>
+      <span class="legend-label">${esc(labels[i])}</span>
+      <span class="legend-val">${fmtMinNoSec(data[i])}</span>
+      <span class="legend-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  const canvas = document.getElementById('dashDonut');
+  canvas.setAttribute('aria-label', `Distribuição por ${dashMode}: ${labels.join(', ')}`);
+
+  if (_dashChart) { _dashChart.destroy(); _dashChart = null; }
+
+  const isEmpty = totalMin === 0;
+  _dashChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{
+        data: isEmpty ? order.map(() => 1) : data,
+        backgroundColor: isEmpty ? order.map(() => '#2A2540') : colors,
+        borderWidth: 0,
+        hoverOffset: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      cutout: '70%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: !isEmpty,
+          position: 'donutOutside',
+          callbacks: {
+            label: function(ctx) {
+              const val = ctx.parsed;
+              const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+              return ` ${fmtMinNoSec(val)} · ${pct}%`;
+            }
+          }
+        }
+      },
+      animation: { duration: 300 },
+    }
+  });
+}
+
+document.getElementById('dashSegmented').querySelectorAll('.segmented__btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#dashSegmented .segmented__btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    dashMode = btn.dataset.mode;
+    renderDashboard();
+  });
+});
+
+
 
 /* ════════════════════════════════════════════════════════════
    INIT
