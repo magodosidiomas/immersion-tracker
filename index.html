@@ -442,6 +442,8 @@
     .text-field--error:focus { border-color: var(--danger) !important; }
     .field-error-msg { font-size: 12px; color: var(--danger); margin-top: 6px; display: none; }
     .field-error-msg.visible { display: block; }
+    .field-hint-msg { font-size: 12px; color: var(--text-disabled); margin-top: 6px; display: none; line-height: 1.5; }
+    .field-hint-msg.visible { display: block; }
 
     .sessions-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .sessions-add-btn { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 600; color: #A78BFA; transition: color var(--t); }
@@ -700,6 +702,7 @@
         <div class="field-wrap">
           <input type="text" class="text-field" id="cfLink" placeholder="Cole o link aqui" autocomplete="off" inputmode="url" style="padding-left:14px;padding-right:14px;" />
         </div>
+        <p class="field-hint-msg" id="cfLinkHint">Importação automática disponível apenas para YouTube e Spotify — título e capa precisam ser preenchidos manualmente.</p>
       </div>
       <div id="cfThumbSection" style="display:none;padding:0 20px 4px;">
         <img id="cfThumbImg" src="" alt="" style="width:160px;height:90px;object-fit:cover;border-radius:var(--r-md);display:block;border:1px solid var(--border-subtle);" />
@@ -1107,6 +1110,7 @@ function openContentForm(id=null) {
     document.getElementById('cfTitle').value='';
     document.querySelectorAll('#cfTypePills .type-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
     setFormThumb('');
+    setLinkHint(false);
   }
   renderCfSessions();
   document.getElementById('contentFormModal').classList.add('open');
@@ -1195,17 +1199,30 @@ document.getElementById('cfTitle').addEventListener('input', () => {
 
 document.getElementById('contentFormSave').addEventListener('click',saveContentForm);
 
-// ── Link: auto-detect YouTube and select type ────────────────
+// ── Link: auto-detect YouTube / YouTube Music / Spotify ──────
 function extractYtId(url) {
   try {
     const u = new URL(url.trim());
     if (u.hostname === 'youtu.be') return u.pathname.slice(1).split('?')[0];
-    if (!u.hostname.includes('youtube.com')) return null;
+    if (!u.hostname.includes('youtube.com') && !u.hostname.includes('music.youtube.com')) return null;
     const shorts = u.pathname.match(/\/shorts\/([^/?]+)/);
     if (shorts) return shorts[1];
     return u.searchParams.get('v');
   } catch {}
   return null;
+}
+
+function isYouTubeUrl(url) {
+  try {
+    const h = new URL(url.trim()).hostname;
+    return h === 'youtu.be' || h.includes('youtube.com');
+  } catch { return false; }
+}
+
+function isSpotifyUrl(url) {
+  try {
+    return new URL(url.trim()).hostname.includes('spotify.com');
+  } catch { return false; }
 }
 
 function setFormThumb(url) {
@@ -1215,39 +1232,70 @@ function setFormThumb(url) {
   else { img.src = ''; section.style.display = 'none'; }
 }
 
-let _ytFetchController = null;
+function setLinkHint(visible) {
+  document.getElementById('cfLinkHint').classList.toggle('visible', visible);
+}
+
+let _fetchController = null;
 let _pendingThumbnail = '';
 
 function onLinkChange() {
   const url = document.getElementById('cfLink').value.trim();
-  const ytId = extractYtId(url);
-  if (!ytId) { _pendingThumbnail = ''; setFormThumb(''); return; }
-
-  document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
-    p.classList.toggle('active', p.dataset.type === 'youtube')
-  );
-
-  _pendingThumbnail = '';
-  setFormThumb('');
-
-  if (_ytFetchController) _ytFetchController.abort();
-  _ytFetchController = new AbortController();
-
   const titleEl = document.getElementById('cfTitle');
-  if (!titleEl.value.trim()) titleEl.placeholder = 'Buscando título...';
 
-  fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, {
-    signal: _ytFetchController.signal
-  })
-    .then(r => { if (!r.ok) throw new Error('oembed failed'); return r.json(); })
-    .then(data => {
-      if (data.title && !titleEl.value.trim()) titleEl.value = data.title;
-      if (data.thumbnail_url) { _pendingThumbnail = data.thumbnail_url; setFormThumb(data.thumbnail_url); }
-      titleEl.placeholder = 'Nome do conteúdo';
-    })
-    .catch(err => {
-      if (err.name !== 'AbortError') titleEl.placeholder = 'Nome do conteúdo';
-    });
+  if (_fetchController) { _fetchController.abort(); _fetchController = null; }
+
+  if (!url) {
+    _pendingThumbnail = ''; setFormThumb(''); setLinkHint(false); return;
+  }
+
+  // ── YouTube / YouTube Music ──────────────────────────────
+  if (isYouTubeUrl(url)) {
+    setLinkHint(false);
+    const ytId = extractYtId(url);
+    if (!ytId) { _pendingThumbnail = ''; setFormThumb(''); return; }
+
+    document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
+      p.classList.toggle('active', p.dataset.type === 'youtube')
+    );
+    _pendingThumbnail = ''; setFormThumb('');
+    _fetchController = new AbortController();
+    if (!titleEl.value.trim()) titleEl.placeholder = 'Buscando título...';
+
+    fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, { signal: _fetchController.signal })
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(data => {
+        if (data.title && !titleEl.value.trim()) titleEl.value = data.title;
+        if (data.thumbnail_url) { _pendingThumbnail = data.thumbnail_url; setFormThumb(data.thumbnail_url); }
+        titleEl.placeholder = 'Nome do conteúdo';
+      })
+      .catch(err => { if (err.name !== 'AbortError') titleEl.placeholder = 'Nome do conteúdo'; });
+    return;
+  }
+
+  // ── Spotify ──────────────────────────────────────────────
+  if (isSpotifyUrl(url)) {
+    setLinkHint(false);
+    document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
+      p.classList.toggle('active', p.dataset.type === 'podcast')
+    );
+    _pendingThumbnail = ''; setFormThumb('');
+    _fetchController = new AbortController();
+    if (!titleEl.value.trim()) titleEl.placeholder = 'Buscando título...';
+
+    fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`, { signal: _fetchController.signal })
+      .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(data => {
+        if (data.title && !titleEl.value.trim()) titleEl.value = data.title;
+        if (data.thumbnail_url) { _pendingThumbnail = data.thumbnail_url; setFormThumb(data.thumbnail_url); }
+        titleEl.placeholder = 'Nome do conteúdo';
+      })
+      .catch(err => { if (err.name !== 'AbortError') titleEl.placeholder = 'Nome do conteúdo'; });
+    return;
+  }
+
+  // ── Outro link: mostrar hint ─────────────────────────────
+  _pendingThumbnail = ''; setFormThumb(''); setLinkHint(true);
 }
 
 const cfLinkEl = document.getElementById('cfLink');
