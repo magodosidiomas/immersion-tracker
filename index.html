@@ -62,7 +62,7 @@
     .lang-wrap { position: relative; }
     .lang-trigger {
       display: flex; align-items: center; gap: 7px;
-      padding: 7px 11px; background: var(--bg-card);
+      height: 40px; padding: 0 11px; background: var(--bg-card);
       border: 1px solid var(--border-subtle); border-radius: var(--r-sm);
       font-size: 14px; font-weight: 500; color: var(--text-primary);
       transition: background var(--t), border-color var(--t);
@@ -396,27 +396,57 @@
     /* ── Toast ──────────────────────────────────────────────────*/
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(8px); background: var(--bg-hover); border: 1px solid var(--bg-subtle); color: var(--text-primary); font-size: 14px; font-weight: 500; padding: 10px 18px; border-radius: 99px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 200ms ease, transform 200ms ease; z-index: 300; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.toast--error { background: rgba(224,82,82,.16); border-color: rgba(224,82,82,.45); color: #FCA5A5; }
 
     /* ── Confirm dialog ─────────────────────────────────────────*/
-    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: flex-end; justify-content: center; padding: 0; opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
     .confirm-overlay.open { opacity: 1; pointer-events: all; }
-    .confirm-dialog { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-xl); width: 100%; max-width: 320px; padding: 24px 20px 20px; display: flex; flex-direction: column; gap: 6px; transform: scale(.95); transition: transform 160ms ease; }
-    .confirm-overlay.open .confirm-dialog { transform: scale(1); }
+    .confirm-dialog { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-xl) var(--r-xl) 0 0; width: 100%; max-width: 480px; padding: 20px 20px 20px; display: flex; flex-direction: column; gap: 6px; transform: translateY(20px); transition: transform 180ms ease; }
+    .confirm-overlay.open .confirm-dialog { transform: translateY(0); }
     .confirm-dialog__title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
     .confirm-dialog__body  { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px; }
-    .confirm-dialog__actions { display: flex; gap: 8px; margin-top: 4px; }
+    .confirm-dialog__actions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
     .confirm-btn { flex: 1; padding: 11px 12px; border-radius: var(--r-md); font-size: 14px; font-weight: 600; transition: background var(--t), opacity var(--t); }
     .confirm-btn--cancel { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
     .confirm-btn--cancel:hover { background: var(--bg-hover); color: var(--text-primary); }
     .confirm-btn--danger { background: var(--danger); color: #fff; }
     .confirm-btn--danger:hover { background: #c94444; }
+    @media (min-width: 640px) {
+      .confirm-overlay { align-items: center; padding: 20px; }
+      .confirm-dialog { border-radius: var(--r-xl); max-width: 340px; transform: translateY(10px) scale(.98); }
+      .confirm-overlay.open .confirm-dialog { transform: none; }
+      .confirm-dialog__actions { flex-direction: row; }
+    }
+
+    /* ── Settings / Profile ─────────────────────────────────────*/
+    .topbar__actions { display:flex; align-items:center; gap:10px; }
+    .icon-btn { width: 40px; height: 40px; border-radius: 12px; background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary); display:flex; align-items:center; justify-content:center; transition: background var(--t), color var(--t), transform var(--t), border-color var(--t); }
+    .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); transform: translateY(-1px); }
+    .icon-btn:active { transform: translateY(0); }
+    .settings-hero { padding: 14px 20px 10px; }
+    .settings-section-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+    .settings-sub { margin-top: 6px; font-size: 13px; color: var(--text-secondary); line-height: 1.35; }
+    .settings-body { padding: 0 20px 40px; }
+    .settings-card { overflow: hidden; margin: 0; }
+    .settings-row { display:flex; align-items:flex-start; justify-content:space-between; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row__left { display:flex; flex-direction:column; gap: 3px; }
+    .settings-row__title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .settings-row__desc { font-size: 13px; color: var(--text-secondary); line-height: 1.35; }
+    .settings-row__btn { flex-shrink:0; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; background: #3D3560; border: 1px solid #3D3560; color: #fff; transition: background var(--t), border-color var(--t), transform var(--t); }
+    .settings-row__btn:hover { background: #4a426e; border-color: #4a426e; }
+    .settings-row__btn:active { transform: translateY(1px); }
 
     /* ════════════════════════════════════════════════════════════
        CONTENT FORM
     ════════════════════════════════════════════════════════════ */
     .form-body { display: flex; flex-direction: column; }
     .form-section { padding: 16px 20px; }
-    .form-section--divider-after { border-bottom: 1px solid var(--border-subtle); }
+    .form-section--divider-after {
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 24px;
+      margin-bottom: 8px;
+    }
     .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; display: block; }
     .form-label-row { display: flex; align-items: center; justify-content: space-between; }
 
@@ -584,7 +614,8 @@
   <header class="topbar">
     <div class="topbar__inner">
       <span class="topbar__logo">Imerso</span>
-      <div class="lang-wrap">
+      <div class="topbar__actions">
+        <div class="lang-wrap">
         <button class="lang-trigger" id="langTrigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Trocar idioma">
           <span class="lang-trigger__flag" id="currentFlag">🌐</span>
           <span id="currentName">Idioma</span>
@@ -597,6 +628,12 @@
             <button class="dd-action" id="ddManageBtn"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>Gerenciar idiomas</button>
           </div>
         </div>
+        </div>
+        <button class="icon-btn" id="settingsBtn" aria-label="Configurações / Perfil">
+          <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle">
+            <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.12 7.12 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 1h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.22-1.12.52-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 7.5a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.83 14.52a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.3.6.22l2.39-.96c.51.41 1.05.72 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.58-.22 1.12-.52 1.63-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z"/>
+          </svg>
+        </button>
       </div>
     </div>
   </header>
@@ -712,6 +749,7 @@
         </div>
 
       </div>
+
     </div>
   </main>
 
@@ -719,6 +757,45 @@
     <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
     <span class="fab__label" id="fabLabel">Adicionar conteúdo</span>
   </button>
+</div>
+
+<!-- ── Settings page ─────────────────────────────────────────────── -->
+<div class="detail-page" id="settingsPage" role="main" aria-label="Configurações">
+  <div class="detail-page__header">
+    <div class="detail-page__header-inner">
+      <button class="sheet__back" id="settingsBack" aria-label="Voltar">
+        <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      </button>
+      <h2 class="detail-page__title">Configurações</h2>
+    </div>
+  </div>
+  <div class="detail-page__body">
+    <div class="page-wrap">
+      <div class="settings-hero">
+        <div class="settings-section-title">Backup</div>
+        <div class="settings-sub">Faça backup dos seus dados</div>
+      </div>
+      <div class="settings-body">
+        <div class="list-card settings-card">
+          <div class="settings-row">
+            <div class="settings-row__left">
+              <div class="settings-row__title">Exportar JSON</div>
+              <div class="settings-row__desc">Baixe um arquivo com todos os seus idiomas, conteúdos e sessões.</div>
+            </div>
+            <button class="settings-row__btn" id="exportJsonBtn">Baixar</button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row__left">
+              <div class="settings-row__title">Importar JSON</div>
+              <div class="settings-row__desc">Substitui seus dados atuais pelo conteúdo do arquivo importado.</div>
+            </div>
+            <button class="settings-row__btn" id="importJsonBtn">Importar</button>
+            <input type="file" id="importJsonFile" accept="application/json" style="display:none" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ── Lang modals ──────────────────────────────────────────────────── -->
@@ -769,26 +846,6 @@
   <div class="detail-page__body">
     <div class="form-body">
       <div class="form-section">
-        <label class="form-label" for="cfLink">Link</label>
-        <div class="field-wrap">
-          <input type="text" class="text-field" id="cfLink" placeholder="Cole o link aqui" autocomplete="off" inputmode="url" style="padding-left:14px;padding-right:14px;" />
-        </div>
-        <p class="field-hint-msg" id="cfLinkHint">Importação automática disponível apenas para YouTube e Spotify — título e capa precisam ser preenchidos manualmente.</p>
-      </div>
-      <div id="cfThumbSection" style="display:none;padding:0 20px 4px;">
-        <img id="cfThumbImg" src="" alt="" style="width:160px;height:90px;object-fit:cover;border-radius:var(--r-md);display:block;border:1px solid var(--border-subtle);" />
-      </div>
-      <div class="form-section">
-        <div class="form-label-row">
-          <label class="form-label" for="cfTitle" style="margin-bottom:0;">Título</label>
-        </div>
-        <div class="field-wrap" style="margin-top:10px;">
-          <input type="text" class="text-field" id="cfTitle" placeholder="Nome do conteúdo" autocomplete="off" />
-          <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-        </div>
-        <p class="field-error-msg" id="cfTitleError">Adicione um título para continuar</p>
-      </div>
-      <div class="form-section form-section--divider-after">
         <label class="form-label">Tipo</label>
         <div class="type-pills" id="cfTypePills">
           <button class="type-pill active" data-type="youtube">YouTube</button>
@@ -798,6 +855,26 @@
           <button class="type-pill" data-type="livro">Livro</button>
           <button class="type-pill" data-type="outro">Outro</button>
         </div>
+      </div>
+      <div class="form-section">
+        <label class="form-label" for="cfLink">Link</label>
+        <div class="field-wrap">
+          <input type="text" class="text-field" id="cfLink" placeholder="Cole o link aqui" autocomplete="off" inputmode="url" style="padding-left:14px;padding-right:14px;" />
+        </div>
+        <p class="field-hint-msg" id="cfLinkHint">Importação automática disponível apenas para YouTube e Spotify — título e capa precisam ser preenchidos manualmente.</p>
+      </div>
+      <div id="cfThumbSection" style="display:none;padding:0 20px 4px;">
+        <img id="cfThumbImg" src="" alt="" style="width:160px;height:90px;object-fit:cover;border-radius:var(--r-md);display:block;border:1px solid var(--border-subtle);" />
+      </div>
+      <div class="form-section form-section--divider-after">
+        <div class="form-label-row">
+          <label class="form-label" for="cfTitle" style="margin-bottom:0;">Título</label>
+        </div>
+        <div class="field-wrap" style="margin-top:10px;">
+          <input type="text" class="text-field" id="cfTitle" placeholder="Nome do conteúdo" autocomplete="off" />
+          <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </div>
+        <p class="field-error-msg" id="cfTitleError">Adicione um título para continuar</p>
       </div>
       <div class="form-section">
         <div class="sessions-header">
@@ -1062,8 +1139,10 @@ const getLang  = id => state.userLanguages.find(l=>l.id===id) || ALL_LANGUAGES.f
 const uid      = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const esc      = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-function toast(msg) {
+function toast(msg, type='default') {
   const el = document.getElementById('toast');
+  el.classList.remove('toast--error');
+  if (type === 'error') el.classList.add('toast--error');
   el.textContent = msg; el.classList.add('show');
   clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 2400);
 }
@@ -1099,6 +1178,14 @@ function fmtSec(totalSec) {
 
 function getWeekStart() {
   const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-d.getDay()); return d;
+}
+
+function fmtPtDateLabel(dateStr) {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString('pt-BR', {
+    day:'numeric',
+    month:'long',
+    year:'numeric'
+  });
 }
 
 function getLangContents() {
@@ -1141,7 +1228,7 @@ function syncTopbar() {
   if (has) {
     if (activeTab === 'library') renderLibrary();
     else if (activeTab === 'study') renderStudyView();
-    else renderDashboard();
+    else if (activeTab === 'dashboard') renderDashboard();
   }
 }
 
@@ -1284,35 +1371,54 @@ document.getElementById('typeChips').querySelectorAll('.type-chip').forEach(chip
    CONTENT FORM
 ════════════════════════════════════════════════════════════ */
 let editingContentId=null, pendingSessionDraft=[];
+const cfEls = {
+  title: document.getElementById('cfTitle'),
+  link: document.getElementById('cfLink'),
+  titleError: document.getElementById('cfTitleError'),
+  sessionsList: document.getElementById('cfSessionsList'),
+  thumbSection: document.getElementById('cfThumbSection'),
+  thumbImg: document.getElementById('cfThumbImg'),
+  linkHint: document.getElementById('cfLinkHint')
+};
+
+function getContentTypePills() {
+  return document.querySelectorAll('#cfTypePills .type-pill');
+}
+
+function setActiveContentType(type) {
+  getContentTypePills().forEach(p => p.classList.toggle('active', p.dataset.type === type));
+}
+
+function getActiveContentType() {
+  return document.querySelector('#cfTypePills .type-pill.active')?.dataset.type || 'youtube';
+}
 
 function openContentForm(id=null) {
   editingContentId=id; pendingSessionDraft=[]; _pendingThumbnail='';
   if (id) {
     const item=getLangContents().find(c=>c.id===id); if(!item)return;
     document.getElementById('contentFormTitle').textContent='Editar conteúdo';
-    document.getElementById('cfLink').value=item.link||'';
-    document.getElementById('cfTitle').value=item.title||'';
-    document.querySelectorAll('#cfTypePills .type-pill').forEach(p=>p.classList.toggle('active',p.dataset.type===item.type));
+    cfEls.link.value=item.link||'';
+    cfEls.title.value=item.title||'';
+    setActiveContentType(item.type);
     pendingSessionDraft=(item.sessions||[]).map(s=>({...s}));
     _pendingThumbnail=item.thumbnail||'';
     setFormThumb(_pendingThumbnail);
   } else {
     document.getElementById('contentFormTitle').textContent='Novo conteúdo';
-    document.getElementById('cfLink').value='';
-    document.getElementById('cfTitle').value='';
-    document.querySelectorAll('#cfTypePills .type-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+    cfEls.link.value='';
+    cfEls.title.value='';
+    setActiveContentType('youtube');
     setFormThumb('');
     setLinkHint(false);
   }
   renderCfSessions();
-  document.getElementById('contentFormModal').classList.add('open');
-  document.body.style.overflow='hidden';
+  openPanel('contentFormModal');
 }
 
 document.getElementById('cfTypePills').querySelectorAll('.type-pill').forEach(pill=>{
   pill.addEventListener('click',()=>{
-    document.querySelectorAll('#cfTypePills .type-pill').forEach(p=>p.classList.remove('active'));
-    pill.classList.add('active');
+    setActiveContentType(pill.dataset.type);
   });
 });
 
@@ -1334,7 +1440,7 @@ function sessionsGroupedHtml(sessions) {
   const groups={};
   sessions.forEach(s=>{ const d=s.date||new Date(s.createdAt).toISOString().slice(0,10); if(!groups[d])groups[d]=[]; groups[d].push(s); });
   return Object.entries(groups).sort((a,b)=>b[0].localeCompare(a[0])).map(([d,list])=>{
-    const label=new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+    const label=fmtPtDateLabel(d);
     return `<div class="session-day-group">
       <div class="session-day-label">${label}</div>
       <div class="session-day-card">${list.map(s=>sessionItemHtml(s)).join('')}</div>
@@ -1343,7 +1449,7 @@ function sessionsGroupedHtml(sessions) {
 }
 
 function renderCfSessions() {
-  const el=document.getElementById('cfSessionsList');
+  const el=cfEls.sessionsList;
   if (!pendingSessionDraft.length) {
     el.innerHTML=`<div class="sessions-empty"><span>Nenhuma sessão ainda</span></div>`;
     return;
@@ -1357,19 +1463,17 @@ function renderCfSessions() {
 document.getElementById('cfAddSessionBtn').addEventListener('click',()=>openSessionForm(null, false));
 
 function closeContentForm() {
-  document.getElementById('contentFormModal').classList.remove('open');
-  document.body.style.overflow='';
+  closePanel('contentFormModal');
 }
 
 function saveContentForm() {
-  const title=document.getElementById('cfTitle').value.trim();
-  const link=document.getElementById('cfLink').value.trim();
-  const type=document.querySelector('#cfTypePills .type-pill.active')?.dataset.type||'youtube';
+  const title=cfEls.title.value.trim();
+  const link=cfEls.link.value.trim();
+  const type=getActiveContentType();
   if (!title) {
-    const el = document.getElementById('cfTitle');
-    el.classList.add('text-field--error');
-    document.getElementById('cfTitleError').classList.add('visible');
-    el.focus();
+    cfEls.title.classList.add('text-field--error');
+    cfEls.titleError.classList.add('visible');
+    cfEls.title.focus();
     return;
   }
   const langId=state.activeLanguage;
@@ -1384,9 +1488,9 @@ function saveContentForm() {
   }
 }
 
-document.getElementById('cfTitle').addEventListener('input', () => {
-  document.getElementById('cfTitle').classList.remove('text-field--error');
-  document.getElementById('cfTitleError').classList.remove('visible');
+cfEls.title.addEventListener('input', () => {
+  cfEls.title.classList.remove('text-field--error');
+  cfEls.titleError.classList.remove('visible');
 });
 
 document.getElementById('contentFormSave').addEventListener('click',saveContentForm);
@@ -1418,22 +1522,20 @@ function isSpotifyUrl(url) {
 }
 
 function setFormThumb(url) {
-  const section = document.getElementById('cfThumbSection');
-  const img = document.getElementById('cfThumbImg');
-  if (url) { img.src = url; section.style.display = 'block'; }
-  else { img.src = ''; section.style.display = 'none'; }
+  if (url) { cfEls.thumbImg.src = url; cfEls.thumbSection.style.display = 'block'; }
+  else { cfEls.thumbImg.src = ''; cfEls.thumbSection.style.display = 'none'; }
 }
 
 function setLinkHint(visible) {
-  document.getElementById('cfLinkHint').classList.toggle('visible', visible);
+  cfEls.linkHint.classList.toggle('visible', visible);
 }
 
 let _fetchController = null;
 let _pendingThumbnail = '';
 
 function onLinkChange() {
-  const url = document.getElementById('cfLink').value.trim();
-  const titleEl = document.getElementById('cfTitle');
+  const url = cfEls.link.value.trim();
+  const titleEl = cfEls.title;
 
   if (_fetchController) { _fetchController.abort(); _fetchController = null; }
 
@@ -1447,9 +1549,7 @@ function onLinkChange() {
     const ytId = extractYtId(url);
     if (!ytId) { _pendingThumbnail = ''; setFormThumb(''); return; }
 
-    document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.type === 'youtube')
-    );
+    setActiveContentType('youtube');
     _pendingThumbnail = ''; setFormThumb('');
     _fetchController = new AbortController();
     if (!titleEl.value.trim()) titleEl.placeholder = 'Buscando título...';
@@ -1468,9 +1568,7 @@ function onLinkChange() {
   // ── Spotify ──────────────────────────────────────────────
   if (isSpotifyUrl(url)) {
     setLinkHint(false);
-    document.querySelectorAll('#cfTypePills .type-pill').forEach(p =>
-      p.classList.toggle('active', p.dataset.type === 'podcast')
-    );
+    setActiveContentType('podcast');
     _pendingThumbnail = ''; setFormThumb('');
     _fetchController = new AbortController();
     if (!titleEl.value.trim()) titleEl.placeholder = 'Buscando título...';
@@ -1490,7 +1588,7 @@ function onLinkChange() {
   _pendingThumbnail = ''; setFormThumb(''); setLinkHint(true);
 }
 
-const cfLinkEl = document.getElementById('cfLink');
+const cfLinkEl = cfEls.link;
 let _linkPrev = '', _linkPollTimer = null;
 function _pollLink() { const c=cfLinkEl.value; if(c!==_linkPrev){_linkPrev=c;onLinkChange();} }
 cfLinkEl.addEventListener('input',  () => { _linkPrev=cfLinkEl.value; onLinkChange(); });
@@ -1537,13 +1635,11 @@ function openSessionForm(sessionId=null, detailMode=false) {
     document.getElementById('sfHoras').value=''; document.getElementById('sfMinutos').value=''; document.getElementById('sfSegundos').value='';
     document.querySelectorAll('.quick-chip').forEach(c=>c.classList.remove('active'));
   }
-  document.getElementById('sessionFormModal').classList.add('open');
-  document.body.style.overflow='hidden';
+  openPanel('sessionFormModal');
 }
 
 function closeSessionForm() {
-  document.getElementById('sessionFormModal').classList.remove('open');
-  if (!document.querySelector('.overlay.open,.confirm-overlay.open')) document.body.style.overflow='';
+  closePanel('sessionFormModal', true);
 }
 
 function setSessionMode(mode) {
@@ -1672,8 +1768,7 @@ let currentDetailId=null;
 
 function openDetail(id) {
   currentDetailId=id; renderDetail(id);
-  document.getElementById('contentDetailModal').classList.add('open');
-  document.body.style.overflow='hidden';
+  openPanel('contentDetailModal');
 }
 
 function renderDetail(id) {
@@ -1725,32 +1820,142 @@ document.getElementById('detailEditBtn').addEventListener('click',()=>{
   if(!currentDetailId)return;
   const item=getLangContents().find(c=>c.id===currentDetailId);
   if(item) pendingSessionDraft=[...(item.sessions||[])];
-  document.getElementById('contentDetailModal').classList.remove('open');
-  document.body.style.overflow='';
+  closePanel('contentDetailModal');
   openContentForm(currentDetailId);
 });
 
 document.getElementById('detailBack').addEventListener('click',()=>{
-  document.getElementById('contentDetailModal').classList.remove('open');
-  document.body.style.overflow='';
+  closePanel('contentDetailModal');
 });
 
 document.getElementById('detailDeleteBtn').addEventListener('click',()=>{
   if(!currentDetailId)return;
   const item=getLangContents().find(c=>c.id===currentDetailId);
   if(!item)return;
-  pendingDeleteId='__content__'+currentDetailId;
-  document.getElementById('confirmTitle').textContent='Excluir conteúdo?';
-  document.getElementById('confirmBody').textContent=`"${item.title||'Sem título'}" e todas as suas sessões serão removidos. Essa ação não pode ser desfeita.`;
-  document.getElementById('confirmModal').classList.add('open');
+  openConfirm({
+    title: 'Excluir conteúdo?',
+    body: `"${item.title||'Sem título'}" e todas as suas sessões serão removidos. Essa ação não pode ser desfeita.`,
+    confirmText: 'Remover',
+    onConfirm: () => {
+      const langId=state.activeLanguage;
+      state.contents[langId]=(state.contents[langId]||[]).filter(c=>c.id!==currentDetailId);
+      closePanel('contentDetailModal');
+      save(); renderLibrary();
+      toast(`"${item.title||'Conteúdo'}" removido`);
+    }
+  });
 });
 
 /* ════════════════════════════════════════════════════════════
    MODALS
 ════════════════════════════════════════════════════════════ */
-function openModal(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); if(!document.querySelector('.overlay.open,.confirm-overlay.open'))document.body.style.overflow=''; }
+function openPanel(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closePanel(id, keepBodyLocked=false) {
+  document.getElementById(id).classList.remove('open');
+  if (!keepBodyLocked) document.body.style.overflow='';
+}
+function openModal(id)  { openPanel(id); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if(!document.querySelector('.overlay.open,.confirm-overlay.open'))document.body.style.overflow='';
+}
 document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);}));
+
+let _confirmAction = null;
+let _confirmCancel = null;
+function openConfirm({ title, body, confirmText = 'Confirmar', onConfirm, onCancel } = {}) {
+  document.getElementById('confirmTitle').textContent = title || 'Confirmar';
+  document.getElementById('confirmBody').textContent = body || '';
+  document.getElementById('confirmDeleteBtn').textContent = confirmText;
+  _confirmAction = typeof onConfirm === 'function' ? onConfirm : null;
+  _confirmCancel = typeof onCancel === 'function' ? onCancel : null;
+  openPanel('confirmModal');
+}
+function closeConfirm() {
+  closePanel('confirmModal', true);
+  document.getElementById('confirmDeleteBtn').textContent = 'Remover';
+  _confirmAction = null;
+  _confirmCancel = null;
+  if(!document.querySelector('.overlay.open,.confirm-overlay.open'))document.body.style.overflow='';
+}
+document.getElementById('confirmCancelBtn').addEventListener('click', () => {
+  try { if (_confirmCancel) _confirmCancel(); } finally { closeConfirm(); }
+});
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+  if (!_confirmAction) return;
+  const fn = _confirmAction;
+  closeConfirm();
+  fn();
+});
+
+function downloadTextFile(filename, text, mime='application/json') {
+  const blob = new Blob([text], { type: `${mime};charset=utf-8` });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 500);
+}
+
+function normalizeImportedState(s) {
+  const out = {
+    userLanguages: Array.isArray(s?.userLanguages) ? s.userLanguages : [],
+    activeLanguage: s?.activeLanguage ?? null,
+    contents: (s?.contents && typeof s.contents === 'object') ? s.contents : {},
+    studySessions: (s?.studySessions && typeof s.studySessions === 'object') ? s.studySessions : {}
+  };
+  if (out.activeLanguage && !out.userLanguages.find(l => l?.id === out.activeLanguage)) {
+    out.activeLanguage = out.userLanguages[0]?.id || null;
+  }
+  if (!out.studySessions) out.studySessions = {};
+  return out;
+}
+
+// Settings actions: export / import / reset
+const importJsonFileEl = document.getElementById('importJsonFile');
+document.getElementById('exportJsonBtn').addEventListener('click', () => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const filename = `imerso-backup-${y}-${m}-${d}.json`;
+  downloadTextFile(filename, JSON.stringify(state, null, 2));
+  toast('Backup JSON baixado');
+});
+
+document.getElementById('importJsonBtn').addEventListener('click', () => {
+  importJsonFileEl.value = '';
+  importJsonFileEl.click();
+});
+
+importJsonFileEl.addEventListener('change', async () => {
+  const f = importJsonFileEl.files?.[0];
+  if (!f) return;
+  try {
+    const text = await f.text();
+    const parsed = JSON.parse(text);
+    const next = normalizeImportedState(parsed);
+    openConfirm({
+      title: 'Importar backup?',
+      body: 'Isso vai substituir seus dados atuais neste dispositivo. Essa ação não pode ser desfeita.',
+      confirmText: 'Importar',
+      onConfirm: () => {
+        state = next;
+        save();
+        syncTopbar();
+        renderDD();
+        toast('Backup importado');
+        if (state.userLanguages.length) switchTab('library');
+        syncTopbar();
+      }
+    });
+  } catch {
+    toast('Formato de arquivo inválido. Envie um arquivo no formato JSON', 'error');
+  }
+});
 
 /* ════════════════════════════════════════════════════════════
    LANG — DROPDOWN
@@ -1805,30 +2010,22 @@ document.getElementById('switchManageBtn').addEventListener('click',()=>{closeMo
 let pendingDeleteId=null;
 function askDelete(id,name) {
   pendingDeleteId=id;
-  document.getElementById('confirmTitle').textContent=`Remover ${name}?`;
-  document.getElementById('confirmBody').textContent=`Você perderá todos os dados de "${name}". Essa ação não pode ser desfeita.`;
-  document.getElementById('confirmModal').classList.add('open');
+  openConfirm({
+    title: `Remover ${name}?`,
+    body: `Você perderá todos os dados de "${name}". Essa ação não pode ser desfeita.`,
+    confirmText: 'Remover',
+    onCancel: () => { pendingDeleteId = null; },
+    onConfirm: () => {
+      if(!pendingDeleteId) return;
+      const l=getLang(pendingDeleteId);
+      state.userLanguages=state.userLanguages.filter(x=>x.id!==pendingDeleteId);
+      if(state.activeLanguage===pendingDeleteId) state.activeLanguage=state.userLanguages[0]?.id||null;
+      pendingDeleteId=null;
+      save(); syncTopbar(); renderManage(); renderDD();
+      toast(`${l.flag} ${l.name} removido`);
+    }
+  });
 }
-document.getElementById('confirmCancelBtn').addEventListener('click',()=>{ pendingDeleteId=null; document.getElementById('confirmModal').classList.remove('open'); });
-document.getElementById('confirmDeleteBtn').addEventListener('click',()=>{
-  if(!pendingDeleteId)return;
-  if(String(pendingDeleteId).startsWith('__content__')) {
-    const cid=pendingDeleteId.replace('__content__','');
-    const langId=state.activeLanguage;
-    const item=state.contents[langId]?.find(c=>c.id===cid);
-    state.contents[langId]=(state.contents[langId]||[]).filter(c=>c.id!==cid);
-    pendingDeleteId=null; document.getElementById('confirmModal').classList.remove('open');
-    document.getElementById('contentDetailModal').classList.remove('open'); document.body.style.overflow=''; save(); renderLibrary();
-    toast(item?`"${item.title||'Conteúdo'}" removido`:'Conteúdo removido');
-    return;
-  }
-  const l=getLang(pendingDeleteId);
-  state.userLanguages=state.userLanguages.filter(x=>x.id!==pendingDeleteId);
-  if(state.activeLanguage===pendingDeleteId) state.activeLanguage=state.userLanguages[0]?.id||null;
-  pendingDeleteId=null; document.getElementById('confirmModal').classList.remove('open');
-  save(); syncTopbar(); renderManage(); renderDD();
-  toast(`${l.flag} ${l.name} removido`);
-});
 
 /* ════════════════════════════════════════════════════════════
    LANG — MANAGE
@@ -1902,12 +2099,20 @@ function switchTab(tab) {
   updateFab();
   if (tab === 'library') renderLibrary();
   else if (tab === 'study') renderStudyView();
-  else renderDashboard();
+  else if (tab === 'dashboard') renderDashboard();
 }
 
 document.getElementById('tabLibrary').addEventListener('click', () => switchTab('library'));
 document.getElementById('tabStudy').addEventListener('click', () => switchTab('study'));
 document.getElementById('tabDashboard').addEventListener('click', () => switchTab('dashboard'));
+
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  openPanel('settingsPage');
+});
+
+document.getElementById('settingsBack').addEventListener('click', () => {
+  closePanel('settingsPage');
+});
 
 // FAB contextual click handler
 document.getElementById('fabBtn').addEventListener('click', () => {
@@ -1959,7 +2164,7 @@ function renderStudyView() {
   el.innerHTML = Object.entries(groups)
     .sort((a, b) => b[0].localeCompare(a[0]))
     .map(([d, list]) => {
-      const label = new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+      const label = fmtPtDateLabel(d);
       const itemsHtml = list.map(s => {
         const catLabel = CAT_LABELS[s.cat] || s.cat || '';
         const subLabel = SUB_LABELS[s.sub] || s.sub || '';
@@ -2055,13 +2260,11 @@ function openStudySessionForm(sessionId = null) {
     document.querySelectorAll('#ssfQuickChips .quick-chip').forEach(c => c.classList.remove('active'));
   }
 
-  document.getElementById('studySessionFormModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  openPanel('studySessionFormModal');
 }
 
 function closeStudySessionForm() {
-  document.getElementById('studySessionFormModal').classList.remove('open');
-  document.body.style.overflow = '';
+  closePanel('studySessionFormModal');
 }
 
 // Cat pill change → re-render subs
