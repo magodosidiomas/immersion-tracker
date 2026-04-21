@@ -497,6 +497,63 @@
     .quick-chip.active { background: rgba(109,40,217,.2); border-color: var(--accent-muted); color: var(--accent-subtle); }
 
     /* ════════════════════════════════════════════════════════════
+       STUDY VIEW
+    ════════════════════════════════════════════════════════════ */
+    .study-view { display: none; flex-direction: column; gap: 16px; }
+    .study-view.visible { display: flex; }
+
+    /* Study session card — category/subcategory are primary */
+    .study-session-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--r-md);
+      overflow: hidden;
+    }
+    .study-day-group { margin-bottom: 16px; }
+    .study-day-group:last-child { margin-bottom: 0; }
+    .study-day-label { font-size: 12px; color: var(--text-disabled); margin-bottom: 6px; }
+    .study-day-card { background: var(--bg-card); border-radius: var(--r-sm); overflow: hidden; }
+
+    .study-session-item {
+      padding: 14px 14px 12px;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .study-session-item:last-child { border-bottom: none; }
+    .study-session-item__left { flex: 1; min-width: 0; }
+    /* "Estudo • Vocabulário" on one line */
+    .study-session-item__header {
+      font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.3;
+    }
+    .study-session-item__sep  { font-weight: 400; color: #6B6488; margin: 0 5px; }
+    .study-session-item__sub-text { color: #B3AECF; font-weight: 500; }
+    /* Duration secondary */
+    .study-session-item__time {
+      font-size: 13px; color: var(--text-secondary); margin-top: 4px;
+    }
+    .study-session-item__edit {
+      color: var(--text-disabled); display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; border-radius: var(--r-sm); transition: background var(--t), color var(--t); flex-shrink: 0;
+    }
+    .study-session-item__edit:hover { background: var(--bg-hover); color: var(--text-secondary); }
+
+    .study-session-item__notes {
+      font-size: 13px; color: var(--text-disabled); margin-top: 4px;
+      line-height: 1.45; white-space: pre-wrap; word-break: break-word;
+    }
+    /* textarea inherits text-field base styles */
+    textarea.text-field { height: auto; padding: 12px 14px; resize: none; line-height: 1.5; }
+
+    .study-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 20px; text-align: center; }
+    .study-empty__icon { font-size: 36px; opacity: .2; }
+    .study-empty__text { font-size: 14px; color: var(--text-secondary); }
+    .study-empty__sub  { font-size: 14px; color: var(--text-disabled); }
+
+    /* FAB for study tab — muted indigo, distinct but not semantic */
+    .fab--study { background: #4B4580; box-shadow: 0 4px 20px rgba(75,69,128,.55); }
+    .fab--study:hover { background: #5A539A; }
+
+    /* ════════════════════════════════════════════════════════════
        DETAIL VIEW
     ════════════════════════════════════════════════════════════ */
     .detail-hero { padding: 16px 20px 20px; border-bottom: 1px solid var(--border-subtle); }
@@ -547,6 +604,7 @@
   <nav class="tabbar" id="tabbar" aria-label="Navegação principal">
     <div class="tabbar__inner">
       <button class="tab-btn active" id="tabLibrary" aria-selected="true">Biblioteca</button>
+      <button class="tab-btn" id="tabStudy" aria-selected="false">Estudo</button>
       <button class="tab-btn" id="tabDashboard" aria-selected="false">Dashboard</button>
     </div>
   </nav>
@@ -592,6 +650,19 @@
         </div>
 
         <div class="content-list" id="contentList"></div>
+      </div>
+
+      <!-- ── Study View ─────────────────────────────────────── -->
+      <div class="study-view" id="studyView">
+        <!-- Stats bar: today/week/total study + streak -->
+        <div class="stats-bar">
+          <div class="stat-chip"><span class="stat-chip__val" id="studyStatToday">0m</span><span class="stat-chip__label">hoje</span></div>
+          <div class="stat-chip"><span class="stat-chip__val" id="studyStatWeek">0m</span><span class="stat-chip__label">esta semana</span></div>
+          <div class="stat-chip"><span class="stat-chip__val" id="studyStatTotal">0m</span><span class="stat-chip__label">total</span></div>
+          <div class="stat-chip stat-chip--streak"><div class="stat-chip__streak-row"><span class="stat-chip__val" id="studyStatStreak">0</span><span class="stat-chip__streak-icon">🔥</span></div><span class="stat-chip__label">streak</span></div>
+        </div>
+
+        <div id="studySessionsList"></div>
       </div>
 
       <!-- ── Dashboard ─────────────────────────────────────────── -->
@@ -646,7 +717,7 @@
 
   <button class="fab" id="fabBtn" style="display:none;" aria-label="Adicionar conteúdo">
     <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-    <span class="fab__label">Adicionar</span>
+    <span class="fab__label" id="fabLabel">Adicionar conteúdo</span>
   </button>
 </div>
 
@@ -822,6 +893,89 @@
   </div>
 </div>
 
+<!-- ── Study session form page ────────────────────────────────────────── -->
+<div class="detail-page" id="studySessionFormModal" role="main" aria-label="Formulário de sessão de estudo">
+  <div class="detail-page__header">
+    <div class="detail-page__header-inner">
+      <button class="sheet__back" id="studySessionFormBack" aria-label="Voltar"><svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg></button>
+      <h2 class="detail-page__title" id="studySessionFormTitle">Nova sessão de estudo</h2>
+    </div>
+  </div>
+  <div class="detail-page__body">
+    <div class="form-body">
+      <div class="form-section">
+        <label class="form-label">Categoria</label>
+        <div class="cat-pills" id="ssfCatPills">
+          <button class="cat-pill active" data-cat="estudo">Estudo</button>
+          <button class="cat-pill" data-cat="producao">Produção</button>
+        </div>
+      </div>
+      <div class="form-section">
+        <label class="form-label">Subcategoria</label>
+        <div class="cat-pills" id="ssfSubPills">
+          <!-- dynamically set based on cat -->
+          <button class="cat-pill active" data-sub="vocabulario">Vocabulário</button>
+          <button class="cat-pill" data-sub="gramatica">Gramática</button>
+        </div>
+      </div>
+      <div class="form-section" style="border-top:1px solid var(--border-subtle); padding-top:20px;">
+        <div class="segmented" id="ssfSegmented">
+          <button class="segmented__btn" data-mode="horario">Horário</button>
+          <button class="segmented__btn active" data-mode="duracao">Duração</button>
+        </div>
+        <div id="ssfHorarioSection" style="display:none; padding-top:20px;">
+          <div class="time-fields">
+            <div class="time-field-wrap">
+              <label class="time-field-label" for="ssfStart">Início</label>
+              <input type="time" class="time-field" id="ssfStart" />
+            </div>
+            <div class="time-field-wrap">
+              <label class="time-field-label" for="ssfEnd">Fim</label>
+              <input type="time" class="time-field" id="ssfEnd" />
+            </div>
+          </div>
+        </div>
+        <div id="ssfDuracaoSection" style="padding-top:20px;">
+          <div class="duration-inputs">
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="ssfHoras" min="0" max="23" placeholder="0" />
+              <span class="duration-field-label">Horas</span>
+            </div>
+            <span class="duration-sep">:</span>
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="ssfMinutos" min="0" max="59" placeholder="00" />
+              <span class="duration-field-label">Min</span>
+            </div>
+            <span class="duration-sep">:</span>
+            <div class="duration-field-wrap">
+              <input type="number" class="duration-field" id="ssfSegundos" min="0" max="59" placeholder="00" />
+              <span class="duration-field-label">Seg</span>
+            </div>
+          </div>
+          <div class="quick-chips" id="ssfQuickChips">
+            <button class="quick-chip" data-min="15">15m</button>
+            <button class="quick-chip" data-min="30">30m</button>
+            <button class="quick-chip" data-min="45">45m</button>
+            <button class="quick-chip" data-min="60">1h</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-section" style="border-top:1px solid var(--border-subtle);">
+        <label class="form-label" for="ssfDate">Data</label>
+        <input type="date" class="text-field" id="ssfDate" style="padding:0 14px;" />
+      </div>
+      <div class="form-section" style="border-top:1px solid var(--border-subtle);">
+        <label class="form-label" for="ssfNotes">Notas</label>
+        <textarea class="text-field" id="ssfNotes" placeholder="Opcional — o que você estudou?" rows="3" style="height:auto;padding:12px 14px;resize:none;line-height:1.5;"></textarea>
+      </div>
+    </div>
+    <div style="padding:12px 20px 40px;display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-primary" id="ssfSaveBtn">Adicionar sessão</button>
+      <button class="btn btn-ghost" id="ssfCancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── Content detail page ──────────────────────────────────────────── -->
 <div class="detail-page" id="contentDetailModal" role="main" aria-label="Detalhe do conteúdo">
   <div class="detail-page__header">
@@ -879,8 +1033,12 @@ const TYPE_META = {
   outro:   {label:'Outro',   icon:'category',    cls:'type-badge--outro'},
 };
 
-const CAT_LABELS = {imersao:'Imersão', interativa:'Imersão interativa'};
-const SUB_LABELS = {'escuta-leitura':'Simultâneo', escuta:'Escuta', leitura:'Leitura'};
+const CAT_LABELS = {imersao:'Imersão', interativa:'Imersão interativa', estudo:'Estudo', producao:'Produção'};
+const SUB_LABELS = {
+  'escuta-leitura':'Simultâneo', escuta:'Escuta', leitura:'Leitura',
+  vocabulario:'Vocabulário', gramatica:'Gramática',
+  fala:'Fala', escrita:'Escrita', conversacao:'Conversação',
+};
 
 /* ════════════════════════════════════════════════════════════
    STATE
@@ -888,12 +1046,13 @@ const SUB_LABELS = {'escuta-leitura':'Simultâneo', escuta:'Escuta', leitura:'Le
 function loadState() {
   try {
     const r = localStorage.getItem('imerso_v2');
-    if (r) { const s = JSON.parse(r); if (!s.contents) s.contents={}; return s; }
+    if (r) { const s = JSON.parse(r); if (!s.contents) s.contents={}; if (!s.studySessions) s.studySessions={}; return s; }
   } catch {}
-  return {userLanguages:[], activeLanguage:null, contents:{}};
+  return {userLanguages:[], activeLanguage:null, contents:{}, studySessions:{}};
 }
 function save() { localStorage.setItem('imerso_v2', JSON.stringify(state)); }
 let state = loadState();
+if (!state.studySessions) state.studySessions = {};
 
 /* ════════════════════════════════════════════════════════════
    HELPERS
@@ -948,6 +1107,12 @@ function getLangContents() {
   return state.contents[id];
 }
 
+function getLangStudySessions() {
+  const id = state.activeLanguage; if (!id) return [];
+  if (!state.studySessions[id]) state.studySessions[id]=[];
+  return state.studySessions[id];
+}
+
 function contentTotalMin(item) {
   return (item.sessions||[]).reduce((a,s)=>a+(s.durationMin||0),0);
 }
@@ -970,11 +1135,33 @@ function syncTopbar() {
   document.getElementById('emptyState').style.display = has ? 'none' : 'flex';
   document.getElementById('tabbar').classList.toggle('visible', has);
   document.getElementById('libraryView').classList.toggle('visible', has && activeTab === 'library');
+  document.getElementById('studyView').classList.toggle('visible', has && activeTab === 'study');
   document.getElementById('dashboardView').classList.toggle('visible', has && activeTab === 'dashboard');
-  document.getElementById('fabBtn').style.display = (has && activeTab === 'library') ? 'flex' : 'none';
+  updateFab();
   if (has) {
     if (activeTab === 'library') renderLibrary();
+    else if (activeTab === 'study') renderStudyView();
     else renderDashboard();
+  }
+}
+
+function updateFab() {
+  const has = state.userLanguages.length > 0;
+  const fab = document.getElementById('fabBtn');
+  const fabLabel = document.getElementById('fabLabel');
+  if (!has || activeTab === 'dashboard') {
+    fab.style.display = 'none';
+    return;
+  }
+  fab.style.display = 'flex';
+  if (activeTab === 'library') {
+    fab.classList.remove('fab--study');
+    fabLabel.textContent = 'Adicionar conteúdo';
+    fab.setAttribute('aria-label', 'Adicionar conteúdo');
+  } else if (activeTab === 'study') {
+    fab.classList.add('fab--study');
+    fabLabel.textContent = 'Adicionar sessão';
+    fab.setAttribute('aria-label', 'Adicionar sessão de estudo');
   }
 }
 
@@ -985,12 +1172,17 @@ let activeTypeFilter='', searchQuery='';
 
 function computeStreak() {
   const contents = getLangContents();
+  const studySessions = getLangStudySessions();
   // Collect all unique session dates (local date strings)
   const days = new Set();
   contents.forEach(c=>(c.sessions||[]).forEach(s=>{
     const d = new Date(s.createdAt);
     days.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
   }));
+  studySessions.forEach(s=>{
+    const d = s.date ? new Date(s.date+'T12:00:00') : new Date(s.createdAt);
+    days.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+  });
   // Walk back from today counting consecutive days
   let streak = 0;
   const now = new Date();
@@ -1309,7 +1501,7 @@ cfLinkEl.addEventListener('blur',   () => { clearInterval(_linkPollTimer); _poll
 document.getElementById('contentFormSaveBtn').addEventListener('click',saveContentForm);
 document.getElementById('contentFormBack').addEventListener('click',closeContentForm);
 document.getElementById('contentFormCancelBtn').addEventListener('click',closeContentForm);
-document.getElementById('fabBtn').addEventListener('click',()=>openContentForm());
+// FAB click is handled contextually in TABS section
 
 
 /* ════════════════════════════════════════════════════════════
@@ -1699,17 +1891,276 @@ let activeTab = 'library';
 function switchTab(tab) {
   activeTab = tab;
   document.getElementById('tabLibrary').classList.toggle('active', tab === 'library');
+  document.getElementById('tabStudy').classList.toggle('active', tab === 'study');
   document.getElementById('tabDashboard').classList.toggle('active', tab === 'dashboard');
   document.getElementById('tabLibrary').setAttribute('aria-selected', tab === 'library');
+  document.getElementById('tabStudy').setAttribute('aria-selected', tab === 'study');
   document.getElementById('tabDashboard').setAttribute('aria-selected', tab === 'dashboard');
   document.getElementById('libraryView').classList.toggle('visible', tab === 'library');
+  document.getElementById('studyView').classList.toggle('visible', tab === 'study');
   document.getElementById('dashboardView').classList.toggle('visible', tab === 'dashboard');
-  document.getElementById('fabBtn').style.display = (tab === 'library' && state.userLanguages.length) ? 'flex' : 'none';
-  if (tab === 'dashboard') renderDashboard();
+  updateFab();
+  if (tab === 'library') renderLibrary();
+  else if (tab === 'study') renderStudyView();
+  else renderDashboard();
 }
 
 document.getElementById('tabLibrary').addEventListener('click', () => switchTab('library'));
+document.getElementById('tabStudy').addEventListener('click', () => switchTab('study'));
 document.getElementById('tabDashboard').addEventListener('click', () => switchTab('dashboard'));
+
+// FAB contextual click handler
+document.getElementById('fabBtn').addEventListener('click', () => {
+  if (activeTab === 'library') openContentForm();
+  else if (activeTab === 'study') openStudySessionForm();
+});
+
+/* ════════════════════════════════════════════════════════════
+   STUDY VIEW
+════════════════════════════════════════════════════════════ */
+
+function renderStudyView() {
+  const sessions = getLangStudySessions();
+  const weekStart = getWeekStart();
+  const todayStr = new Date().toISOString().slice(0, 10);
+  let total = 0, week = 0, today = 0;
+  sessions.forEach(s => {
+    const min = s.durationMin || 0;
+    total += min;
+    const sDate = s.date || new Date(s.createdAt).toISOString().slice(0, 10);
+    if (new Date(sDate + 'T12:00:00') >= weekStart) week += min;
+    if (sDate === todayStr) today += min;
+  });
+  const streak = computeStreak();
+  document.getElementById('studyStatTotal').textContent = fmtMinNoSec(total);
+  document.getElementById('studyStatWeek').textContent  = fmtMinNoSec(week);
+  document.getElementById('studyStatToday').textContent = fmtMinNoSec(today);
+  const streakEl = document.getElementById('studyStatStreak');
+  streakEl.textContent = streak;
+  const fireEl = document.querySelector('#studyView .stat-chip__streak-icon');
+  if (fireEl) fireEl.style.opacity = streak > 0 ? '1' : '0.3';
+
+  const el = document.getElementById('studySessionsList');
+  if (!sessions.length) {
+    el.innerHTML = `<div class="study-empty">
+      <div class="study-empty__icon">✏️</div>
+      <div class="study-empty__text">Nenhuma sessão ainda</div>
+      <div class="study-empty__sub">Toque no + para registrar seu primeiro estudo.</div>
+    </div>`;
+    return;
+  }
+  // Group by date
+  const groups = {};
+  sessions.forEach(s => {
+    const d = s.date || new Date(s.createdAt).toISOString().slice(0, 10);
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(s);
+  });
+  el.innerHTML = Object.entries(groups)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([d, list]) => {
+      const label = new Date(d + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+      const itemsHtml = list.map(s => {
+        const catLabel = CAT_LABELS[s.cat] || s.cat || '';
+        const subLabel = SUB_LABELS[s.sub] || s.sub || '';
+        let timeStr = '';
+        if (s.mode === 'horario' && s.start) timeStr = s.end ? `${s.start} — ${s.end}` : `${s.start} — em andamento`;
+        else timeStr = fmtSec(Math.round((s.durationMin || 0) * 60));
+        const notesHtml = s.notes ? `<div class="study-session-item__notes">${esc(s.notes)}</div>` : '';
+        return `<div class="study-session-item">
+          <div class="study-session-item__left">
+            <div class="study-session-item__header">${esc(catLabel)}${subLabel ? `<span class="study-session-item__sep">•</span><span class="study-session-item__sub-text">${esc(subLabel)}</span>` : ''}</div>
+            <div class="study-session-item__time">${timeStr}</div>
+            ${notesHtml}
+          </div>
+          <button class="study-session-item__edit" data-sid="${s.id}" aria-label="Editar sessão">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0;display:inline-block;vertical-align:middle"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          </button>
+        </div>`;
+      }).join('');
+      return `<div class="study-day-group">
+        <div class="study-day-label">${label}</div>
+        <div class="study-day-card">${itemsHtml}</div>
+      </div>`;
+    }).join('');
+
+  el.querySelectorAll('.study-session-item__edit').forEach(btn => {
+    btn.addEventListener('click', () => openStudySessionForm(btn.dataset.sid));
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   STUDY SESSION FORM
+════════════════════════════════════════════════════════════ */
+let editingStudySessionId = null;
+
+const SSF_SUBS = {
+  estudo:   [{value:'vocabulario', label:'Vocabulário'}, {value:'gramatica', label:'Gramática'}],
+  producao: [{value:'fala', label:'Fala'}, {value:'escrita', label:'Escrita'}, {value:'conversacao', label:'Conversação'}],
+};
+
+function ssfRenderSubs(cat, activeSub) {
+  const pills = document.getElementById('ssfSubPills');
+  const opts = SSF_SUBS[cat] || SSF_SUBS.estudo;
+  pills.innerHTML = opts.map((o, i) =>
+    `<button class="cat-pill${(!activeSub && i === 0) || activeSub === o.value ? ' active' : ''}" data-sub="${o.value}">${o.label}</button>`
+  ).join('');
+  pills.querySelectorAll('.cat-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      pills.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+    });
+  });
+}
+
+function setStudySessionMode(mode) {
+  document.querySelectorAll('#ssfSegmented .segmented__btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.getElementById('ssfHorarioSection').style.display = mode === 'horario' ? '' : 'none';
+  document.getElementById('ssfDuracaoSection').style.display = mode === 'duracao' ? '' : 'none';
+}
+
+function openStudySessionForm(sessionId = null) {
+  editingStudySessionId = sessionId;
+  document.getElementById('studySessionFormTitle').textContent = sessionId ? 'Editar sessão' : 'Nova sessão de estudo';
+
+  if (sessionId) {
+    const s = getLangStudySessions().find(x => x.id === sessionId);
+    if (!s) return;
+    document.getElementById('ssfDate').value = s.date || new Date().toISOString().slice(0, 10);
+    document.getElementById('ssfNotes').value = s.notes || '';
+    // set cat pills
+    document.querySelectorAll('#ssfCatPills .cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === s.cat));
+    ssfRenderSubs(s.cat || 'estudo', s.sub);
+    setStudySessionMode(s.mode || 'duracao');
+    if (s.mode === 'horario') {
+      document.getElementById('ssfStart').value = s.start || '';
+      document.getElementById('ssfEnd').value   = s.end   || '';
+    } else {
+      const _totalSec = Math.round((s.durationMin || 0) * 60);
+      document.getElementById('ssfHoras').value   = Math.floor(_totalSec / 3600) || '';
+      document.getElementById('ssfMinutos').value = Math.floor((_totalSec % 3600) / 60) || '';
+      document.getElementById('ssfSegundos').value = _totalSec % 60 || '';
+    }
+  } else {
+    document.getElementById('ssfDate').value    = new Date().toISOString().slice(0, 10);
+    document.getElementById('ssfNotes').value   = '';
+    document.querySelectorAll('#ssfCatPills .cat-pill').forEach((p, i) => p.classList.toggle('active', i === 0));
+    ssfRenderSubs('estudo', null);
+    setStudySessionMode('duracao');
+    document.getElementById('ssfHoras').value    = '';
+    document.getElementById('ssfMinutos').value  = '';
+    document.getElementById('ssfSegundos').value = '';
+    document.getElementById('ssfStart').value    = '';
+    document.getElementById('ssfEnd').value      = '';
+    document.querySelectorAll('#ssfQuickChips .quick-chip').forEach(c => c.classList.remove('active'));
+  }
+
+  document.getElementById('studySessionFormModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeStudySessionForm() {
+  document.getElementById('studySessionFormModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Cat pill change → re-render subs
+document.getElementById('ssfCatPills').querySelectorAll('.cat-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('#ssfCatPills .cat-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    ssfRenderSubs(pill.dataset.cat, null);
+  });
+});
+
+document.getElementById('ssfSegmented').querySelectorAll('.segmented__btn').forEach(btn => {
+  btn.addEventListener('click', () => setStudySessionMode(btn.dataset.mode));
+});
+
+document.getElementById('ssfQuickChips').querySelectorAll('.quick-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#ssfQuickChips .quick-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const min = +chip.dataset.min;
+    document.getElementById('ssfHoras').value   = Math.floor(min / 60) || '';
+    document.getElementById('ssfMinutos').value = min % 60 || '';
+    document.getElementById('ssfSegundos').value = '';
+  });
+});
+
+['ssfHoras', 'ssfMinutos', 'ssfSegundos'].forEach((id, idx, arr) => {
+  const el = document.getElementById(id);
+  const max = id === 'ssfHoras' ? 23 : 59;
+  el.addEventListener('input', () => {
+    document.querySelectorAll('#ssfQuickChips .quick-chip').forEach(c => c.classList.remove('active'));
+  });
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const next = arr[idx + 1];
+      if (next) document.getElementById(next).focus();
+      else document.getElementById('ssfSaveBtn').focus();
+    }
+  });
+  el.addEventListener('blur', () => {
+    let v = parseInt(el.value);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > max) v = max;
+    el.value = v === 0 ? '' : v;
+  });
+  el.addEventListener('focus', () => {
+    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+  });
+});
+
+document.getElementById('ssfSaveBtn').addEventListener('click', () => {
+  const mode = document.querySelector('#ssfSegmented .segmented__btn.active').dataset.mode;
+  const cat  = document.querySelector('#ssfCatPills .cat-pill.active')?.dataset.cat || 'estudo';
+  const sub  = document.querySelector('#ssfSubPills .cat-pill.active')?.dataset.sub || '';
+  const date = document.getElementById('ssfDate').value || new Date().toISOString().slice(0, 10);
+  const notes = document.getElementById('ssfNotes').value.trim();
+  let durationMin = 0, start = '', end = '';
+
+  if (mode === 'horario') {
+    start = document.getElementById('ssfStart').value;
+    end   = document.getElementById('ssfEnd').value;
+    if (start && end) {
+      const [sh, sm] = start.split(':').map(Number), [eh, em] = end.split(':').map(Number);
+      durationMin = (eh * 60 + em) - (sh * 60 + sm);
+      if (durationMin < 0) durationMin += 24 * 60;
+    }
+  } else {
+    const _h = parseInt(document.getElementById('ssfHoras').value)   || 0;
+    const _m = parseInt(document.getElementById('ssfMinutos').value)  || 0;
+    const _s = parseInt(document.getElementById('ssfSegundos').value) || 0;
+    durationMin = (_h * 3600 + _m * 60 + _s) / 60;
+  }
+
+  const langId = state.activeLanguage;
+  if (!state.studySessions[langId]) state.studySessions[langId] = [];
+
+  if (editingStudySessionId) {
+    const idx = state.studySessions[langId].findIndex(s => s.id === editingStudySessionId);
+    if (idx > -1) {
+      state.studySessions[langId][idx] = {
+        ...state.studySessions[langId][idx],
+        mode, cat, sub, start, end, durationMin, date, notes,
+      };
+    }
+    save(); closeStudySessionForm(); renderStudyView();
+    toast('Sessão atualizada');
+  } else {
+    state.studySessions[langId].push({
+      id: uid(), mode, cat, sub, start, end, durationMin, date, notes,
+      createdAt: new Date().toISOString(),
+    });
+    save(); closeStudySessionForm(); renderStudyView();
+    toast('Sessão adicionada');
+  }
+});
+
+document.getElementById('ssfCancelBtn').addEventListener('click', closeStudySessionForm);
+document.getElementById('studySessionFormBack').addEventListener('click', closeStudySessionForm);
 
 /* ════════════════════════════════════════════════════════════
    DASHBOARD
@@ -1730,6 +2181,13 @@ const DASH_COLORS = {
   'escuta-leitura': '#7F77DD',
   escuta:           '#AFA9EC',
   leitura:          '#CECBF6',
+  estudo:           '#F59E42',
+  producao:         '#E07B9A',
+  vocabulario:      '#FBBF6A',
+  gramatica:        '#FDE68A',
+  fala:             '#F472B6',
+  escrita:          '#F9A8D4',
+  conversacao:      '#FBCFE8',
   youtube:  '#FCA5A5',
   serie:    '#FDE68A',
   podcast:  '#99F6E4',
@@ -1743,6 +2201,13 @@ const DASH_LABELS = {
   'escuta-leitura': 'Simultâneo',
   escuta:           'Escuta',
   leitura:          'Leitura',
+  estudo:           'Estudo',
+  producao:         'Produção',
+  vocabulario:      'Vocabulário',
+  gramatica:        'Gramática',
+  fala:             'Fala',
+  escrita:          'Escrita',
+  conversacao:      'Conversação',
   youtube:  'YouTube',
   serie:    'Série',
   podcast:  'Podcast',
@@ -1757,26 +2222,39 @@ let _dashChart = null;
 function renderDashboard() {
   if (!state.userLanguages.length) return;
   const contents = getLangContents();
+  const studySessions = getLangStudySessions();
   const totals = {};
 
+  // Aggregate immersion sessions (from content)
   contents.forEach(c => {
     (c.sessions || []).forEach(s => {
       let key;
-      if (dashMode === 'categoria')    key = s.cat  || 'imersao';
+      if (dashMode === 'categoria')         key = s.cat  || 'imersao';
       else if (dashMode === 'subcategoria') key = s.sub  || 'escuta-leitura';
-      else                             key = c.type || 'outro';
+      else                                  key = c.type || 'outro';
       totals[key] = (totals[key] || 0) + (s.durationMin || 0);
     });
   });
 
-  let order;
-  if (dashMode === 'categoria')    order = ['imersao', 'interativa'];
-  else if (dashMode === 'subcategoria') order = ['escuta-leitura', 'escuta', 'leitura'];
-  else order = ['youtube','serie','podcast','livro','website','outro'];
+  // Aggregate study sessions (standalone) — only for categoria and subcategoria modes
+  if (dashMode !== 'tipo') {
+    studySessions.forEach(s => {
+      const key = dashMode === 'categoria' ? (s.cat || 'estudo') : (s.sub || 'vocabulario');
+      totals[key] = (totals[key] || 0) + (s.durationMin || 0);
+    });
+  }
 
-  // For tipo: only show keys that have data
-  if (dashMode === 'tipo') order = order.filter(k => (totals[k] || 0) > 0);
-  if (!order.length && dashMode === 'tipo') order = ['outro'];
+  let order;
+  if (dashMode === 'categoria')
+    order = ['imersao', 'interativa', 'estudo', 'producao'];
+  else if (dashMode === 'subcategoria')
+    order = ['escuta-leitura', 'escuta', 'leitura', 'vocabulario', 'gramatica', 'fala', 'escrita', 'conversacao'];
+  else
+    order = ['youtube','serie','podcast','livro','website','outro'];
+
+  // Only show keys with data (except categoria which always shows all)
+  if (dashMode !== 'categoria') order = order.filter(k => (totals[k] || 0) > 0);
+  if (!order.length) order = dashMode === 'tipo' ? ['outro'] : (dashMode === 'categoria' ? ['imersao','interativa','estudo','producao'] : ['vocabulario']);
 
   const labels   = order.map(k => DASH_LABELS[k] || k);
   const data     = order.map(k => totals[k] || 0);
@@ -1863,6 +2341,10 @@ function getActiveDays() {
       const d = s.date || new Date(s.createdAt).toISOString().slice(0,10);
       days.add(d);
     });
+  });
+  getLangStudySessions().forEach(s => {
+    const d = s.date || new Date(s.createdAt).toISOString().slice(0,10);
+    days.add(d);
   });
   return days;
 }
