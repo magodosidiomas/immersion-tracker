@@ -166,7 +166,10 @@ Aparecem ao tocar em **Pronto** / **Salvar sessão** / **Salvar alterações**. 
 ### Troca
 
 - ✅ **Bottom sheet**, aberta pelo seletor "Coreano ⌄" do topo, no mesmo padrão da sheet de prática. Lista os idiomas do usuário com o atual marcado e, fixos embaixo, **Adicionar idioma** e **Gerenciar idiomas**.
-- ✅ O **rádio fica à direita**, deixando a esquerda livre para uma bandeira no futuro.
+- ✅ **Regra de botões no rodapé da sheet:** Múltiplos botões no rodapé devem ter **obrigatoriamente a mesma altura** (mínimo de 44 px / `h-11`) e tamanho de texto consistente (`text-sm` / 14 px), sem botões diminuídos.
+- ✅ **Regra do piso de 12 px:** Nunca usar tamanho de fonte inferior a 12 px (`text-xs`) no app inteiro.
+- ✅ **Regra de rolagem e fades:** Máscaras de gradiente devem ser dinâmicas (`ScrollAreaFade`). O topo NUNCA tem fade quando `scrollTop === 0` (o primeiro item começa 100% nítido e opaco).
+- ✅ O **indicador de seleção fica à direita**, deixando a esquerda livre para uma bandeira no futuro.
 - ✅ A sheet rola com altura máxima de 92%.
 
 ### Adicionar

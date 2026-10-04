@@ -558,7 +558,7 @@ function goalsView(){
         <div class="gfill" style="width:${pct.toFixed(1)}%"></div>
         <div class="gticks">${ticksHtml}</div>
       </div>
-      <div class="gcard-bot">Faltam ${human(remSec)} para o Nível ${li+2}</div>
+      <div class="gcard-bot">${remSec>0?`Faltam ${human(remSec)} para o Nível ${li+2}`:'Nível concluído!'}</div>
     </div>`;
   card.innerHTML=`<div class="top"><button class="lang" id="lang" aria-label="Idioma: ${LN(CUR)}">${LN(CUR)} ⌄</button></div>
   <div class="hl"><div class="ghero"><div class="gbig">${H(t)}</div>${heroCard}</div>

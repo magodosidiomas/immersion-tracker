@@ -16,14 +16,13 @@ import {
 } from '@/components/ui/dialog'
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
+import { ScrollAreaFade } from '@/components/ui/scroll-area-fade'
 import { toast } from 'sonner'
 import {
   Sun,
@@ -36,7 +35,8 @@ import {
   Clock,
   Globe,
   Layers,
-  ChevronLeft
+  ChevronLeft,
+  Plus
 } from 'lucide-react'
 
 interface StorybookViewProps {
@@ -307,18 +307,26 @@ export function StorybookView({ onBackToApp, theme, onToggleTheme }: StorybookVi
             <div className="p-6 border rounded-xl bg-card">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="destructive">Abrir Diálogo de Confirmação</Button>
+                  <Button variant="destructive" className="h-11 min-h-[44px] rounded-xl text-sm font-medium px-5">
+                    Abrir Diálogo de Confirmação
+                  </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Descartar esta sessão?</DialogTitle>
-                    <DialogDescription>
+                <DialogContent className="max-w-[380px] p-6">
+                  <DialogHeader className="gap-2 text-left">
+                    <DialogTitle className="text-lg font-semibold tracking-tight">Descartar esta sessão?</DialogTitle>
+                    <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
                       Os 47 minutos medidos não serão registrados no seu histórico. Esta ação não pode ser desfeita.
                     </DialogDescription>
                   </DialogHeader>
-                  <DialogFooter className="gap-2 sm:gap-0">
-                    <Button variant="outline">Cancelar</Button>
-                    <Button variant="destructive" onClick={() => toast.error('Sessão descartada')}>
+                  <DialogFooter className="grid grid-cols-2 gap-2.5 pt-2">
+                    <Button variant="outline" className="h-11 min-h-[44px] rounded-xl text-sm font-medium flex-1">
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="h-11 min-h-[44px] rounded-xl text-sm font-medium flex-1"
+                      onClick={() => toast.error('Sessão descartada')}
+                    >
                       Descartar
                     </Button>
                   </DialogFooter>
@@ -339,27 +347,51 @@ export function StorybookView({ onBackToApp, theme, onToggleTheme }: StorybookVi
                     <Globe className="size-4" /> Abrir Bottom Sheet (Exemplo de Idioma)
                   </Button>
                 </DrawerTrigger>
-                <DrawerContent className="max-w-md mx-auto">
-                  <DrawerHeader>
-                    <DrawerTitle>Trocar de idioma</DrawerTitle>
-                    <DrawerDescription>Selecione o perfil de estudo ativo</DrawerDescription>
+                <DrawerContent className="max-w-md mx-auto p-0 border-t border-border/80">
+                  <DrawerHeader className="px-5 pt-4 pb-2 text-left">
+                    <DrawerTitle className="text-base font-semibold tracking-tight">Trocar de idioma</DrawerTitle>
+                    <DrawerDescription className="text-xs text-muted-foreground">Selecione o perfil de estudo ativo</DrawerDescription>
                   </DrawerHeader>
-                  <div className="p-4 space-y-2">
-                    {['Coreano (한국어)', 'Japonês (日本語)', 'Inglês (English)', 'Espanhol (Español)'].map((lang, i) => (
+                  <ScrollAreaFade className="px-3 py-1 space-y-0.5 max-h-[46vh]">
+                    {[
+                      { name: 'Coreano', native: '한국어' },
+                      { name: 'Japonês', native: '日本語' },
+                      { name: 'Inglês', native: 'English' },
+                      { name: 'Espanhol', native: 'Español' },
+                      { name: 'Francês', native: 'Français' },
+                      { name: 'Alemão', native: 'Deutsch' },
+                    ].map((item, i) => (
                       <button
-                        key={lang}
-                        className="w-full flex items-center justify-between p-3.5 rounded-xl border hover:bg-muted/50 transition-colors text-left"
+                        key={item.name}
+                        className={`w-full flex items-center justify-between py-2.5 px-3 rounded-xl transition-all duration-150 text-left cursor-pointer ${
+                          i === 0
+                            ? 'bg-muted/70 font-medium text-foreground'
+                            : 'hover:bg-muted/40 active:bg-muted/60 text-foreground'
+                        }`}
                       >
-                        <span className="font-medium text-sm">{lang}</span>
-                        {i === 0 && <Check className="size-4 text-primary" />}
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{item.name}</span>
+                          <span className="text-xs text-muted-foreground">({item.native})</span>
+                        </div>
+                        {i === 0 && <Check className="size-4 text-primary shrink-0 stroke-[2.25px]" />}
                       </button>
                     ))}
+                  </ScrollAreaFade>
+                  <div className="p-4 pt-3 space-y-2 border-t border-border/40">
+                    <Button
+                      variant="secondary"
+                      className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2 cursor-pointer shadow-none"
+                    >
+                      <Plus className="size-4" />
+                      <span>Adicionar idioma</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm text-foreground/80 hover:text-foreground hover:bg-muted/50 cursor-pointer flex items-center justify-center transition-colors"
+                    >
+                      Gerenciar idiomas
+                    </Button>
                   </div>
-                  <DrawerFooter>
-                    <DrawerClose asChild>
-                      <Button variant="outline">Fechar</Button>
-                    </DrawerClose>
-                  </DrawerFooter>
                 </DrawerContent>
               </Drawer>
             </div>

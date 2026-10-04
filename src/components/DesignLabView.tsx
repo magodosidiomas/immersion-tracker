@@ -104,7 +104,7 @@ export function DesignLabView({
               <div>
                 <h3 className="font-bold text-base flex items-center gap-1.5">
                   1. Precisão Industrial
-                  {selectedDirection === 'industrial' && <Badge variant="secondary" className="text-[10px]">Ativo</Badge>}
+                  {selectedDirection === 'industrial' && <Badge variant="secondary" className="text-xs">Ativo</Badge>}
                 </h3>
                 <p className="text-xs text-muted-foreground">Inspiração Braun / Teenage Engineering / Linear</p>
               </div>
@@ -130,7 +130,7 @@ export function DesignLabView({
 
               {/* Display de Precisão */}
               <div className="my-auto text-center py-6 px-4 bg-neutral-50 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-800/80 rounded-2xl shadow-inner">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 dark:text-neutral-500 block mb-1">
+                <span className="text-xs font-mono uppercase tracking-widest text-neutral-400 dark:text-neutral-500 block mb-1">
                   CRONÔMETRO ATIVO
                 </span>
                 <div className="font-mono text-5xl font-normal tracking-tight text-neutral-900 dark:text-neutral-100 tabular-nums">
@@ -154,7 +154,7 @@ export function DesignLabView({
                   </button>
                 </div>
 
-                <div className="p-3 bg-neutral-200/60 dark:bg-neutral-900 rounded-xl text-[11px] font-mono text-neutral-600 dark:text-neutral-400 flex justify-between items-center border border-neutral-300/40 dark:border-neutral-800/60">
+                <div className="p-3 bg-neutral-200/60 dark:bg-neutral-900 rounded-xl text-xs font-mono text-neutral-600 dark:text-neutral-400 flex justify-between items-center border border-neutral-300/40 dark:border-neutral-800/60">
                   <span>METRIC: 14.5H TOTAL</span>
                   <span className="text-neutral-900 dark:text-neutral-200 font-bold">NÍVEL 5 (45%)</span>
                 </div>
@@ -168,7 +168,7 @@ export function DesignLabView({
               <div>
                 <h3 className="font-bold text-base flex items-center gap-1.5">
                   2. Editorial & Calmo
-                  {selectedDirection === 'editorial' && <Badge variant="secondary" className="text-[10px]">Ativo</Badge>}
+                  {selectedDirection === 'editorial' && <Badge variant="secondary" className="text-xs">Ativo</Badge>}
                 </h3>
                 <p className="text-xs text-muted-foreground">Inspiração Things 3 / iA Writer / Marfim</p>
               </div>
@@ -229,7 +229,7 @@ export function DesignLabView({
               <div>
                 <h3 className="font-bold text-base flex items-center gap-1.5">
                   3. Âmbar Tangível
-                  {selectedDirection === 'amber' && <Badge variant="secondary" className="text-[10px]">Ativo</Badge>}
+                  {selectedDirection === 'amber' && <Badge variant="secondary" className="text-xs">Ativo</Badge>}
                 </h3>
                 <p className="text-xs text-muted-foreground">Inspiração Amie / Arc / Gamificação de Luxo</p>
               </div>
@@ -253,7 +253,7 @@ export function DesignLabView({
                   </span>
                   <span className="font-semibold text-sm">Coreano</span>
                 </div>
-                <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 border-amber-500/30 font-semibold gap-1 text-[11px]">
+                <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 border-amber-500/30 font-semibold gap-1 text-xs">
                   <Sparkles className="size-3" /> Nível 5
                 </Badge>
               </div>
