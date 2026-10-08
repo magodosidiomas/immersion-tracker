@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { Play, Plus, BarChart3 } from 'lucide-react'
 import type { SessionRecord, LanguageProfile } from '@/types/imerso'
 import { ScrollAreaFade } from '@/components/ui/scroll-area-fade'
 
 interface StatsViewProps {
   sessions: SessionRecord[]
   currentLanguage: LanguageProfile
+  onStartTimer?: () => void
+  onAddSession?: () => void
 }
 
 type Period = 'all' | 'month' | 'week'
@@ -23,13 +26,13 @@ const ACTIVITY_COLORS: Record<string, string> = {
 
 const IMMERSION_PRACTICES = ['Escuta e leitura', 'Escuta', 'Leitura']
 
-export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
+export function StatsView({ sessions, currentLanguage, onStartTimer, onAddSession }: StatsViewProps) {
   const [period, setPeriod] = useState<Period>('all')
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null)
 
   const now = Date.now()
   let filteredSessions = sessions.filter(
-    s => s.language === currentLanguage.id || (!s.language && currentLanguage.id)
+    s => s.language === currentLanguage.id
   )
 
   if (period === 'week') {
@@ -102,7 +105,7 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
     >
       {/* Filtro de Período (Pills com 'Tudo' primeiro) */}
       <div
-        className="flex p-0.5 bg-muted/60 dark:bg-muted/30 rounded-xl border border-border/70"
+        className="flex p-1 bg-muted/60 dark:bg-muted/30 rounded-xl border border-border/70"
         onClick={e => e.stopPropagation()}
       >
         <button
@@ -111,7 +114,7 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
             setPeriod('all')
             setSelectedActivity(null)
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+          className={`flex-1 py-2 text-sm font-semibold rounded-lg min-h-[38px] transition-all cursor-pointer ${
             period === 'all'
               ? 'bg-background text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground'
@@ -125,7 +128,7 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
             setPeriod('month')
             setSelectedActivity(null)
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+          className={`flex-1 py-2 text-sm font-semibold rounded-lg min-h-[38px] transition-all cursor-pointer ${
             period === 'month'
               ? 'bg-background text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground'
@@ -139,7 +142,7 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
             setPeriod('week')
             setSelectedActivity(null)
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+          className={`flex-1 py-2 text-sm font-semibold rounded-lg min-h-[38px] transition-all cursor-pointer ${
             period === 'week'
               ? 'bg-background text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground'
@@ -150,9 +153,9 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
       </div>
 
       {/* Donut Principal Interativo */}
-      <div className="flex flex-col items-center justify-center my-1 select-none">
+      <div className="flex flex-col items-center justify-center my-2 select-none">
         <div
-          className="relative w-[190px] h-[190px] cursor-pointer"
+          className="relative w-[220px] h-[220px] cursor-pointer"
           onClick={e => {
             // Clicou no miolo/fundo do donut -> desmarca
             if ((e.target as HTMLElement).tagName !== 'circle') {
@@ -203,22 +206,22 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
             )}
           </svg>
 
-          {/* Miolo Compacto (18px / 11px) sem o texto de 'X atividades' */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-5">
-            <span className="text-[18px] font-bold tracking-tight text-foreground tabular-nums leading-tight">
+          {/* Miolo com Hierarquia Clara (24px / 14px) */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-4">
+            <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums leading-tight">
               {activeItem
                 ? formatHumanDuration(activeItem.duration)
                 : formatHumanDuration(totalDurationSeconds)}
             </span>
             <span
-              className={`text-[11px] font-medium max-w-[120px] truncate transition-colors ${
+              className={`text-sm font-semibold max-w-[150px] truncate transition-colors mt-0.5 ${
                 activeItem ? 'text-foreground' : 'text-muted-foreground'
               }`}
             >
               {activeItem ? activeItem.name : 'Total estudado'}
             </span>
             {activeItem && (
-              <span className="text-[10px] text-muted-foreground font-medium tabular-nums mt-0.5">
+              <span className="text-xs text-muted-foreground font-medium tabular-nums mt-0.5">
                 {Math.round(activeItem.pct)}% do período
               </span>
             )}
@@ -229,14 +232,48 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
       {/* Lista de Atividades */}
       <div className="space-y-2">
         <div className="flex items-center justify-between px-0.5">
-          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Distribuição por atividade
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Por atividade
           </span>
         </div>
 
         {activities.length === 0 ? (
-          <div className="p-6 text-center text-xs text-muted-foreground bg-muted/20 border border-border/70 rounded-xl">
-            Nenhuma sessão registrada neste período.
+          <div className="py-8 px-4 flex flex-col items-center justify-center text-center space-y-3">
+            <div className="size-12 rounded-2xl bg-muted/40 flex items-center justify-center text-muted-foreground">
+              <BarChart3 className="size-6 text-muted-foreground/80 stroke-[1.75px]" />
+            </div>
+            <div className="space-y-1 max-w-[280px]">
+              <h4 className="text-base font-bold text-foreground">
+                {period === 'all' ? 'Nenhuma sessão registrada' : 'Nenhuma sessão neste período'}
+              </h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {period === 'all'
+                  ? 'Inicie o timer ou adicione seus registros para acompanhar a distribuição.'
+                  : 'Não há sessões de estudo registradas nesta faixa de tempo.'}
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-2.5 pt-2 w-full max-w-[280px]">
+              {onStartTimer && (
+                <button
+                  type="button"
+                  onClick={onStartTimer}
+                  className="w-full h-11 min-h-[44px] px-4 rounded-xl bg-[#6d28d9] hover:bg-[#5b21b6] text-white text-sm font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer shadow-xs"
+                >
+                  <Play className="size-4 fill-current" />
+                  Iniciar timer
+                </button>
+              )}
+              {onAddSession && (
+                <button
+                  type="button"
+                  onClick={onAddSession}
+                  className="w-full h-11 min-h-[44px] px-4 rounded-xl border border-border/80 text-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:bg-muted/40 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Plus className="size-4" />
+                  Adicionar sessão
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="bg-muted/20 border border-border/70 rounded-xl overflow-hidden divide-y divide-border/40">
@@ -252,7 +289,7 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
                     e.stopPropagation()
                     handleToggleActivity(act.name)
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all cursor-pointer min-h-[46px] ${
+                  className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all cursor-pointer min-h-[48px] ${
                     isAct
                       ? 'bg-muted/60 dark:bg-muted/40'
                       : 'hover:bg-muted/40 dark:hover:bg-muted/20'
@@ -263,16 +300,16 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
                       className="size-2 rounded-full shrink-0"
                       style={{ backgroundColor: act.color }}
                     />
-                    <span className="text-[13px] font-medium text-foreground truncate">
+                    <span className="text-sm font-semibold text-foreground truncate">
                       {act.name}
                     </span>
                   </div>
 
                   <div className="flex items-baseline gap-2 tabular-nums shrink-0 ml-3">
-                    <span className="text-[13px] font-semibold text-foreground">
+                    <span className="text-sm font-bold text-foreground">
                       {formatHumanDuration(act.duration)}
                     </span>
-                    <span className="text-[12px] text-muted-foreground min-w-[28px] text-right">
+                    <span className="text-xs text-muted-foreground min-w-[32px] text-right font-medium">
                       {Math.round(act.pct)}%
                     </span>
                   </div>
@@ -312,7 +349,7 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
                 strokeDasharray={`${immDash} ${miniCirc}`}
               />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-foreground tabular-nums">
+            <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-foreground tabular-nums">
               {immersionPct}%
             </div>
           </div>
@@ -321,9 +358,9 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-[#8b5cf6] shrink-0" />
-                <span className="text-[13px] font-medium text-foreground">Imersão</span>
+                <span className="text-sm font-medium text-foreground">Imersão</span>
               </div>
-              <span className="text-[13px] font-semibold text-foreground tabular-nums">
+              <span className="text-sm font-bold text-foreground tabular-nums">
                 {formatHumanDuration(immersionDuration)}
               </span>
             </div>
@@ -331,9 +368,9 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-[#c4b5fd] shrink-0" />
-                <span className="text-[13px] font-medium text-muted-foreground">Outras atividades</span>
+                <span className="text-sm font-medium text-muted-foreground">Outras atividades</span>
               </div>
-              <span className="text-[13px] font-semibold text-foreground tabular-nums">
+              <span className="text-sm font-bold text-foreground tabular-nums">
                 {formatHumanDuration(otherDuration)}
               </span>
             </div>

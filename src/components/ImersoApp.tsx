@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
-import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import {
   Drawer,
   DrawerClose,
@@ -47,6 +46,7 @@ import { AddLanguageView } from '@/components/AddLanguageView'
 import { ManageLanguagesView } from '@/components/ManageLanguagesView'
 import { LanguageFlag, preloadFlags } from '@/components/LanguageFlag'
 import { ScrollAreaFade } from '@/components/ui/scroll-area-fade'
+import { APP_VERSION } from '@/version'
 import {
   PRACTICES,
   type SessionRecord,
@@ -402,6 +402,20 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
     }
   }
 
+  const handleOpenManualEntry = (dateTimestamp?: number) => {
+    setManualEntryDate(dateTimestamp ?? null)
+    setEditingSessionId(null)
+    setSummarySeconds(1800)
+    setEntrySource('manual')
+    digitBufferRef.current = '003000'
+    isFreshEditRef.current = true
+    setIsEditingTime(false)
+    setSelectedPractice('')
+    setSelectedStyle(null)
+    setInlineErrors({})
+    setIsSummaryOpen(true)
+  }
+
   // Discard and navigation logic
   const handleRequestDiscard = () => {
     if (summarySeconds <= 10) {
@@ -496,7 +510,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
     const existingSession = editingSessionId ? sessions.find(s => s.id === editingSessionId) : null
     const newRecord: SessionRecord = {
       id: editingSessionId || Date.now().toString(),
-      language: existingSession ? existingSession.language : currentLangId,
+      language: existingSession?.language || currentLangId,
       startedAt: existingSession
         ? existingSession.startedAt
         : manualEntryDate || (Date.now() - summarySeconds * 1000),
@@ -541,13 +555,17 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             <AddLanguageView
               userLanguages={languages}
               onAddLanguage={lang => handleAddLanguage(lang, addLanguageOrigin)}
-              onClose={() => {
-                if (addLanguageOrigin === 'manage' && languages.length > 0) {
-                  setCurrentScreen('manage-languages')
-                } else {
-                  setCurrentScreen('main')
-                }
-              }}
+              onClose={
+                languages.length > 0
+                  ? () => {
+                      if (addLanguageOrigin === 'manage') {
+                        setCurrentScreen('manage-languages')
+                      } else {
+                        setCurrentScreen('main')
+                      }
+                    }
+                  : undefined
+              }
               isFirstUse={languages.length === 0}
             />
           </div>
@@ -659,26 +677,32 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                   {/* Top Bar do Resumo / Registro Manual / Edição */}
                   <div className="flex items-center justify-between min-h-[48px] mb-4">
                     {editingSessionId || entrySource === 'manual' ? (
-                      <div className="flex items-center gap-3">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setIsSummaryOpen(false)
-                            setEditingSessionId(null)
-                          }}
-                          className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
-                          title="Fechar sem salvar"
-                        >
-                          <X className="size-5" />
-                        </Button>
-                        <h1 className="text-base font-semibold text-foreground tracking-tight">
-                          {editingSessionId ? 'Editar sessão' : 'Registrar sessão'}
-                        </h1>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setIsSummaryOpen(false)
+                              setEditingSessionId(null)
+                            }}
+                            className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
+                            title="Fechar sem salvar"
+                          >
+                            <X className="size-5" />
+                          </Button>
+                          <h1 className="text-base font-semibold text-foreground tracking-tight">
+                            {editingSessionId ? 'Editar sessão' : 'Registrar sessão'}
+                          </h1>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 text-xs font-semibold text-foreground border border-border/60 shrink-0">
+                          {currentLanguage.id && <LanguageFlag code={currentLanguage.id} className="size-3.5 shrink-0" />}
+                          <span>{currentLanguage.name}</span>
+                        </div>
                       </div>
                     ) : (
-                      <>
+                      <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-3">
                           <Button
                             type="button"
@@ -695,17 +719,23 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                           </h1>
                         </div>
 
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={handleRequestDiscard}
-                          className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                          title="Descartar sessão"
-                        >
-                          <X className="size-5" />
-                        </Button>
-                      </>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 text-xs font-semibold text-foreground border border-border/60 shrink-0">
+                            {currentLanguage.id && <LanguageFlag code={currentLanguage.id} className="size-3.5 shrink-0" />}
+                            <span>{currentLanguage.name}</span>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleRequestDiscard}
+                            className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
+                            title="Descartar sessão"
+                          >
+                            <X className="size-5" />
+                          </Button>
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -932,29 +962,25 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                 </div>
 
                 {/* Hero Card Level Progress */}
-                <Card className="border border-border/70 bg-muted/20 rounded-2xl shadow-none overflow-hidden">
-                  <CardHeader className="p-4 pb-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-base font-bold text-foreground">
-                        {isMax ? 'Nível Máximo' : `Nível ${levelIdx + 1}`}
-                      </span>
-                      <span className="tabular-nums text-sm text-muted-foreground font-medium">
-                        {formatHuman(lvlDoneSecs)} / {spanHours}h
-                      </span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-4 pt-1 space-y-3">
-                    <div className="w-full bg-muted/80 rounded-full h-2.5 overflow-hidden border border-border/40">
-                      <div
-                        className="bg-foreground h-full rounded-full transition-all duration-300"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      {isMax ? 'Você concluiu todos os níveis!' : `Faltam ${formatHuman(remSecs)} para o Nível ${levelIdx + 2}`}
-                    </p>
-                  </CardContent>
-                </Card>
+                <div className="border border-border/70 bg-muted/20 rounded-xl p-3.5 space-y-2">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-sm font-bold text-foreground">
+                      {isMax ? 'Nível Máximo' : `Nível ${levelIdx + 1}`}
+                    </span>
+                    <span className="tabular-nums text-xs text-muted-foreground font-medium">
+                      {formatHuman(lvlDoneSecs)} / {spanHours}h
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted/80 rounded-full h-2 overflow-hidden border border-border/40">
+                    <div
+                      className="bg-foreground h-full rounded-full transition-all duration-300"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium pt-0.5">
+                    {isMax ? 'Você concluiu todos os níveis!' : `Faltam ${formatHuman(remSecs)} para o Nível ${levelIdx + 2}`}
+                  </p>
+                </div>
 
                 {/* Lista de Níveis */}
                 <div className="space-y-1.5 pt-1">
@@ -984,10 +1010,10 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                                 <Lock className="size-4 text-muted-foreground/60 stroke-[1.75px]" />
                               )}
                             </div>
-                            <span className="text-sm font-medium">Nível {idx + 1}</span>
+                            <span className="text-base font-semibold">Nível {idx + 1}</span>
                           </div>
-                          <span className="text-sm tabular-nums text-muted-foreground font-normal">
-                            {loH}h – {hiH}h
+                          <span className="text-sm tabular-nums text-muted-foreground font-medium">
+                            {loH}h - {hiH}h
                           </span>
                         </div>
                       )
@@ -998,8 +1024,13 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             )
           })()
         ) : activeTab === 'estatisticas' ? (
-          /* ABA 3: ESTATÍSTICAS (SUPERFÍCIE ÚNICA) */
-          <StatsView sessions={sessions} currentLanguage={currentLanguage} />
+          /* ABA 3: ESTATÍSTICAS (SUPERFÍCIE ÚNICA - ESCOPO POR IDIOMA) */
+          <StatsView
+            sessions={languageSessions}
+            currentLanguage={currentLanguage}
+            onStartTimer={() => setActiveTab('timer')}
+            onAddSession={() => handleOpenManualEntry()}
+          />
         ) : (
           /* ABA 4: HISTÓRICO (PROTÓTIPO & SPEC SEÇÃO 11) */
           (() => {
@@ -1110,50 +1141,70 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                 )}
 
                 {languageSessions.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground text-sm font-medium">
-                    Nenhuma sessão registrada em {currentLanguage.name} ainda.
+                  <div className="py-12 px-4 flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="size-12 rounded-2xl bg-muted/40 flex items-center justify-center text-muted-foreground">
+                      <History className="size-6 text-muted-foreground/80 stroke-[1.75px]" />
+                    </div>
+                    <div className="space-y-1 max-w-[280px]">
+                      <h4 className="text-base font-bold text-foreground">
+                        Nenhuma sessão ainda
+                      </h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Comece uma sessão com o timer ou registre o tempo já estudado.
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-center gap-2.5 pt-2 w-full max-w-[280px]">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('timer')}
+                        className="w-full h-11 min-h-[44px] px-4 rounded-xl bg-[#6d28d9] hover:bg-[#5b21b6] text-white text-sm font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer shadow-xs"
+                      >
+                        <Play className="size-4 fill-current" />
+                        Iniciar timer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenManualEntry()}
+                        className="w-full h-11 min-h-[44px] px-4 rounded-xl border border-border/80 text-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:bg-muted/40 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Plus className="size-4" />
+                        Adicionar sessão
+                      </button>
+                    </div>
                   </div>
                 ) : selectedDateFilter && displayGroups.length === 0 ? (
-                  /* Estado de Vazio Dedicado para Data Selecionada */
-                  <div className="flex flex-col items-center justify-center text-center p-6 bg-muted/20 border border-border/70 rounded-2xl space-y-4 my-4">
-                    <div className="size-12 rounded-2xl bg-muted/60 flex items-center justify-center text-muted-foreground">
-                      <CalendarIcon className="size-6 text-foreground/70" />
+                  /* Estado de Vazio Dedicado para Data Selecionada - Fundo Limpo Padronizado */
+                  <div className="py-10 px-4 flex flex-col items-center justify-center text-center space-y-3">
+                    <div className="size-12 rounded-2xl bg-muted/40 flex items-center justify-center text-muted-foreground">
+                      <CalendarIcon className="size-6 text-muted-foreground/80 stroke-[1.75px]" />
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-1 max-w-[280px]">
                       <h4 className="text-base font-bold text-foreground">
                         Nenhum registro em {formatDateDisplay(selectedDateFilter)}
                       </h4>
-                      <p className="text-xs text-muted-foreground font-medium">
+                      <p className="text-sm text-muted-foreground leading-relaxed">
                         Você não possui sessões de estudo salvas nesta data.
                       </p>
                     </div>
-                    <div className="flex flex-col gap-2 w-full pt-1">
-                      <Button
+                    <div className="flex flex-col items-center gap-2.5 pt-2 w-full max-w-[280px]">
+                      <button
                         type="button"
                         onClick={() => {
                           const targetTs = new Date(selectedDateFilter + 'T12:00:00').getTime()
-                          setManualEntryDate(targetTs)
-                          setEditingSessionId(null)
-                          setSummarySeconds(1800)
-                          setSelectedPractice('Escuta e leitura')
-                          setSelectedStyle('Imersão')
-                          setEntrySource('manual')
-                          digitBufferRef.current = getDigitsFromSeconds(1800)
-                          isFreshEditRef.current = true
-                          setIsSummaryOpen(true)
+                          handleOpenManualEntry(targetTs)
                         }}
-                        className="w-full h-11 min-h-[44px] font-semibold text-xs gap-1.5 cursor-pointer"
+                        className="w-full h-11 min-h-[44px] px-4 rounded-xl bg-[#6d28d9] hover:bg-[#5b21b6] text-white text-sm font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer shadow-xs"
                       >
-                        <Plus className="size-4" /> Registrar nesta data
-                      </Button>
-                      <Button
+                        <Plus className="size-4" />
+                        Adicionar nesta data
+                      </button>
+                      <button
                         type="button"
-                        variant="outline"
                         onClick={() => setSelectedDateFilter(null)}
-                        className="w-full h-11 min-h-[44px] font-semibold text-xs cursor-pointer"
+                        className="w-full h-11 min-h-[44px] px-4 rounded-xl border border-border/80 text-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:bg-muted/40 active:scale-95 transition-all cursor-pointer"
                       >
                         Ver todo o histórico
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -1174,7 +1225,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                           )}
 
                           <div className="flex items-center justify-between px-1 pt-1">
-                            <span className="text-sm font-bold text-foreground/90">
+                            <span className="text-base font-bold text-foreground/90">
                               {dateLabel(g.timestamp)}
                             </span>
                           </div>
@@ -1205,17 +1256,17 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                                 <div className="space-y-0.5">
                                   <div className="text-base font-semibold text-foreground">{s.practice}</div>
                                   {s.style && (
-                                    <div className="text-xs text-muted-foreground font-medium">{s.style}</div>
+                                    <div className="text-sm text-muted-foreground font-medium">{s.style}</div>
                                   )}
                                 </div>
-                                <span className="tabular-nums text-sm font-semibold text-foreground/90">
+                                <span className="tabular-nums text-sm font-bold text-foreground/90">
                                   {formatHuman(s.duration)}
                                 </span>
                               </button>
                             ))}
 
                             <div className="flex items-center justify-between px-4 py-3 bg-muted/40 text-sm font-semibold text-foreground border-t border-border/50">
-                              <span className="text-muted-foreground font-medium">Total do dia</span>
+                              <span className="text-sm font-medium text-muted-foreground">Total do dia</span>
                               <span className="tabular-nums text-base font-bold text-foreground">
                                 {formatHuman(dayTotal)}
                               </span>
@@ -1357,6 +1408,9 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             >
               Gerenciar idiomas
             </Button>
+            <div className="text-[11px] text-muted-foreground/50 text-center pt-1 font-mono tracking-wider">
+              v{APP_VERSION}
+            </div>
           </div>
         </DrawerContent>
       </Drawer>

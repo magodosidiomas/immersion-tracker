@@ -32,16 +32,7 @@ export const PRACTICES: PracticeOption[] = [
   { name: 'Vocabulário', hasStyle: false },
 ]
 
-export const DEFAULT_LANGUAGES: LanguageProfile[] = [
-  { id: 'ko', name: 'Coreano', nativeName: '한국어' },
-  { id: 'ja', name: 'Japonês', nativeName: '日本語' },
-  { id: 'en', name: 'Inglês', nativeName: 'English' },
-  { id: 'es', name: 'Espanhol', nativeName: 'Español' },
-  { id: 'fr', name: 'Francês', nativeName: 'Français' },
-  { id: 'de', name: 'Alemão', nativeName: 'Deutsch' },
-  { id: 'it', name: 'Italiano', nativeName: 'Italiano' },
-  { id: 'zh', name: 'Mandarim', nativeName: '中文' },
-]
+export const DEFAULT_LANGUAGES: LanguageProfile[] = []
 
 export const CATALOG_LANGUAGES: LanguageProfile[] = [
   // Mais estudados no mundo (Top referências: Duolingo Language Report, Ethnologue, EF EPI)

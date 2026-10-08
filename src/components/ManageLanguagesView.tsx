@@ -14,6 +14,7 @@ import { ScrollAreaFade } from '@/components/ui/scroll-area-fade'
 import { LanguageFlag } from '@/components/LanguageFlag'
 import { toast } from 'sonner'
 import type { LanguageProfile, SessionRecord } from '@/types/imerso'
+import { APP_VERSION } from '@/version'
 
 export interface ManageLanguagesViewProps {
   languages: LanguageProfile[]
@@ -192,6 +193,12 @@ export function ManageLanguagesView({
             <Plus className="size-4" />
             <span>Adicionar idioma</span>
           </Button>
+
+          <div className="text-center pt-8 pb-3">
+            <span className="text-xs text-muted-foreground/60 font-mono tracking-wider">
+              Imerso v{APP_VERSION}
+            </span>
+          </div>
         </div>
       </ScrollAreaFade>
 

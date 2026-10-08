@@ -83,3 +83,37 @@ git push origin dev
 ```
 
 Pronto! Seu site e o repositório no GitHub ficam 100% atualizados e sincronizados.
+
+---
+
+## 6. Controle de Versões (Como o Imerso Acompanha Versões)
+
+O Imerso adota o padrão de **Versionamento Semântico (SemVer)** no formato `MAJOR.MINOR.PATCH` (ex: `2.1.0`):
+
+* **MAJOR (2.x.x):** Grandes saltos arquiteturais (ex: reescrita completa React 19).
+* **MINOR (x.1.x):** Novas funcionalidades, melhorias visuais e upgrades de telas.
+* **PATCH (x.x.1):** Correções pontuais de bugs e hotfixes rápidos.
+
+### 📌 Onde a versão fica registrada
+1. **`package.json`**: `"version": "2.1.0"` (padrão oficial do ecossistema Node/NPM).
+2. **`src/version.ts`**: `APP_VERSION = '2.1.0'` (lido pelo React e exibido discretamente no menu de idiomas).
+3. **`CHANGELOG.md`**: Histórico detalhado de todas as novidades, melhorias e correções organizadas por data.
+4. **Git Tags**: Marcações oficiais no histórico do repositório (`git tag v2.1.0`).
+
+### 🏷️ Como lançar uma nova versão
+Ao fechar um pacote de melhorias:
+```bash
+# 1. Atualize o package.json e src/version.ts com a nova versão
+# 2. Registre as novidades no CHANGELOG.md
+# 3. Compile e envie para a Cloudflare
+npm run build
+npx wrangler pages deploy dist --project-name imerso
+
+# 4. Crie o commit e a tag de versão no Git
+git add .
+git commit -m "chore(release): v2.1.0 - UI upgrades e correção de idiomas"
+git tag -a v2.1.0 -m "Release v2.1.0"
+git push origin dev --tags
+```
+Com isso, você tem rastreabilidade total do que mudou em cada versão, tanto no código quanto no site em produção!
+

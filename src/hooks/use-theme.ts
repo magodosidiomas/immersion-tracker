@@ -8,7 +8,7 @@ export function useTheme() {
     if (saved === 'dark' || saved === 'light') {
       return saved
     }
-    return 'light' // Light mode como default solicitado
+    return 'dark' // Dark first default
   })
 
   useEffect(() => {

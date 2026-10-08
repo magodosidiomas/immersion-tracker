@@ -6,7 +6,7 @@ Imerso is a zero-friction language immersion tracking application.
 - **Goal 2:** Zero friction to start or log a session.
 
 ## 2. Core Structure & Mental Model
-- **Language Profiles:** All sessions, history, goals, and levels are scoped to the currently selected language profile. Switching languages switches profiles.
+- **Language Profiles & Onboarding:** All sessions, history, goals, and levels are scoped to the currently selected language profile. New users start with **0 languages** and are presented directly with the onboarding view ("Qual idioma você está aprendendo?") to pick their initial language from the catalog. Switching languages switches profiles.
 - **Navigation:** 4 main bottom nav tabs: **Timer**, **Metas** (Goals/Levels), **Estatísticas** (Statistics), and **Histórico** (History).
 - **Session Locking:** While a timer session is active (running or paused):
   - Bottom nav is hidden.
