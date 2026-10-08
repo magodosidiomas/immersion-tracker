@@ -3,6 +3,7 @@
 ## 1. Context & MD Documentation Architecture
 - **`PRODUCT.md`**: Authoritative product vision, business rules, language profiling, feature specs. Read ONLY for feature/business logic tasks.
 - **`DESIGN.md`**: Authoritative visual tokens, typography rules, layout floors, component anti-patterns. Read ONLY for UI/UX tasks.
+- **`KNOWLEDGE.md`**: Base de conhecimento técnico, modelo mental de deploy (Cloudflare Pages), terminal e dicionário de comandos operacionais.
 - **`GEMINI.md`**: Core execution rules & token efficiency guidelines. Always enforced.
 - **Why this architecture?**: Scoping context into distinct MDs avoids loading massive, irrelevant prompt text into the LLM window, saving context tokens on every turn while ensuring zero-guessing accuracy.
 
