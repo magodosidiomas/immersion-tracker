@@ -9,49 +9,23 @@ interface StatsViewProps {
 
 type Period = 'all' | 'month' | 'week'
 
-interface PillarDef {
-  id: string
-  name: string
-  items: string[]
-  strokeColor: string
-  dotClass: string
-  activeBorderClass: string
-  activeBgClass: string
+// Paleta Calibrada de Alto Contraste (Estilo Analytics)
+const ACTIVITY_COLORS: Record<string, string> = {
+  'Escuta e leitura': '#8b5cf6', // Roxo Linear
+  'Escuta':           '#0284c7', // Azul Safira
+  'Leitura':          '#6ee7b7', // Menta suave
+  'Fala':             '#65a30d', // Verde Oliva
+  'Escrita':          '#d97706', // Âmbar queimado
+  'Vocabulário':      '#f59e0b', // Âmbar dourado
+  'Gramática':        '#f43f5e', // Coral Rose
+  'Pronúncia':        '#94a3b8', // Lavanda Slate
 }
 
-const PILLARS: PillarDef[] = [
-  {
-    id: 'imm',
-    name: 'Imersão',
-    items: ['Escuta e leitura', 'Escuta', 'Leitura'],
-    strokeColor: '#ededed',
-    dotClass: 'bg-zinc-100 dark:bg-zinc-100',
-    activeBorderClass: 'border-zinc-300 dark:border-zinc-600',
-    activeBgClass: 'bg-zinc-100/10 dark:bg-zinc-800/40',
-  },
-  {
-    id: 'out',
-    name: 'Produção',
-    items: ['Fala', 'Escrita'],
-    strokeColor: '#8b8b85',
-    dotClass: 'bg-zinc-400 dark:bg-zinc-400',
-    activeBorderClass: 'border-zinc-400/80 dark:border-zinc-500',
-    activeBgClass: 'bg-zinc-400/10 dark:bg-zinc-800/40',
-  },
-  {
-    id: 'fnd',
-    name: 'Fundamentos',
-    items: ['Pronúncia', 'Gramática', 'Vocabulário'],
-    strokeColor: '#50504d',
-    dotClass: 'bg-zinc-600 dark:bg-zinc-600',
-    activeBorderClass: 'border-zinc-500/80 dark:border-zinc-600',
-    activeBgClass: 'bg-zinc-500/10 dark:bg-zinc-800/40',
-  },
-]
+const IMMERSION_PRACTICES = ['Escuta e leitura', 'Escuta', 'Leitura']
 
 export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
   const [period, setPeriod] = useState<Period>('all')
-  const [activePillarId, setActivePillarId] = useState<string | null>(null)
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null)
 
   const now = Date.now()
   let filteredSessions = sessions.filter(
@@ -66,7 +40,7 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
 
   const totalDurationSeconds = filteredSessions.reduce((acc, s) => acc + s.duration, 0)
 
-  // Format seconds to human string (ex: "14h 30m" ou "45 min")
+  // Formatação consistente em horas e minutos
   const formatHumanDuration = (secs: number) => {
     if (secs <= 0) return '0 min'
     const hours = Math.floor(secs / 3600)
@@ -76,52 +50,70 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
     return `${hours}h ${minutes}m`
   }
 
-  // Calculate pillar distribution
-  const pillarsData = PILLARS.map(pillar => {
-    const matchingSessions = filteredSessions.filter(s => pillar.items.includes(s.practice))
-    const pillarTotalSecs = matchingSessions.reduce((acc, s) => acc + s.duration, 0)
-    const pct = totalDurationSeconds > 0 ? (pillarTotalSecs / totalDurationSeconds) * 100 : 0
-
-    // Sub-items breakdown
-    const subItems = pillar.items.map(item => {
-      const itemSecs = matchingSessions
-        .filter(s => s.practice === item)
-        .reduce((acc, s) => acc + s.duration, 0)
-      const itemPct = totalDurationSeconds > 0 ? (itemSecs / totalDurationSeconds) * 100 : 0
-      return { name: item, duration: itemSecs, pct: itemPct }
-    })
-
-    return {
-      ...pillar,
-      duration: pillarTotalSecs,
-      pct,
-      subItems,
-    }
+  // Agrupamento por atividade
+  const activityMap = new Map<string, number>()
+  filteredSessions.forEach(s => {
+    const current = activityMap.get(s.practice) || 0
+    activityMap.set(s.practice, current + s.duration)
   })
 
-  const activePillar = pillarsData.find(p => p.id === activePillarId)
+  const activities = Array.from(activityMap.entries())
+    .map(([name, duration]) => ({
+      name,
+      duration,
+      pct: totalDurationSeconds > 0 ? (duration / totalDurationSeconds) * 100 : 0,
+      isImmersion: IMMERSION_PRACTICES.includes(name),
+      color: ACTIVITY_COLORS[name] || '#71717a',
+    }))
+    .sort((a, b) => b.duration - a.duration)
 
-  // SVG Donut calculation
-  const size = 164
-  const strokeWidth = 14
-  const radius = (size - strokeWidth - 8) / 2
-  const circumference = 2 * Math.PI * radius
-  let accumulatedAngle = 0
+  // Cálculo de Imersão vs Outras Atividades
+  const immersionDuration = activities
+    .filter(a => a.isImmersion)
+    .reduce((acc, a) => acc + a.duration, 0)
+  const otherDuration = Math.max(0, totalDurationSeconds - immersionDuration)
+  const immersionPct = totalDurationSeconds > 0 ? Math.round((immersionDuration / totalDurationSeconds) * 100) : 0
 
-  const handlePillarToggle = (id: string) => {
-    setActivePillarId(prev => (prev === id ? null : id))
+  // Atividade selecionada atualmente no Donut
+  const activeItem = selectedActivity ? activities.find(a => a.name === selectedActivity) : null
+
+  const handleToggleActivity = (name: string) => {
+    setSelectedActivity(prev => (prev === name ? null : name))
   }
 
+  const handleClearSelection = () => {
+    if (selectedActivity) setSelectedActivity(null)
+  }
+
+  // Cálculos SVG do Donut Principal
+  const r = 38
+  const circ = 2 * Math.PI * r
+  let accumulatedOffset = 0
+
+  // Cálculos SVG do Mini-Donut de Imersão
+  const miniR = 28
+  const miniCirc = 2 * Math.PI * miniR
+  const immDash = (immersionPct / 100) * miniCirc
+
   return (
-    <ScrollAreaFade className="flex-1 min-h-0 py-2 pr-3 space-y-4">
-      {/* Filtro de Período (Pills) */}
-      <div className="flex p-1 bg-muted/60 rounded-xl border border-border/60">
+    <ScrollAreaFade
+      className="flex-1 min-h-0 py-2 pr-2 space-y-5"
+      onClick={handleClearSelection}
+    >
+      {/* Filtro de Período (Pills com 'Tudo' primeiro) */}
+      <div
+        className="flex p-0.5 bg-muted/60 dark:bg-muted/30 rounded-xl border border-border/70"
+        onClick={e => e.stopPropagation()}
+      >
         <button
           type="button"
-          onClick={() => setPeriod('all')}
+          onClick={() => {
+            setPeriod('all')
+            setSelectedActivity(null)
+          }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
             period === 'all'
-              ? 'bg-card text-foreground shadow-xs'
+              ? 'bg-background text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -129,10 +121,13 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
         </button>
         <button
           type="button"
-          onClick={() => setPeriod('month')}
+          onClick={() => {
+            setPeriod('month')
+            setSelectedActivity(null)
+          }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
             period === 'month'
-              ? 'bg-card text-foreground shadow-xs'
+              ? 'bg-background text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -140,10 +135,13 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
         </button>
         <button
           type="button"
-          onClick={() => setPeriod('week')}
+          onClick={() => {
+            setPeriod('week')
+            setSelectedActivity(null)
+          }}
           className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
             period === 'week'
-              ? 'bg-card text-foreground shadow-xs'
+              ? 'bg-background text-foreground shadow-xs'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -151,137 +149,197 @@ export function StatsView({ sessions, currentLanguage }: StatsViewProps) {
         </button>
       </div>
 
-      {/* Hero Section: Donut Chart Interativo com Centro Dinâmico (Superfície Única) */}
-      <div className="flex flex-col items-center justify-center py-4 px-4 bg-muted/20 border border-border/70 rounded-2xl transition-colors">
-        <div className="relative flex items-center justify-center my-1">
-          <svg width={size} height={size} className="transform -rotate-90">
-            {/* Donut Background Circle */}
-            <circle
-              cx={size / 2}
-              cy={size / 2}
-              r={radius}
-              stroke="currentColor"
-              strokeWidth={strokeWidth}
-              fill="transparent"
-              className="text-muted/25"
-            />
-
-            {/* Donut Segments Interativos */}
-            {totalDurationSeconds > 0 &&
-              pillarsData.map(pillar => {
-                if (pillar.pct <= 0) return null
-                const isSelected = activePillarId === pillar.id
-                const strokeDasharray = `${(pillar.pct / 100) * circumference} ${circumference}`
-                const strokeDashoffset = -((accumulatedAngle / 100) * circumference)
-                accumulatedAngle += pillar.pct
+      {/* Donut Principal Interativo */}
+      <div className="flex flex-col items-center justify-center my-1 select-none">
+        <div
+          className="relative w-[190px] h-[190px] cursor-pointer"
+          onClick={e => {
+            // Clicou no miolo/fundo do donut -> desmarca
+            if ((e.target as HTMLElement).tagName !== 'circle') {
+              handleClearSelection()
+            }
+          }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+            {totalDurationSeconds === 0 ? (
+              <circle
+                cx={50}
+                cy={50}
+                r={r}
+                fill="none"
+                stroke="currentColor"
+                className="text-muted/40"
+                strokeWidth={10}
+              />
+            ) : (
+              activities.map(act => {
+                const strokeDash = (act.pct / 100) * circ
+                const isAct = selectedActivity === act.name
+                const isDim = selectedActivity && !isAct
+                const currentOffset = accumulatedOffset
+                accumulatedOffset += strokeDash
 
                 return (
                   <circle
-                    key={pillar.id}
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke={pillar.strokeColor}
-                    strokeWidth={isSelected ? strokeWidth + 4 : strokeWidth}
-                    strokeDasharray={strokeDasharray}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="butt"
-                    fill="transparent"
+                    key={act.name}
+                    cx={50}
+                    cy={50}
+                    r={r}
+                    fill="none"
+                    stroke={act.color}
+                    strokeWidth={isAct ? 14 : 11}
+                    strokeDasharray={`${strokeDash} ${circ}`}
+                    strokeDashoffset={-currentOffset}
                     className={`transition-all duration-200 cursor-pointer ${
-                      activePillarId && !isSelected ? 'opacity-35' : 'opacity-100'
+                      isDim ? 'opacity-20' : 'opacity-100'
                     }`}
-                    onMouseEnter={() => setActivePillarId(pillar.id)}
-                    onMouseLeave={() => setActivePillarId(null)}
-                    onClick={() => handlePillarToggle(pillar.id)}
+                    onClick={e => {
+                      e.stopPropagation()
+                      handleToggleActivity(act.name)
+                    }}
                   />
                 )
-              })}
+              })
+            )}
           </svg>
 
-          {/* Display Central Dinâmico */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-2">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground truncate max-w-[100px]">
-              {activePillar ? activePillar.name : 'Total'}
-            </span>
-            <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums leading-tight">
-              {activePillar
-                ? formatHumanDuration(activePillar.duration)
+          {/* Miolo Compacto (18px / 11px) sem o texto de 'X atividades' */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-5">
+            <span className="text-[18px] font-bold tracking-tight text-foreground tabular-nums leading-tight">
+              {activeItem
+                ? formatHumanDuration(activeItem.duration)
                 : formatHumanDuration(totalDurationSeconds)}
             </span>
-            {activePillar && (
-              <span className="text-xs font-semibold text-muted-foreground tabular-nums mt-0.5">
-                {Math.round(activePillar.pct)}% do tempo
+            <span
+              className={`text-[11px] font-medium max-w-[120px] truncate transition-colors ${
+                activeItem ? 'text-foreground' : 'text-muted-foreground'
+              }`}
+            >
+              {activeItem ? activeItem.name : 'Total estudado'}
+            </span>
+            {activeItem && (
+              <span className="text-[10px] text-muted-foreground font-medium tabular-nums mt-0.5">
+                {Math.round(activeItem.pct)}% do período
               </span>
             )}
           </div>
         </div>
       </div>
 
-      {/* Lista dos 3 Pilares - Superfície Única Agrupada */}
-      <div className="space-y-4 pt-1">
-        {pillarsData.map(pillar => {
-          const isSelected = activePillarId === pillar.id
+      {/* Lista de Atividades */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between px-0.5">
+          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+            Distribuição por atividade
+          </span>
+        </div>
 
-          return (
-            <div key={pillar.id} className="space-y-1.5">
-              {/* Título do Pilar */}
-              <button
-                type="button"
-                onClick={() => handlePillarToggle(pillar.id)}
-                onMouseEnter={() => setActivePillarId(pillar.id)}
-                onMouseLeave={() => setActivePillarId(null)}
-                className={`w-full flex items-center justify-between px-1 py-0.5 rounded-lg text-left transition-colors cursor-pointer ${
-                  isSelected ? 'text-foreground font-bold' : 'text-foreground/90 hover:text-foreground'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className={`size-3 rounded-full ${pillar.dotClass} shrink-0`} />
-                  <span className="font-bold text-base tracking-tight">{pillar.name}</span>
-                </div>
-                <div className="tabular-nums text-sm font-semibold">
-                  {formatHumanDuration(pillar.duration)}{' '}
-                  <span className="font-normal text-muted-foreground">
-                    · {Math.round(pillar.pct)}%
-                  </span>
-                </div>
-              </button>
+        {activities.length === 0 ? (
+          <div className="p-6 text-center text-xs text-muted-foreground bg-muted/20 border border-border/70 rounded-xl">
+            Nenhuma sessão registrada neste período.
+          </div>
+        ) : (
+          <div className="bg-muted/20 border border-border/70 rounded-xl overflow-hidden divide-y divide-border/40">
+            {activities.map(act => {
+              const isAct = selectedActivity === act.name
+              const isDim = selectedActivity && !isAct
 
-              {/* Card contendo os sub-itens agrupados sob uma única superfície limpa */}
-              <div
-                className={`bg-muted/20 rounded-2xl border transition-all duration-200 divide-y divide-border/40 overflow-hidden ${
-                  isSelected
-                    ? `${pillar.activeBorderClass} ${pillar.activeBgClass} ring-1 ring-border/50`
-                    : 'border-border/70 hover:border-border/90'
-                }`}
-              >
-                {pillar.subItems.map(item => {
-                  const itemHasSecs = item.duration > 0
-                  return (
-                    <div
-                      key={item.name}
-                      className={`flex items-center justify-between px-4 py-3 min-h-[44px] text-sm transition-opacity ${
-                        itemHasSecs
-                          ? 'opacity-100 font-medium text-foreground'
-                          : 'opacity-40 text-muted-foreground font-normal'
-                      }`}
-                    >
-                      <span className={itemHasSecs ? 'text-foreground' : 'text-muted-foreground'}>
-                        {item.name}
-                      </span>
-                      <span className="tabular-nums font-medium">
-                        {formatHumanDuration(item.duration)}{' '}
-                        <span className="text-muted-foreground font-normal">
-                          · {Math.round(item.pct)}%
-                        </span>
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )
-        })}
+              return (
+                <button
+                  type="button"
+                  key={act.name}
+                  onClick={e => {
+                    e.stopPropagation()
+                    handleToggleActivity(act.name)
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all cursor-pointer min-h-[46px] ${
+                    isAct
+                      ? 'bg-muted/60 dark:bg-muted/40'
+                      : 'hover:bg-muted/40 dark:hover:bg-muted/20'
+                  } ${isDim ? 'opacity-35' : 'opacity-100'}`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span
+                      className="size-2 rounded-full shrink-0"
+                      style={{ backgroundColor: act.color }}
+                    />
+                    <span className="text-[13px] font-medium text-foreground truncate">
+                      {act.name}
+                    </span>
+                  </div>
+
+                  <div className="flex items-baseline gap-2 tabular-nums shrink-0 ml-3">
+                    <span className="text-[13px] font-semibold text-foreground">
+                      {formatHumanDuration(act.duration)}
+                    </span>
+                    <span className="text-[12px] text-muted-foreground min-w-[28px] text-right">
+                      {Math.round(act.pct)}%
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Mini-Donut de Imersão no Rodapé */}
+      {totalDurationSeconds > 0 && (
+        <div
+          className="bg-muted/20 border border-border/70 rounded-xl p-4 flex items-center gap-4 select-none"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="relative size-[68px] shrink-0">
+            <svg viewBox="0 0 72 72" className="w-full h-full -rotate-90">
+              {/* Trilha de Outras Atividades em Lilás Sutil */}
+              <circle
+                cx={36}
+                cy={36}
+                r={miniR}
+                fill="none"
+                stroke="#c4b5fd"
+                strokeWidth={7}
+                className="opacity-70 dark:opacity-80"
+              />
+              {/* Arco de Imersão em Roxo Linear */}
+              <circle
+                cx={36}
+                cy={36}
+                r={miniR}
+                fill="none"
+                stroke="#8b5cf6"
+                strokeWidth={7}
+                strokeDasharray={`${immDash} ${miniCirc}`}
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-foreground tabular-nums">
+              {immersionPct}%
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-[#8b5cf6] shrink-0" />
+                <span className="text-[13px] font-medium text-foreground">Imersão</span>
+              </div>
+              <span className="text-[13px] font-semibold text-foreground tabular-nums">
+                {formatHumanDuration(immersionDuration)}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-[#c4b5fd] shrink-0" />
+                <span className="text-[13px] font-medium text-muted-foreground">Outras atividades</span>
+              </div>
+              <span className="text-[13px] font-semibold text-foreground tabular-nums">
+                {formatHumanDuration(otherDuration)}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </ScrollAreaFade>
   )
 }

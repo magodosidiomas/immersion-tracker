@@ -22,7 +22,16 @@ export function useTheme() {
   }, [theme])
 
   const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'))
+    setTheme(prev => {
+      const next = prev === 'light' ? 'dark' : 'light'
+      const root = document.documentElement
+      if (next === 'dark') {
+        root.classList.add('dark')
+      } else {
+        root.classList.remove('dark')
+      }
+      return next
+    })
   }
 
   return { theme, setTheme, toggleTheme }

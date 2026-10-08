@@ -69,3 +69,56 @@ export function deleteSessionsForLanguage(languageId: string) {
   const updated = current.filter(s => s.language !== languageId)
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(updated))
 }
+
+export function exportBackupJSON() {
+  const backupData = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    languages: getStoredLanguages(),
+    currentLanguageId: getCurrentLanguageId(),
+    sessions: getStoredSessions(),
+  }
+
+  const jsonStr = JSON.stringify(backupData, null, 2)
+  const blob = new Blob([jsonStr], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const dateStr = new Date().toISOString().slice(0, 10)
+
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `imerso-backup-${dateStr}.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+export function importBackupJSON(jsonContent: string): { success: boolean; message: string; count?: number } {
+  try {
+    const parsed = JSON.parse(jsonContent)
+    if (!parsed || typeof parsed !== 'object') {
+      return { success: false, message: 'Arquivo JSON inválido' }
+    }
+
+    const { languages, sessions, currentLanguageId } = parsed
+
+    if (!Array.isArray(languages) || !Array.isArray(sessions)) {
+      return { success: false, message: 'Estrutura de backup incompatível' }
+    }
+
+    // Save languages and sessions
+    saveStoredLanguages(languages)
+    if (currentLanguageId) {
+      setCurrentLanguageId(currentLanguageId)
+    }
+
+    // Merge sessions safely or replace
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions))
+
+    return { success: true, message: 'Backup restaurado com sucesso', count: sessions.length }
+  } catch (err) {
+    console.error('Erro ao importar backup:', err)
+    return { success: false, message: 'Erro ao ler o arquivo JSON' }
+  }
+}
+

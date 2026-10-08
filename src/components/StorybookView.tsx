@@ -132,6 +132,60 @@ export function StorybookView({ onBackToApp, theme, onToggleTheme }: StorybookVi
           </div>
 
           <div>
+            <h2 className="text-lg font-semibold mb-1">Exploração de Roxo Refinado (Anti-AI-Slop)</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Cores sólidas, sem gradientes de plástico e sem halos coloridos falsos. Clique e passe o mouse para testar:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6 border border-zinc-800 rounded-2xl bg-zinc-900/50 mb-8">
+              {/* Opção 1: Linear Sólido */}
+              <div className="p-5 rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/10 text-violet-300 border border-violet-500/20 mb-2">OPÇÃO 1 • RECOMENDADA (LINEAR)</div>
+                  <h4 className="font-bold text-sm text-white">Roxo Sólido Corporativo</h4>
+                  <p className="text-xs text-zinc-400 mt-1">Cor sólida profunda (#6d28d9 / violet-700), texto branco puro, contraste WCAG AA+, sem gradiente e com sombra neutra física preta.</p>
+                </div>
+                <button
+                  type="button"
+                  className="w-full h-14 rounded-2xl font-bold text-base text-white flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 active:scale-[0.98]
+                    bg-[#6d28d9] hover:bg-[#5b21b6] border border-violet-500/30 shadow-sm"
+                >
+                  <Play className="size-5 fill-current" /> Iniciar sessão
+                </button>
+              </div>
+
+              {/* Opção 2: Dark Violet Arquitetural */}
+              <div className="p-5 rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 mb-2">OPÇÃO 2 • ARQUITETURAL</div>
+                  <h4 className="font-bold text-sm text-white">Violeta Escuro Fosco</h4>
+                  <p className="text-xs text-zinc-400 mt-1">Fundo sóbrio (#4c1d95 / violet-900) com borda física iluminada (#7c3aed / 40%), ultra integrado ao dark mode sem competir com o timer.</p>
+                </div>
+                <button
+                  type="button"
+                  className="w-full h-14 rounded-2xl font-bold text-base text-violet-100 flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 active:scale-[0.98]
+                    bg-[#3b0764] hover:bg-[#4c1d95] border border-violet-500/40 shadow-sm"
+                >
+                  <Play className="size-5 fill-current text-violet-200" /> Iniciar sessão
+                </button>
+              </div>
+
+              {/* Opção 3: Monocromático com Acento Violeta */}
+              <div className="p-5 rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 mb-2">OPÇÃO 3 • MINIMAL CHIC</div>
+                  <h4 className="font-bold text-sm text-white">Chumbo com Acento Roxo</h4>
+                  <p className="text-xs text-zinc-400 mt-1">Fundo zinc escuro clássico de alta densidade, com tipografia violeta e borda viva, mantendo o minimalismo original.</p>
+                </div>
+                <button
+                  type="button"
+                  className="w-full h-14 rounded-2xl font-bold text-base text-violet-300 flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 active:scale-[0.98]
+                    bg-zinc-900 hover:bg-zinc-850 hover:text-white border border-violet-500/50 shadow-sm"
+                >
+                  <Play className="size-5 fill-current" /> Iniciar sessão
+                </button>
+              </div>
+            </div>
+
             <h2 className="text-lg font-semibold mb-1">Botões de Ação do Timer (Imerso)</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Controles reais utilizados no cronômetro do aplicativo.

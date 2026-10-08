@@ -16,7 +16,7 @@ Imerso is a zero-friction language immersion tracking application.
 - States: Idle (`00:00:00`), Running, Paused.
 - Measured via **timestamp comparison** (not simple setInterval) so app minimize/screen lock doesn't affect accuracy.
 - Practice is chosen **after** clicking "Encerrar" (never before/during).
-- **3-Hour Threshold ("Ainda está aí?"):** After 3h continuous running session, prompt user, but keep measuring in background.
+- **Ajuste Pós-Sessão & Esquecimento (Zero Fricção):** Sem interrupções de modais durante a contagem. Caso o usuário esqueça o timer aberto, o editor de tempo estilo Samsung na tela de encerramento permite corrigir ou descartar o registro com agilidade.
 
 ## 4. Practices & Styles
 - Exactly 1 practice per session.
@@ -34,11 +34,18 @@ Imerso is a zero-friction language immersion tracking application.
   - **Imersão interativa:** Frequent pauses to look up words.
 
 ## 5. Daily Cap & Rules
-- Total logged study hours across all language profiles cannot exceed **24h per calendar day**.
-- Sessions crossing midnight count entirely toward the `startedAt` day.
-- Single duration field in summary/manual log uses right-to-left digit shift (Samsung clock style).
+- Duração máxima de uma sessão individual limitada a **24h** no editor de tempo.
+- Sessões que cruzam a meia-noite pertencem ao dia de início (`startedAt`).
+- Campo de duração no resumo/registro manual utiliza deslocamento de dígitos da direita para a esquerda (estilo relógio Samsung).
 
-## 6. Copy Guidelines
+## 6. Data & Backup Strategy
+- **Local Storage & Backup (MVP):** All profiles and session records are stored in browser `localStorage`.
+- **JSON Export / Import:** Users can export a complete `.json` backup file (`imerso-backup-YYYY-MM-DD.json`) and import it at any time via the Settings menu (`Configurações`).
+- **Roadmap (Próxima Versão - Custo Zero):**
+  - **Google Drive Sync:** Sincronização automática via `appDataFolder` do Google Drive do usuário (OAuth client-side, $0 custo de backend e zero manutenção).
+
+## 7. Copy Guidelines
 - Buttons: Imperative verbs (`Iniciar`, `Pausar`, `Retomar`, `Encerrar`, `Pronto`, `Salvar sessão`, `Salvar alterações`).
-- Toasts: Past tense (`Sessão salva`, `Sessão descartada`, `Japonês adicionado`).
+- Toasts: Past tense (`Sessão salva`, `Sessão descartada`, `Japonês adicionado`, `Backup exportado`).
 - Case: Sentence case throughout. Never use generic labels like "OK".
+

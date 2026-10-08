@@ -172,7 +172,7 @@ export function ManageLanguagesView({
                   setConfirmInput('')
                   setDeleteTarget(lang)
                 }}
-                className="size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 cursor-pointer transition-colors"
+                className="size-9 min-h-[44px] min-w-[44px] rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 cursor-pointer transition-colors"
                 title={`Remover ${lang.name}`}
               >
                 <Trash2 className="size-4" />

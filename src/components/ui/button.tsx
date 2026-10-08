@@ -17,6 +17,12 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent aria-expanded:text-accent-foreground",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 shadow-xs",
+        "subtle-destructive":
+          "border border-border/70 bg-card text-muted-foreground hover:border-destructive/40 hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/15 transition-all duration-150",
+        "ghost-destructive":
+          "bg-transparent text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-150",
+        purple:
+          "bg-[#6d28d9] text-white hover:bg-[#5b21b6] border border-violet-500/30 shadow-sm active:scale-[0.98] transition-all duration-150",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

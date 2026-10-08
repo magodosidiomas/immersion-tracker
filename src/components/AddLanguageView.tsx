@@ -42,10 +42,22 @@ export function AddLanguageView({
     <div className="flex-1 flex flex-col min-h-0 w-full animate-in fade-in duration-200">
       {/* Top Header */}
       {isFirstUse ? (
-        <div className="pt-2 pb-4">
+        <div className="pt-2 pb-4 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight text-foreground text-left">
             Qual idioma você está aprendendo?
           </h1>
+          {onClose && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="size-9 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer shrink-0 ml-2"
+              aria-label="Fechar"
+            >
+              <X className="size-5" />
+            </Button>
+          )}
         </div>
       ) : (
         <header className="flex items-center justify-between min-h-[44px] pb-3">

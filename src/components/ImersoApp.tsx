@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import {
   Drawer,
@@ -36,7 +37,10 @@ import {
   BarChart3,
   History,
   AlertCircle,
-  Lock
+  Lock,
+  Settings,
+  Download,
+  Upload
 } from 'lucide-react'
 import { StatsView } from '@/components/StatsView'
 import { AddLanguageView } from '@/components/AddLanguageView'
@@ -58,6 +62,8 @@ import {
   saveSessionRecord,
   deleteSessionRecord,
   deleteSessionsForLanguage,
+  exportBackupJSON,
+  importBackupJSON,
 } from '@/lib/storage'
 
 interface ImersoAppProps {
@@ -85,6 +91,31 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const [languages, setLanguages] = useState<LanguageProfile[]>(getStoredLanguages)
   const [currentLangId, setCurrentLangIdState] = useState<string>(getCurrentLanguageId)
   const [isLangDrawerOpen, setIsLangDrawerOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const content = event.target?.result as string
+      if (!content) return
+      const res = importBackupJSON(content)
+      if (res.success) {
+        setLanguages(getStoredLanguages())
+        setCurrentLangIdState(getCurrentLanguageId())
+        setSessions(getStoredSessions())
+        toast.success(res.message)
+        setIsSettingsOpen(false)
+      } else {
+        toast.error(res.message)
+      }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
 
   // Preload flags for user languages immediately
   useEffect(() => {
@@ -100,11 +131,11 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const accumulatedRef = useRef<number>(0)
   const timerIntervalRef = useRef<number | null>(null)
 
-  // Tipografia Global Travada em Outfit (Geometria moderna, zeros circulares sem corte)
-  const fontClass = 'font-outfit'
+  // Tipografia Global Travada em Satoshi (Neo-grotesca independente, anti-slop, zeros tabulares nítidos)
+  const fontClass = 'font-satoshi'
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-app-font', 'outfit')
+    document.documentElement.setAttribute('data-app-font', 'satoshi')
   }, [])
 
   // Summary State (After Encerrar)
@@ -510,7 +541,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             userLanguages={languages}
             onAddLanguage={lang => handleAddLanguage(lang, addLanguageOrigin)}
             onClose={() => {
-              if (addLanguageOrigin === 'manage') {
+              if (addLanguageOrigin === 'manage' && languages.length > 0) {
                 setCurrentScreen('manage-languages')
               } else {
                 setCurrentScreen('main')
@@ -536,19 +567,21 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             {!isSummaryOpen && (
               <header className="flex items-center justify-between min-h-[48px] mb-4">
                 {timerState !== 'idle' ? (
-                  <>
+                  <div className="flex items-center gap-3">
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
                       onClick={() => setIsDiscardDialogOpen(true)}
-                      className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                      className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer shrink-0"
                       title="Descartar sessão"
                     >
                       <X className="size-5" />
                     </Button>
-                    <div />
-                  </>
+                    <h1 className="text-base font-semibold text-foreground tracking-tight">
+                      Sessão ativa
+                    </h1>
+                  </div>
                 ) : (
                   <>
                     <Button
@@ -589,20 +622,24 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                         variant="ghost"
                         size="icon"
                         onClick={onToggleTheme}
-                        className="size-9 rounded-lg text-muted-foreground cursor-pointer"
-                        title="Alternar Light / Dark"
+                        className="size-9 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
+                        title={theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'}
                       >
-                        {theme === 'light' ? <Moon className="size-4" /> : <Sun className="size-4" />}
+                        {theme === 'light' ? (
+                          <Moon className="size-4.5" />
+                        ) : (
+                          <Sun className="size-4.5" />
+                        )}
                       </Button>
 
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={onOpenStorybook}
-                        className="size-9 rounded-lg text-primary cursor-pointer"
-                        title="Abrir UI Kit / Storybook"
+                        onClick={() => setIsSettingsOpen(true)}
+                        className="size-9 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
+                        title="Configurações e Backup"
                       >
-                        <Layers className="size-4" />
+                        <Settings className="size-4.5" />
                       </Button>
                     </div>
                   </>
@@ -618,31 +655,41 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                   {/* Top Bar do Resumo / Registro Manual / Edição */}
                   <div className="flex items-center justify-between min-h-[48px] mb-4">
                     {editingSessionId || entrySource === 'manual' ? (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setIsSummaryOpen(false)
-                          setEditingSessionId(null)
-                        }}
-                        className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer"
-                        title="Fechar sem salvar"
-                      >
-                        <X className="size-5" />
-                      </Button>
-                    ) : (
-                      <>
+                      <div className="flex items-center gap-3">
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
-                          onClick={handleBackToTimer}
-                          className="size-9 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer"
-                          title="Voltar ao timer"
+                          onClick={() => {
+                            setIsSummaryOpen(false)
+                            setEditingSessionId(null)
+                          }}
+                          className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
+                          title="Fechar sem salvar"
                         >
-                          <ChevronLeft className="size-5" />
+                          <X className="size-5" />
                         </Button>
+                        <h1 className="text-base font-semibold text-foreground tracking-tight">
+                          {editingSessionId ? 'Editar sessão' : 'Registrar sessão'}
+                        </h1>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleBackToTimer}
+                            className="size-9 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
+                            title="Voltar ao timer"
+                          >
+                            <ChevronLeft className="size-5" />
+                          </Button>
+                          <h1 className="text-base font-semibold text-foreground tracking-tight">
+                            Revisar e salvar
+                          </h1>
+                        </div>
 
                         <Button
                           type="button"
@@ -671,7 +718,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                       onBlur={() => setIsEditingTime(false)}
                       onKeyDown={handleTimeKeyDown}
                       onChange={handleTimeChange}
-                      className={`w-full text-5xl sm:text-6xl font-extrabold py-5 px-6 rounded-2xl border text-center transition-all tabular-nums font-outfit bg-card shadow-xs focus:outline-none cursor-text caret-primary ${
+                      className={`w-full text-5xl sm:text-6xl font-[900] tracking-[-0.035em] py-5 px-6 rounded-2xl border text-center transition-all tabular-nums font-satoshi bg-card shadow-xs focus:outline-none cursor-text caret-primary ${
                         inlineErrors.time
                           ? 'border-destructive ring-4 ring-destructive/10'
                           : isEditingTime
@@ -724,21 +771,22 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                     <div className="grid grid-cols-2 gap-3">
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="subtle-destructive"
                         size="lg"
                         onClick={() => setIsDeleteSessionDialogOpen(true)}
-                        className="h-14 text-sm font-semibold rounded-2xl text-destructive bg-destructive/10 hover:bg-destructive/20 active:scale-[0.98] transition-all cursor-pointer"
+                        className="h-14 text-sm font-semibold rounded-2xl active:scale-[0.98] cursor-pointer"
                       >
                         Excluir sessão
                       </Button>
                       <Button
                         type="button"
                         size="lg"
+                        variant="purple"
                         onClick={() => {
                           setIsEditingTime(false)
                           handleSaveSession()
                         }}
-                        className="h-14 text-sm font-bold rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                        className="h-14 text-sm font-bold rounded-2xl cursor-pointer"
                       >
                         Salvar alterações
                       </Button>
@@ -747,11 +795,12 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                     <Button
                       type="button"
                       size="lg"
+                      variant="purple"
                       onClick={() => {
                         setIsEditingTime(false)
                         handleSaveSession()
                       }}
-                      className="w-full h-14 text-base font-bold rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                      className="w-full h-14 text-base font-bold rounded-2xl cursor-pointer"
                     >
                       Salvar sessão
                     </Button>
@@ -763,10 +812,10 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
           <div className="flex-1 flex flex-col justify-between py-2">
             <div />
 
-            {/* Grande Display hh:mm:ss: Outfit ExtraBold (800), espaçamento confortável e contraste acessível */}
+            {/* Grande Display hh:mm:ss: Satoshi Black (900), tracking tight de alta densidade */}
             <div className="text-center my-auto py-8">
               <div
-                className={`text-[66px] sm:text-[74px] leading-none tracking-[0.015em] tabular-nums font-extrabold select-none transition-colors duration-200 ${
+                className={`text-[66px] sm:text-[76px] leading-none tracking-[-0.04em] tabular-nums font-[900] select-none transition-colors duration-200 font-satoshi ${
                   timerState === 'idle'
                     ? 'text-zinc-500 dark:text-zinc-400'
                     : 'text-foreground'
@@ -781,8 +830,9 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
               {timerState === 'idle' && (
                 <Button
                   size="lg"
+                  variant="purple"
                   onClick={handleStart}
-                  className="w-full h-14 text-base sm:text-lg font-bold rounded-2xl gap-2.5 shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                  className="w-full h-14 text-base sm:text-lg font-bold rounded-2xl gap-2.5 cursor-pointer"
                 >
                   <Play className="size-5 fill-current" /> Iniciar
                 </Button>
@@ -802,8 +852,9 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                   <Button
                     type="button"
                     size="lg"
+                    variant="purple"
                     onClick={handleStop}
-                    className="h-14 text-base font-bold rounded-2xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                    className="h-14 text-base font-bold rounded-2xl gap-2 cursor-pointer"
                   >
                     <Check className="size-5 stroke-[2.5px]" /> Concluir
                   </Button>
@@ -824,8 +875,9 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                   <Button
                     type="button"
                     size="lg"
+                    variant="purple"
                     onClick={handleStop}
-                    className="h-14 text-base font-bold rounded-2xl gap-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:scale-[0.98] transition-all duration-150 cursor-pointer"
+                    className="h-14 text-base font-bold rounded-2xl gap-2 cursor-pointer"
                   >
                     <Check className="size-5 stroke-[2.5px]" /> Concluir
                   </Button>
@@ -1449,6 +1501,155 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* DIÁLOGO: CONFIRMAÇÃO DE EXCLUIR SESSÃO */}
+      <Dialog open={isDeleteSessionDialogOpen} onOpenChange={setIsDeleteSessionDialogOpen}>
+        <DialogContent className="max-w-[380px] p-6">
+          <DialogHeader className="gap-2 text-left">
+            <DialogTitle className="text-lg font-semibold tracking-tight">Excluir esta sessão?</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              A sessão de <strong className="text-foreground">{formatTime(summarySeconds)}</strong> em{' '}
+              <strong className="text-foreground">{selectedPractice || 'estudo'}</strong> será removida permanentemente do seu histórico.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="grid grid-cols-2 gap-2.5 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 min-h-[44px] rounded-xl text-sm font-medium flex-1 cursor-pointer"
+              onClick={() => setIsDeleteSessionDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="h-11 min-h-[44px] rounded-xl text-sm font-semibold flex-1 cursor-pointer"
+              onClick={handleDeleteSession}
+            >
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* DRAWER: CONFIGURAÇÕES E BACKUP */}
+      <Drawer open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DrawerContent className="max-w-[400px] mx-auto p-0 border-t border-border/80">
+          <DrawerHeader className="px-5 pt-4 pb-2 text-left">
+            <DrawerTitle className="text-base font-semibold tracking-tight">Configurações</DrawerTitle>
+            <DrawerDescription className="sr-only">
+              Opções de aparência, dados e backup
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="p-4 space-y-4">
+            {/* Seção 1: Tema */}
+            <div className="space-y-2">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
+                Aparência
+              </span>
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={onToggleTheme}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onToggleTheme()
+                  }
+                }}
+                className="w-full h-12 min-h-[44px] flex items-center justify-between px-3.5 rounded-xl font-medium text-sm cursor-pointer border border-border/70 bg-card hover:bg-muted/40 transition-colors select-none"
+              >
+                <div className="flex items-center gap-2.5">
+                  {theme === 'light' ? (
+                    <Sun className="size-4.5 text-amber-500" />
+                  ) : (
+                    <Moon className="size-4.5 text-indigo-400" />
+                  )}
+                  <span>Modo {theme === 'light' ? 'claro' : 'escuro'}</span>
+                </div>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Switch
+                    variant="purple"
+                    checked={theme === 'dark'}
+                    onCheckedChange={onToggleTheme}
+                    aria-label="Alternar modo escuro"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Seção 2: Backup e Dados */}
+            <div className="space-y-2 pt-1">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
+                Backup e Dados
+              </span>
+
+              <div className="grid grid-cols-1 gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    exportBackupJSON()
+                    toast.success('Backup exportado')
+                  }}
+                  className="w-full h-12 min-h-[44px] justify-start gap-3 px-3.5 rounded-xl font-medium text-sm cursor-pointer"
+                >
+                  <Download className="size-4.5 text-primary" />
+                  <span>Exportar backup (JSON)</span>
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-12 min-h-[44px] justify-start gap-3 px-3.5 rounded-xl font-medium text-sm cursor-pointer border-border/70"
+                >
+                  <Upload className="size-4.5 text-muted-foreground" />
+                  <span>Importar backup (JSON)</span>
+                </Button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json,application/json"
+                  onChange={handleImportFile}
+                  className="sr-only"
+                />
+              </div>
+            </div>
+
+            {/* Seção 3: UI Kit / Dev Tools (Discreto) */}
+            <div className="pt-2 border-t border-border/40">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setIsSettingsOpen(false)
+                  onOpenStorybook()
+                }}
+                className="w-full h-10 min-h-[44px] justify-start gap-2.5 px-3 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/40 cursor-pointer"
+              >
+                <Layers className="size-4 text-muted-foreground" />
+                <span>Ver Storybook / Design System</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="p-4 pt-0">
+            <DrawerClose asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm text-foreground/80 hover:text-foreground hover:bg-muted/50 cursor-pointer flex items-center justify-center transition-colors"
+              >
+                Fechar
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
