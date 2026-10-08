@@ -1408,9 +1408,6 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             >
               Gerenciar idiomas
             </Button>
-            <div className="text-[11px] text-muted-foreground/50 text-center pt-1 font-mono tracking-wider">
-              v{APP_VERSION}
-            </div>
           </div>
         </DrawerContent>
       </Drawer>
@@ -1699,7 +1696,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             </div>
           </div>
 
-          <div className="p-4 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4">
+          <div className="p-4 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4 space-y-2">
             <DrawerClose asChild>
               <Button
                 type="button"
@@ -1709,6 +1706,11 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                 Fechar
               </Button>
             </DrawerClose>
+            <div className="text-center pt-0.5">
+              <span className="text-[11px] text-muted-foreground/50 font-mono tracking-wider">
+                Imerso v{APP_VERSION}
+              </span>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>

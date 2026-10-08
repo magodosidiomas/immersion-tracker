@@ -91,7 +91,20 @@ export function StatsView({ sessions, currentLanguage, onStartTimer, onAddSessio
   // Cálculos SVG do Donut Principal
   const r = 38
   const circ = 2 * Math.PI * r
-  let accumulatedOffset = 0
+
+  const donutSlices = activities.reduce<
+    Array<(typeof activities)[number] & { strokeDash: number; offset: number }>
+  >((acc, act) => {
+    const strokeDash = (act.pct / 100) * circ
+    const previousOffset =
+      acc.length > 0 ? acc[acc.length - 1].offset + acc[acc.length - 1].strokeDash : 0
+    acc.push({
+      ...act,
+      strokeDash,
+      offset: previousOffset,
+    })
+    return acc
+  }, [])
 
   // Cálculos SVG do Mini-Donut de Imersão
   const miniR = 28
@@ -152,35 +165,22 @@ export function StatsView({ sessions, currentLanguage, onStartTimer, onAddSessio
         </button>
       </div>
 
-      {/* Donut Principal Interativo */}
-      <div className="flex flex-col items-center justify-center my-2 select-none">
-        <div
-          className="relative w-[220px] h-[220px] cursor-pointer"
-          onClick={e => {
-            // Clicou no miolo/fundo do donut -> desmarca
-            if ((e.target as HTMLElement).tagName !== 'circle') {
-              handleClearSelection()
-            }
-          }}
-        >
-          <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-            {totalDurationSeconds === 0 ? (
-              <circle
-                cx={50}
-                cy={50}
-                r={r}
-                fill="none"
-                stroke="currentColor"
-                className="text-muted/40"
-                strokeWidth={10}
-              />
-            ) : (
-              activities.map(act => {
-                const strokeDash = (act.pct / 100) * circ
+      {/* Donut Principal Interativo - Oculto quando 0 min */}
+      {totalDurationSeconds > 0 && (
+        <div className="flex flex-col items-center justify-center my-2 select-none">
+          <div
+            className="relative w-[220px] h-[220px] cursor-pointer"
+            onClick={e => {
+              // Clicou no miolo/fundo do donut -> desmarca
+              if ((e.target as HTMLElement).tagName !== 'circle') {
+                handleClearSelection()
+              }
+            }}
+          >
+            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+              {donutSlices.map(act => {
                 const isAct = selectedActivity === act.name
                 const isDim = selectedActivity && !isAct
-                const currentOffset = accumulatedOffset
-                accumulatedOffset += strokeDash
 
                 return (
                   <circle
@@ -191,8 +191,8 @@ export function StatsView({ sessions, currentLanguage, onStartTimer, onAddSessio
                     fill="none"
                     stroke={act.color}
                     strokeWidth={isAct ? 14 : 11}
-                    strokeDasharray={`${strokeDash} ${circ}`}
-                    strokeDashoffset={-currentOffset}
+                    strokeDasharray={`${act.strokeDash} ${circ}`}
+                    strokeDashoffset={-act.offset}
                     className={`transition-all duration-200 cursor-pointer ${
                       isDim ? 'opacity-20' : 'opacity-100'
                     }`}
@@ -202,40 +202,42 @@ export function StatsView({ sessions, currentLanguage, onStartTimer, onAddSessio
                     }}
                   />
                 )
-              })
-            )}
-          </svg>
+              })}
+            </svg>
 
-          {/* Miolo com Hierarquia Clara (24px / 14px) */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-4">
-            <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums leading-tight">
-              {activeItem
-                ? formatHumanDuration(activeItem.duration)
-                : formatHumanDuration(totalDurationSeconds)}
-            </span>
-            <span
-              className={`text-sm font-semibold max-w-[150px] truncate transition-colors mt-0.5 ${
-                activeItem ? 'text-foreground' : 'text-muted-foreground'
-              }`}
-            >
-              {activeItem ? activeItem.name : 'Total estudado'}
-            </span>
-            {activeItem && (
-              <span className="text-xs text-muted-foreground font-medium tabular-nums mt-0.5">
-                {Math.round(activeItem.pct)}% do período
+            {/* Miolo com Hierarquia Clara (24px / 14px) */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none p-4">
+              <span className="text-2xl font-extrabold tracking-tight text-foreground tabular-nums leading-tight">
+                {activeItem
+                  ? formatHumanDuration(activeItem.duration)
+                  : formatHumanDuration(totalDurationSeconds)}
               </span>
-            )}
+              <span
+                className={`text-sm font-semibold max-w-[150px] truncate transition-colors mt-0.5 ${
+                  activeItem ? 'text-foreground' : 'text-muted-foreground'
+                }`}
+              >
+                {activeItem ? activeItem.name : 'Total estudado'}
+              </span>
+              {activeItem && (
+                <span className="text-xs text-muted-foreground font-medium tabular-nums mt-0.5">
+                  {Math.round(activeItem.pct)}% do período
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Lista de Atividades */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between px-0.5">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Por atividade
-          </span>
-        </div>
+        {activities.length > 0 && (
+          <div className="flex items-center justify-between px-0.5">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Por atividade
+            </span>
+          </div>
+        )}
 
         {activities.length === 0 ? (
           <div className="py-8 px-4 flex flex-col items-center justify-center text-center space-y-3">

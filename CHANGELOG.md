@@ -5,6 +5,17 @@ O formato é baseado no padrão [Keep a Changelog](https://keepachangelog.com/pt
 
 ---
 
+## [2.1.1] - 2026-10-08
+
+### 💄 Refinos Visuais & Local de Versão
+- **Ocultação do Donut em 0 Minutos:**
+  - O gráfico Donut interativo e o cabeçalho "Por atividade" agora só aparecem quando há tempo de estudo registrado (`totalDurationSeconds > 0`).
+  - Quando zerado, a tela apresenta apenas o Empty State limpo, eliminando o anel cinza vazio de 220px e o ruído visual desnecessário.
+- **Versão Movida para o Menu de Configurações:**
+  - O indicador de versão (`Imerso v2.1.1`) foi transferido do switch/gerenciador de idiomas para o rodapé do Drawer de Configurações (Settings), local padrão e intuitivo para informações do sistema.
+
+---
+
 ## [2.1.0] - 2026-10-08
 
 ### 🚀 Novidades & Melhorias de UI
