@@ -533,39 +533,43 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const totalSecondsLanguage = languageSessions.reduce((acc, curr) => acc + curr.duration, 0)
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 sm:p-6 transition-colors">
-      {/* Container Central com proporção móvel e bordas suaves */}
-      <div className={`w-full max-w-[400px] h-[700px] max-h-[90vh] border border-border/80 bg-card rounded-[32px] p-5 flex flex-col relative shadow-sm overflow-hidden ${fontClass}`}>
+    <div className="min-h-screen bg-background sm:bg-zinc-100 sm:dark:bg-zinc-950/80 text-foreground flex flex-col items-center justify-center p-0 sm:p-6 transition-colors">
+      {/* Container Principal: Fullscreen no mobile (100dvh, sem borda/raio), frame de celular a partir de sm (640px) */}
+      <div className={`w-full sm:max-w-[400px] h-dvh sm:h-[700px] sm:max-h-[90vh] border-0 sm:border border-border/80 bg-background sm:bg-card rounded-none sm:rounded-[32px] flex flex-col relative shadow-none sm:shadow-lg overflow-hidden ${fontClass}`}>
         {currentScreen === 'add-language' || languages.length === 0 ? (
-          <AddLanguageView
-            userLanguages={languages}
-            onAddLanguage={lang => handleAddLanguage(lang, addLanguageOrigin)}
-            onClose={() => {
-              if (addLanguageOrigin === 'manage' && languages.length > 0) {
-                setCurrentScreen('manage-languages')
-              } else {
-                setCurrentScreen('main')
-              }
-            }}
-            isFirstUse={languages.length === 0}
-          />
+          <div className="flex-1 min-h-0 flex flex-col px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
+            <AddLanguageView
+              userLanguages={languages}
+              onAddLanguage={lang => handleAddLanguage(lang, addLanguageOrigin)}
+              onClose={() => {
+                if (addLanguageOrigin === 'manage' && languages.length > 0) {
+                  setCurrentScreen('manage-languages')
+                } else {
+                  setCurrentScreen('main')
+                }
+              }}
+              isFirstUse={languages.length === 0}
+            />
+          </div>
         ) : currentScreen === 'manage-languages' ? (
-          <ManageLanguagesView
-            languages={languages}
-            sessions={sessions}
-            onBack={() => setCurrentScreen('main')}
-            onOpenAddLanguage={() => {
-              setAddLanguageOrigin('manage')
-              setCurrentScreen('add-language')
-            }}
-            onReorderLanguages={handleReorderLanguages}
-            onDeleteLanguage={handleDeleteLanguage}
-          />
+          <div className="flex-1 min-h-0 flex flex-col px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
+            <ManageLanguagesView
+              languages={languages}
+              sessions={sessions}
+              onBack={() => setCurrentScreen('main')}
+              onOpenAddLanguage={() => {
+                setAddLanguageOrigin('manage')
+                setCurrentScreen('add-language')
+              }}
+              onReorderLanguages={handleReorderLanguages}
+              onDeleteLanguage={handleDeleteLanguage}
+            />
+          </div>
         ) : (
           <>
             {/* Top Bar Geral: Apenas visível quando NÃO estiver no Resumo/Edição */}
             {!isSummaryOpen && (
-              <header className="flex items-center justify-between min-h-[48px] mb-4">
+              <header className="flex items-center justify-between min-h-[48px] px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-5 mb-2 sm:mb-4 shrink-0">
                 {timerState !== 'idle' ? (
                   <div className="flex items-center gap-3">
                     <Button
@@ -650,7 +654,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             {/* CONTEÚDO PRINCIPAL (CONDICIONAL POR ABA) */}
             {isSummaryOpen ? (
               /* TELA DE RESUMO DA SESSÃO / EDIÇÃO */
-              <div className="flex-1 flex flex-col justify-between pt-1 pb-2">
+              <div className="flex-1 min-h-0 flex flex-col justify-between px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
                 <div>
                   {/* Top Bar do Resumo / Registro Manual / Edição */}
                   <div className="flex items-center justify-between min-h-[48px] mb-4">
@@ -807,26 +811,28 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                   )}
                 </div>
               </div>
-        ) : activeTab === 'timer' ? (
-          /* ABA 1: TIMER (CONFORME SPEC.MD SEÇÃO 3) */
-          <div className="flex-1 flex flex-col justify-between py-2">
-            <div />
+        ) : (
+          <main className="flex-1 min-h-0 px-4 sm:px-5 flex flex-col overflow-hidden">
+            {activeTab === 'timer' ? (
+              /* ABA 1: TIMER (CONFORME SPEC.MD SEÇÃO 3) */
+              <div className="flex-1 flex flex-col justify-between py-2">
+                <div />
 
-            {/* Grande Display hh:mm:ss: Satoshi Black (900), tracking tight de alta densidade */}
-            <div className="text-center my-auto py-8">
-              <div
-                className={`text-[66px] sm:text-[76px] leading-none tracking-[-0.04em] tabular-nums font-[900] select-none transition-colors duration-200 font-satoshi ${
-                  timerState === 'idle'
-                    ? 'text-zinc-500 dark:text-zinc-400'
-                    : 'text-foreground'
-                }`}
-              >
-                {formatTime(elapsedSeconds)}
-              </div>
-            </div>
+                {/* Grande Display hh:mm:ss: Satoshi Black (900), tracking tight de alta densidade */}
+                <div className="text-center my-auto py-8">
+                  <div
+                    className={`text-[66px] sm:text-[76px] leading-none tracking-[-0.04em] tabular-nums font-[900] select-none transition-colors duration-200 font-satoshi ${
+                      timerState === 'idle'
+                        ? 'text-zinc-500 dark:text-zinc-400'
+                        : 'text-foreground'
+                    }`}
+                  >
+                    {formatTime(elapsedSeconds)}
+                  </div>
+                </div>
 
-            {/* Controles do Timer: 56px de altura, cantos suaves e resposta tátil sólida */}
-            <div className="space-y-3 pb-2">
+                {/* Controles do Timer: 56px de altura, cantos suaves e resposta tátil sólida */}
+                <div className={`space-y-3 ${timerState !== 'idle' ? 'pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-2' : 'pb-2'}`}>
               {timerState === 'idle' && (
                 <Button
                   size="lg"
@@ -1224,10 +1230,12 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             )
           })()
         )}
+            </main>
+        )}
 
         {/* BOTTOM NAV (Some durante sessão ativa, conforme SPEC SEÇÃO 2) */}
         {timerState === 'idle' && !isSummaryOpen && (
-          <nav className="flex items-center justify-around px-1 pt-3 border-t border-border mt-auto">
+          <nav className="flex items-center justify-around w-full px-2 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:pb-3 border-t border-border mt-auto shrink-0 bg-background sm:bg-card">
             <button
               onClick={() => setActiveTab('timer')}
               className={`flex flex-col items-center gap-1 py-1.5 px-3 rounded-xl transition-all duration-150 active:scale-95 cursor-pointer ${
@@ -1283,7 +1291,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
 
       {/* DRAWER: TROCA DE IDIOMA (REFINADO - SEM LINHAS EXCESSIVAS, SEM CARDS, SCROLL COM FADE, CHECKMARK) */}
       <Drawer open={isLangDrawerOpen} onOpenChange={setIsLangDrawerOpen}>
-        <DrawerContent className="max-w-[400px] mx-auto p-0 border-t border-border/80">
+        <DrawerContent className="w-full sm:max-w-[400px] mx-auto p-0 border-t border-border/80">
           <DrawerHeader className="px-5 pt-4 pb-2 text-left">
             <DrawerTitle className="text-base font-semibold tracking-tight">Idioma</DrawerTitle>
             <DrawerDescription className="sr-only">
@@ -1323,7 +1331,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
           </ScrollAreaFade>
 
           {/* AÇÕES FIXAS DO RODAPÉ (RULE: MESMA ALTURA MÍNIMA DE 44PX E TEXTO LEGÍVEL) */}
-          <div className="p-4 pt-3 space-y-2 border-t border-border/40">
+          <div className="p-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4 space-y-2 border-t border-border/40">
             <Button
               type="button"
               variant="secondary"
@@ -1355,7 +1363,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
 
       {/* DRAWER: SELEÇÃO DE PRÁTICA E ESTILO (SPEC SEÇÃO 6 - REFINO IMPECCABLE) */}
       <Drawer open={isPracticeDrawerOpen} onOpenChange={setIsPracticeDrawerOpen}>
-        <DrawerContent className="max-w-[400px] mx-auto p-0 border-t border-border/80">
+        <DrawerContent className="w-full sm:max-w-[400px] mx-auto p-0 border-t border-border/80">
           <DrawerHeader className="px-5 pt-4 pb-2 text-left">
             {practiceDrawerStep === 1 ? (
               <div>
@@ -1460,7 +1468,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
           </ScrollAreaFade>
 
           {/* RODAPÉ ALINHADO À REGRA DE 44PX E PISO DE 12PX */}
-          <div className="p-4 pt-3 border-t border-border/40">
+          <div className="p-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4 border-t border-border/40">
             <DrawerClose asChild>
               <Button
                 type="button"
@@ -1535,7 +1543,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
 
       {/* DRAWER: CONFIGURAÇÕES E BACKUP */}
       <Drawer open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DrawerContent className="max-w-[400px] mx-auto p-0 border-t border-border/80">
+        <DrawerContent className="w-full sm:max-w-[400px] mx-auto p-0 border-t border-border/80">
           <DrawerHeader className="px-5 pt-4 pb-2 text-left">
             <DrawerTitle className="text-base font-semibold tracking-tight">Configurações</DrawerTitle>
             <DrawerDescription className="sr-only">
@@ -1637,7 +1645,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
             </div>
           </div>
 
-          <div className="p-4 pt-0">
+          <div className="p-4 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4">
             <DrawerClose asChild>
               <Button
                 type="button"

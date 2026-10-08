@@ -97,7 +97,7 @@ export function ManageLanguagesView({
   const targetStats = deleteTarget ? getLanguageStats(deleteTarget.id) : null
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-card animate-in fade-in-50 duration-200">
+    <div className="flex-1 flex flex-col min-h-0 bg-transparent animate-in fade-in-50 duration-200">
       {/* Top Header */}
       <header className="flex items-center justify-between min-h-[48px] px-1 mb-2">
         <Button
