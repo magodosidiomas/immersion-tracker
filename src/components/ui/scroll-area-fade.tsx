@@ -71,8 +71,9 @@ export function ScrollAreaFade({
       style={{
         maskImage,
         WebkitMaskImage: maskImage,
+        WebkitOverflowScrolling: 'touch',
       }}
-      className={cn('overflow-y-auto scrollbar-subtle', className)}
+      className={cn('overflow-y-auto overscroll-contain scrollbar-subtle', className)}
       {...props}
     >
       {children}

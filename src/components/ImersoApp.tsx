@@ -547,9 +547,9 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const totalSecondsLanguage = languageSessions.reduce((acc, curr) => acc + curr.duration, 0)
 
   return (
-    <div className="min-h-screen bg-background sm:bg-zinc-100 sm:dark:bg-zinc-950/80 text-foreground flex flex-col items-center justify-center p-0 sm:p-6 transition-colors">
-      {/* Container Principal: Fullscreen no mobile (100dvh, sem borda/raio), frame de celular a partir de sm (640px) */}
-      <div className={`w-full sm:max-w-[400px] h-dvh sm:h-[700px] sm:max-h-[90vh] border-0 sm:border border-border/80 bg-background sm:bg-card rounded-none sm:rounded-[32px] flex flex-col relative shadow-none sm:shadow-lg overflow-hidden ${fontClass}`}>
+    <div className="h-dvh sm:min-h-screen sm:h-auto overflow-hidden sm:overflow-auto bg-background sm:bg-zinc-100 sm:dark:bg-zinc-950/80 text-foreground flex flex-col items-center justify-center p-0 sm:p-6 transition-colors">
+      {/* Container Principal: Fullscreen no mobile (h-full sem recalcular dvh), frame de celular a partir de sm (640px) */}
+      <div className={`w-full sm:max-w-[400px] h-full sm:h-[700px] sm:max-h-[90vh] border-0 sm:border border-border/80 bg-background sm:bg-card rounded-none sm:rounded-[32px] flex flex-col relative shadow-none sm:shadow-lg overflow-hidden ${fontClass}`}>
         {currentScreen === 'add-language' || languages.length === 0 ? (
           <div className="flex-1 min-h-0 flex flex-col px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
             <AddLanguageView

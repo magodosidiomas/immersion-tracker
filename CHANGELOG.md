@@ -5,6 +5,17 @@ O formato é baseado no padrão [Keep a Changelog](https://keepachangelog.com/pt
 
 ---
 
+## [2.1.2] - 2026-10-09
+
+### 🐛 Correções & Mobile UX
+- **Eliminação do Scroll Fantasma e Efeito Elástico no Mobile:**
+  - Bloqueio de `overscroll-behavior-y: none` e fixação de altura 100% no `html` e `body`.
+  - Contenção do contêiner mobile com `h-dvh` e `overflow-hidden`, isolando as rolagens internas no `ScrollAreaFade`.
+  - Inclusão de `interactive-widget=resizes-content` na meta tag viewport para evitar saltos visuais ao abrir o teclado.
+  - Rolagem inercial nativa suave (`-webkit-overflow-scrolling: touch`) e `overscroll-contain` em todas as listas internas.
+
+---
+
 ## [2.1.1] - 2026-10-08
 
 ### 💄 Refinos Visuais & Local de Versão
