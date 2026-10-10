@@ -117,3 +117,30 @@ git push origin dev --tags
 ```
 Com isso, você tem rastreabilidade total do que mudou em cada versão, tanto no código quanto no site em produção!
 
+---
+
+## 7. Como Ativar o Google Drive Sync (Client-Side OAuth - Custo $0)
+
+A sincronização com o Google Drive funciona 100% no navegador do usuário e salva os dados na pasta oculta `appDataFolder` do Google Drive, sem acesso aos arquivos pessoais do usuário.
+
+Para colocar sua própria chave em produção ou no ambiente local:
+
+1. **Acesse o Google Cloud Console:**
+   * Vá em [APIs & Services > Credentials](https://console.cloud.google.com/apis/credentials).
+   * Crie um projeto (ex: `Imerso`).
+   * Em **OAuth consent screen**, selecione `External`, defina o nome "Imerso" e adicione seu e-mail.
+   * Em **Credentials**, clique em `Create Credentials` > `OAuth Client ID`.
+   * Escolha **Web application** (Aplicação Web).
+2. **Origens JavaScript Autorizadas:**
+   * Adicione `http://localhost:5173` (para testes no seu PC).
+   * Adicione `https://imerso.pages.dev` (ou seu domínio de produção).
+3. **Configuração de Variáveis de Ambiente:**
+   * No arquivo `.env` local:
+     ```env
+     VITE_GOOGLE_CLIENT_ID="seu-id-aqui.apps.googleusercontent.com"
+     ```
+   * Na Cloudflare Pages (Deploy):
+     * Vá no painel da Cloudflare > **Workers & Pages** > **imerso** > **Settings** > **Environment variables**.
+     * Adicione a variável `VITE_GOOGLE_CLIENT_ID` com o mesmo valor para os builds de produção.
+
+

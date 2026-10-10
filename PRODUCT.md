@@ -39,10 +39,13 @@ Imerso is a zero-friction language immersion tracking application.
 - Campo de duração no resumo/registro manual utiliza deslocamento de dígitos da direita para a esquerda (estilo relógio Samsung).
 
 ## 6. Data & Backup Strategy
-- **Local Storage & Backup (MVP):** All profiles and session records are stored in browser `localStorage`.
+- **Local Storage & Backup:** All profiles and session records are stored in browser `localStorage`.
 - **JSON Export / Import:** Users can export a complete `.json` backup file (`imerso-backup-YYYY-MM-DD.json`) and import it at any time via the Settings menu (`Configurações`).
-- **Roadmap (Próxima Versão - Custo Zero):**
-  - **Google Drive Sync:** Sincronização automática via `appDataFolder` do Google Drive do usuário (OAuth client-side, $0 custo de backend e zero manutenção).
+- **Google Drive Sync (Custo Zero & Privacidade Total):**
+  - Integração client-side via Google Identity Services e Google Drive REST API v3.
+  - Armazenamento no `appDataFolder` (pasta isolada e invisível do app, sem acesso aos arquivos pessoais do Google Drive do usuário).
+  - Sincronização inteligente bidirecional (union por ID de sessão e perfis de idiomas).
+  - Auto-sync em background sempre que uma sessão é salva ou excluída caso o usuário esteja autenticado.
 
 ## 7. Copy Guidelines
 - Buttons: Imperative verbs (`Iniciar`, `Pausar`, `Retomar`, `Encerrar`, `Pronto`, `Salvar sessão`, `Salvar alterações`).

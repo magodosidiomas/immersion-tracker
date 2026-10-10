@@ -25,7 +25,7 @@
 - [ ] **Calendário Mensal de Consistência:** Heatmap/calendário na aba de Estatísticas/Histórico mostrando dias de estudo ativo.
 - [ ] **Student Export / Share:** Implement 1-click weekly immersion summary card (image or text) for students to send to mentor.
 - [ ] **Consistency Streaks:** Track weekly active days (e.g. 6/7 days active) to prevent notification fatigue.
-- [ ] **Cloud Persistence:** Evaluate Google Drive / Supabase backup sync for cross-device support.
+- [x] **Cloud Persistence (Google Drive Sync):** Implementada sincronização client-side no Google Drive (`appDataFolder`) com zero custo de servidor, login via Google Identity Services e merge bidirecional.
 
 ### 🟡 P2 — Medium Priority
 - [ ] **Revisitar paleta de cores das estatísticas:** Avaliar contraste e harmonia das cores de cada atividade no Donut de `StatsView` após testes com dados reais de uso.
