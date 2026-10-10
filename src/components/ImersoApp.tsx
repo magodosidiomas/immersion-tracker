@@ -46,6 +46,7 @@ import { AddLanguageView } from '@/components/AddLanguageView'
 import { ManageLanguagesView } from '@/components/ManageLanguagesView'
 import { LanguageFlag, preloadFlags } from '@/components/LanguageFlag'
 import { ScrollAreaFade } from '@/components/ui/scroll-area-fade'
+import { GoogleDriveSync } from '@/components/GoogleDriveSync'
 import { APP_VERSION } from '@/version'
 import {
   PRACTICES,
@@ -65,6 +66,7 @@ import {
   exportBackupJSON,
   importBackupJSON,
 } from '@/lib/storage'
+import { syncSilentlyIfConnected } from '@/lib/google-drive'
 
 interface ImersoAppProps {
   onOpenStorybook: () => void
@@ -300,6 +302,33 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
     return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
   }
 
+  // Format seconds adaptively for browser tab title (mm:ss or h:mm:ss)
+  const formatTabTime = (totalSeconds: number) => {
+    const hrs = Math.floor(totalSeconds / 3600)
+    const mins = Math.floor((totalSeconds % 3600) / 60)
+    const secs = totalSeconds % 60
+    const pad = (n: number) => n.toString().padStart(2, '0')
+    if (hrs > 0) {
+      return `${hrs}:${pad(mins)}:${pad(secs)}`
+    }
+    return `${pad(mins)}:${pad(secs)}`
+  }
+
+  // Sync browser tab title with active timer state
+  useEffect(() => {
+    if (timerState === 'running') {
+      document.title = `▶ ${formatTabTime(elapsedSeconds)} · Imerso`
+    } else if (timerState === 'paused') {
+      document.title = `⏸ ${formatTabTime(elapsedSeconds)} · Imerso`
+    } else {
+      document.title = 'Imerso'
+    }
+
+    return () => {
+      document.title = 'Imerso'
+    }
+  }, [timerState, elapsedSeconds])
+
   // Timer Actions
   const handleStart = () => {
     accumulatedRef.current = 0
@@ -530,6 +559,9 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
     const mins = Math.max(1, Math.round(summarySeconds / 60))
     const styleInfo = selectedStyle ? ` · ${selectedStyle}` : ''
     toast.success(isEdit ? 'Sessão atualizada' : `Sessão salva · ${mins} min · ${selectedPractice}${styleInfo}`)
+
+    // Silent background sync with Google Drive if user connected
+    syncSilentlyIfConnected().catch(() => {})
   }
 
   const handleDeleteSession = () => {
@@ -540,6 +572,9 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
     setIsDeleteSessionDialogOpen(false)
     setEditingSessionId(null)
     toast.info('Sessão excluída')
+
+    // Silent background sync with Google Drive if user connected
+    syncSilentlyIfConnected().catch(() => {})
   }
 
   // Filter sessions for current language
@@ -625,17 +660,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                         size="icon"
                         title="Registrar sessão manual"
                         className="size-9 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
-                        onClick={() => {
-                          setSummarySeconds(1800) // 30 min default
-                          setEntrySource('manual')
-                          digitBufferRef.current = '003000'
-                          isFreshEditRef.current = true
-                          setIsEditingTime(false)
-                          setSelectedPractice('')
-                          setSelectedStyle(null)
-                          setInlineErrors({})
-                          setIsSummaryOpen(true)
-                        }}
+                        onClick={() => handleOpenManualEntry()}
                       >
                         <Plus className="size-5" />
                       </Button>
@@ -686,6 +711,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                             onClick={() => {
                               setIsSummaryOpen(false)
                               setEditingSessionId(null)
+                              setManualEntryDate(null)
                             }}
                             className="size-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
                             title="Fechar sem salvar"
@@ -1070,9 +1096,12 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
               return dt.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
             }
 
+            // Sort sessions descending by startedAt to guarantee correct day groupings
+            const sortedSessions = [...languageSessions].sort((a, b) => b.startedAt - a.startedAt)
+
             // Group sessions by day ISO
             const allGroups: { dayKey: string; timestamp: number; items: typeof languageSessions }[] = []
-            languageSessions.forEach(s => {
+            sortedSessions.forEach(s => {
               const k = isoDate(new Date(s.startedAt))
               let g = allGroups[allGroups.length - 1]
               if (!g || g.dayKey !== k) {
@@ -1639,10 +1668,21 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
               </div>
             </div>
 
-            {/* Seção 2: Backup e Dados */}
+            {/* Seção 2: Nuvem Google Drive */}
+            <div className="pt-1">
+              <GoogleDriveSync
+                onSyncComplete={() => {
+                  setLanguages(getStoredLanguages())
+                  setCurrentLangIdState(getCurrentLanguageId())
+                  setSessions(getStoredSessions())
+                }}
+              />
+            </div>
+
+            {/* Seção 3: Backup Local e Dados */}
             <div className="space-y-2 pt-1">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
-                Backup e Dados
+                Backup Local
               </span>
 
               <div className="grid grid-cols-1 gap-2">

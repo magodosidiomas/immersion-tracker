@@ -5,6 +5,18 @@ O formato é baseado no padrão [Keep a Changelog](https://keepachangelog.com/pt
 
 ---
 
+## [2.1.3] - 2026-10-10
+
+### 🚀 Novidades & Experiência de Uso
+- **Timer em Tempo Real na Aba do Navegador (`document.title`):**
+  - O título da aba agora acompanha dinamicamente a contagem do cronômetro quando ativo (`▶ 14:20 · Imerso` para < 1h e `▶ 1:15:30 · Imerso` para >= 1h).
+  - Exibição de estado pausado claro (`⏸ 14:20 · Imerso`).
+  - Restauração automática para o título minimalista `Imerso` quando inativo, finalizado ou desmontado.
+- **Correção de Ordenação do Histórico:**
+  - Garantia de ordenação estritamente cronológica decrescente (`startedAt`) nos agrupamentos diários de sessões.
+
+---
+
 ## [2.1.2] - 2026-10-09
 
 ### 🐛 Correções & Mobile UX
