@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidade — Imerso</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            zinc: {
+              850: '#1f1f23',
+              900: '#18181b',
+              950: '#09090b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-zinc-950 text-zinc-100 antialiased min-h-screen py-12 px-4 sm:px-6">
+  <main class="max-w-2xl mx-auto space-y-8">
+    <header class="space-y-2 border-b border-zinc-800 pb-6">
+      <div class="flex items-center gap-2.5">
+        <div class="size-8 rounded-lg bg-zinc-800 border border-zinc-700/60 flex items-center justify-center font-bold text-sm text-zinc-200">
+          I
+        </div>
+        <span class="text-base font-semibold tracking-tight text-zinc-100">Imerso</span>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-zinc-100 pt-2">Política de privacidade</h1>
+      <p class="text-sm text-zinc-400">Última atualização: 12 de outubro de 2026</p>
+    </header>
+
+    <section class="space-y-4 text-sm text-zinc-300 leading-relaxed">
+      <h2 class="text-base font-semibold text-zinc-100">1. Visão geral</h2>
+      <p>
+        O <strong>Imerso</strong> é uma aplicação de acompanhamento e registro de sessões de imersão e aprendizado de idiomas. A sua privacidade e o controle sobre os seus dados são prioridades absolutas no desenvolvimento deste aplicativo.
+      </p>
+    </section>
+
+    <section class="space-y-4 text-sm text-zinc-300 leading-relaxed">
+      <h2 class="text-base font-semibold text-zinc-100">2. Dados coletados e armazenamento local</h2>
+      <p>
+        Por padrão, todos os seus dados (idiomas configurados, metas, cronômetros e histórico de sessões) são processados e armazenados <strong>exclusivamente de forma local</strong> no armazenamento do seu próprio navegador (LocalStorage / IndexedDB). Não operamos servidores próprios de rastreamento de dados de usuários.
+      </p>
+    </section>
+
+    <section class="space-y-4 text-sm text-zinc-300 leading-relaxed">
+      <h2 class="text-base font-semibold text-zinc-100">3. Integração com o Google Drive</h2>
+      <p>
+        Caso você opte por habilitar a sincronização na nuvem com o Google Drive:
+      </p>
+      <ul class="list-disc pl-5 space-y-2 text-zinc-400">
+        <li>
+          <strong>Escopo restrito de dados (AppData):</strong> O Imerso utiliza exclusivamente o escopo restrito <code class="text-xs bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-zinc-300">drive.appdata</code>. Isso significa que o aplicativo cria e acessa apenas uma pasta oculta reservada ao Imerso no seu Google Drive.
+        </li>
+        <li>
+          <strong>Isolamento total:</strong> O Imerso <strong>não possui acesso, visualização ou capacidade de leitura/modificação</strong> sobre nenhum outro arquivo, pasta ou documento pessoal existente no seu Google Drive.
+        </li>
+        <li>
+          <strong>Identificação de usuário:</strong> Solicitamos apenas seu nome, e-mail e foto de perfil para exibir o status da conta conectada na interface do aplicativo.
+        </li>
+      </ul>
+    </section>
+
+    <section class="space-y-4 text-sm text-zinc-300 leading-relaxed">
+      <h2 class="text-base font-semibold text-zinc-100">4. Compartilhamento e uso de dados</h2>
+      <p>
+        O Imerso <strong>não vende, não aluga e não compartilha</strong> suas informações pessoais com terceiros ou redes de publicidade. Os dados sincronizados servem unicamente para manter seu histórico de estudos disponível entre seus diferentes dispositivos (como celular e computador).
+      </p>
+    </section>
+
+    <section class="space-y-4 text-sm text-zinc-300 leading-relaxed">
+      <h2 class="text-base font-semibold text-zinc-100">5. Revogação de acesso</h2>
+      <p>
+        Você pode desconectar sua conta a qualquer momento dentro das configurações do aplicativo clicando em <em>"Desconectar"</em>, ou revogar diretamente o acesso do aplicativo através da página de gerenciamento de permissões da sua Conta Google (<a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" class="text-zinc-200 underline underline-offset-4 hover:text-white">myaccount.google.com/permissions</a>).
+      </p>
+    </section>
+
+    <section class="space-y-4 text-sm text-zinc-300 leading-relaxed border-t border-zinc-800/80 pt-6">
+      <h2 class="text-base font-semibold text-zinc-100">6. Contato</h2>
+      <p>
+        Se você tiver qualquer dúvida referente à privacidade ou ao funcionamento do aplicativo, você pode entrar em contato através do repositório oficial do projeto ou pelo e-mail disponibilizado na tela de consentimento.
+      </p>
+    </section>
+
+    <footer class="pt-8 border-t border-zinc-800/60 text-xs text-zinc-500 flex items-center justify-between">
+      <span>Imerso</span>
+      <a href="/" class="text-zinc-400 hover:text-zinc-200 transition-colors">Voltar ao aplicativo</a>
+    </footer>
+  </main>
+</body>
+</html>
