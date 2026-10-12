@@ -961,7 +961,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
               <ScrollAreaFade className="flex-1 min-h-0 py-2 pr-3 space-y-4">
                 {/* Header */}
                 <div>
-                  <span className="text-xs font-semibold text-muted-foreground block mb-1">
+                  <span className="text-sm font-semibold text-muted-foreground block mb-1">
                     Tempo total
                   </span>
                   <div className="text-5xl font-extrabold tracking-tight text-foreground tabular-nums">
@@ -975,7 +975,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                     <span className="text-sm font-bold text-foreground">
                       {isMax ? 'Nível Máximo' : `Nível ${levelIdx + 1}`}
                     </span>
-                    <span className="tabular-nums text-xs text-muted-foreground font-medium">
+                    <span className="tabular-nums text-sm text-muted-foreground font-medium">
                       {formatHuman(lvlDoneSecs)} / {spanHours}h
                     </span>
                   </div>
@@ -986,13 +986,20 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                     />
                   </div>
                   <p className="text-sm text-muted-foreground font-medium pt-0.5">
-                    {isMax ? 'Você concluiu todos os níveis!' : `Faltam ${formatHuman(remSecs)} para o Nível ${levelIdx + 2}`}
+                    {isMax ? (
+                      'Você concluiu todos os níveis!'
+                    ) : (
+                      <>
+                        Faltam <span className="text-primary font-semibold">{formatHuman(remSecs)}</span> para o{' '}
+                        <span className="text-primary font-semibold">Nível {levelIdx + 2}</span>
+                      </>
+                    )}
                   </p>
                 </div>
 
                 {/* Lista de Níveis */}
                 <div className="space-y-1.5 pt-1">
-                  <span className="text-xs font-semibold text-muted-foreground px-1 block">
+                  <span className="text-sm font-semibold text-muted-foreground px-1 block">
                     Níveis
                   </span>
                   <div className="bg-muted/20 rounded-2xl border border-border/70 divide-y divide-border/40 overflow-hidden">
@@ -1137,7 +1144,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
 
                 {/* Filtro Ativo por Data */}
                 {selectedDateFilter && (
-                  <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-xl border border-border/60 text-xs">
+                  <div className="flex items-center justify-between p-2.5 bg-muted/30 rounded-xl border border-border/60 text-sm">
                     <span className="font-semibold text-foreground truncate mr-2">
                       Filtrado: {formatDateDisplay(selectedDateFilter)}
                     </span>
@@ -1230,7 +1237,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                       return (
                         <div key={g.dayKey} id={`day-group-${g.dayKey}`} className="space-y-2 scroll-mt-6">
                           {showMonthHeader && (
-                            <div className="sticky top-0 bg-card/95 backdrop-blur-xs py-2 px-1 text-xs font-bold uppercase tracking-widest text-muted-foreground z-10">
+                            <div className="py-2 px-1 text-sm font-semibold text-muted-foreground capitalize">
                               {m}
                             </div>
                           )}

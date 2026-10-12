@@ -157,7 +157,7 @@ export function ManageLanguagesView({
                       ({lang.nativeName})
                     </span>
                   </div>
-                  <span className="text-xs text-muted-foreground font-medium">
+                  <span className="text-sm text-muted-foreground font-medium">
                     {stats.formattedTime}
                   </span>
                 </div>
