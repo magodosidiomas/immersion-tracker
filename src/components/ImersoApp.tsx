@@ -1666,7 +1666,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
 
       {/* DIÁLOGO: CONFIRMAÇÃO DE DESCARTAR SESSÃO */}
       <Dialog open={isDiscardDialogOpen} onOpenChange={setIsDiscardDialogOpen}>
-        <DialogContent className="max-w-[380px] p-6">
+        <DialogContent className="sm:max-w-[380px] p-6">
           <DialogHeader className="gap-2 text-left">
             <DialogTitle className="text-lg font-semibold tracking-tight">Descartar esta sessão?</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground leading-relaxed">
@@ -1694,7 +1694,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
 
       {/* DIÁLOGO: CONFIRMAÇÃO DE EXCLUIR SESSÃO */}
       <Dialog open={isDeleteSessionDialogOpen} onOpenChange={setIsDeleteSessionDialogOpen}>
-        <DialogContent className="max-w-[380px] p-6">
+        <DialogContent className="sm:max-w-[380px] p-6">
           <DialogHeader className="gap-2 text-left">
             <DialogTitle className="text-lg font-semibold tracking-tight">Excluir esta sessão?</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground leading-relaxed">

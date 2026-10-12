@@ -17,7 +17,7 @@ interface PrivacyPolicyDialogProps {
 export function PrivacyPolicyDialog({ open, onOpenChange }: PrivacyPolicyDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[420px] p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[420px] p-5 sm:p-6 max-h-[85vh] overflow-y-auto">
         <DialogHeader className="gap-2 text-left pb-1 border-b border-border/50">
           <div className="flex items-center gap-2">
             <div className="size-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">

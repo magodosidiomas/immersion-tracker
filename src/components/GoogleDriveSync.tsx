@@ -232,7 +232,7 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
 
       {/* Modal explicativa do (i) */}
       <Dialog open={isInfoOpen} onOpenChange={setIsInfoOpen}>
-        <DialogContent className="max-w-[360px] p-5">
+        <DialogContent className="sm:max-w-[360px] p-5">
           <DialogHeader className="text-left gap-1.5">
             <div className="flex items-center gap-2">
               <GoogleDriveLogo className="size-5 shrink-0" />

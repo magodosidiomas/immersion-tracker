@@ -28,6 +28,7 @@ declare global {
             client_id: string
             scope: string
             callback: (response: { access_token?: string; error?: string; expires_in?: number }) => void
+            error_callback?: (error: { message?: string; type?: string }) => void
           }) => {
             requestAccessToken: (options?: { prompt?: string }) => void
           }
@@ -114,10 +115,13 @@ export function requestGoogleAccessToken(): Promise<string> {
     }
 
     try {
+      let timeoutId: ReturnType<typeof setTimeout> | null = null
+
       const client = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: `${DRIVE_APP_DATA_SCOPE} ${USERINFO_SCOPE}`,
         callback: (resp) => {
+          if (timeoutId) clearTimeout(timeoutId)
           if (resp.error) {
             reject(new Error(resp.error))
             return
@@ -132,9 +136,18 @@ export function requestGoogleAccessToken(): Promise<string> {
             reject(new Error('Nenhum token retornado pelo Google'))
           }
         },
+        error_callback: (nonOAuthError) => {
+          if (timeoutId) clearTimeout(timeoutId)
+          reject(new Error(nonOAuthError?.message || 'Login cancelado ou bloqueado pelo navegador'))
+        },
       })
 
-      client.requestAccessToken({ prompt: '' })
+      // Timeout de segurança (45s) para evitar loop de sincronização infinito caso o popup feche sem resposta
+      timeoutId = setTimeout(() => {
+        reject(new Error('Tempo esgotado ao aguardar autenticação do Google'))
+      }, 45000)
+
+      client.requestAccessToken({ prompt: 'select_account' })
     } catch (err) {
       reject(err)
     }

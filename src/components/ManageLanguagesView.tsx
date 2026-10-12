@@ -205,7 +205,7 @@ export function ManageLanguagesView({
           }
         }}
       >
-        <DialogContent className="max-w-[380px] p-6">
+        <DialogContent className="sm:max-w-[380px] p-6">
           <div className="flex flex-col gap-4">
             <DialogHeader className="text-left gap-1.5">
               <DialogTitle className="text-lg font-semibold flex items-center gap-2 tracking-tight">
