@@ -124,7 +124,7 @@ export function SettingsView({
         {/* GRUPO 3: BACKUP LOCAL (GRUPO NATIVO ESTILO LINEAR) */}
         <div className="space-y-2">
           <span className="text-sm font-semibold text-muted-foreground block px-1">
-            Backup Local
+            Backup local
           </span>
           <div className="rounded-2xl border border-border/80 bg-card/60 divide-y divide-border/50 overflow-hidden">
             <button
@@ -167,7 +167,7 @@ export function SettingsView({
         {/* GRUPO 4: SOBRE & DESENVOLVIMENTO (LISTA NATIVA LIMPA) */}
         <div className="space-y-2">
           <span className="text-sm font-semibold text-muted-foreground block px-1">
-            Sobre o App
+            Sobre o app
           </span>
           <div className="rounded-2xl border border-border/80 bg-card/60 divide-y divide-border/50 overflow-hidden">
             <button

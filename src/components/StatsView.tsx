@@ -233,7 +233,7 @@ export function StatsView({ sessions, currentLanguage, onStartTimer, onAddSessio
       <div className="space-y-2">
         {activities.length > 0 && (
           <div className="flex items-center justify-between px-0.5">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <span className="text-sm font-semibold text-muted-foreground">
               Por atividade
             </span>
           </div>
