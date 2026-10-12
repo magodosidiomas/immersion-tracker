@@ -38,6 +38,7 @@
 - ❌ **Zero termos em inglês:** Microcopy 100% em português brasileiro autêntico. Banido "Sync", "Retry", "Login", etc.
 - ❌ **Zero setas/adereços em botões:** Proibido adereços clichê como `→`, `>>` em botões de ação.
 - ❌ **Zero touch targets < 44px:** Todo botão ou controle interativo deve ter altura real de no mínimo 44px (`h-11`).
+- ❌ **Zero dividers desalinhados ou colados:** Proibido terminantemente dividers colados em elementos, com margens assimétricas ou espaçamento irregular. Priorizar ritmo espacial limpo (`space-y-*` / `gap-*`). Dividers só devem existir em listas homogêneas (`divide-y divide-border/50`).
 - ❌ NO generic vibrant rainbow colors unless explicitly representing macro-pillars (Imerso macro-pilares use subtle grayscale scale: Imersão `#ededed`, Produção `#8b8b85`, Fundamentos `#50504d`).
 - ❌ NO unstyled native scrollbars or missing scroll masks.
 - ❌ NO layout shift when switching states or opening/closing keyboard.

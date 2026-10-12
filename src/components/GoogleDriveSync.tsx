@@ -1,9 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import {
-  Cloud,
   RefreshCw,
   Info,
-  X,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -155,12 +154,11 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
 
   return (
     <div className="space-y-2">
-      {/* Header do Card com Ícone de Info (i) */}
+      {/* Header da Seção: Sincronização */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-1.5">
-          <Cloud className="size-4 text-muted-foreground" />
           <span className="text-sm font-semibold text-muted-foreground block">
-            Google Drive
+            Sincronização
           </span>
           <button
             type="button"
@@ -172,167 +170,157 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
             <Info className="size-3.5" />
           </button>
         </div>
-
-        {isConnected && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="size-1.5 rounded-full bg-emerald-400" />
-            Conectado
-          </span>
-        )}
       </div>
 
-      {/* Card Principal */}
-      <div className="p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xs space-y-3.5">
-        {syncError && (
-          <div className="p-4 rounded-2xl bg-muted/60 border border-border space-y-3 animate-in fade-in-50 duration-200">
-            <div className="flex items-start gap-3">
-              <div className="size-2 rounded-full bg-amber-400 mt-2 shrink-0" />
-              <div className="flex-1 min-w-0 space-y-1">
-                <p className="text-sm font-semibold text-foreground">Não foi possível sincronizar</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {syncError}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSyncError(null)}
-                className="text-muted-foreground hover:text-foreground p-1 cursor-pointer shrink-0"
-                title="Dispensar aviso"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="flex items-center justify-end pt-1 border-t border-border/40">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={isConnected ? handleSyncNow : handleConnect}
-                className="h-11 min-h-[44px] px-4 rounded-xl text-sm font-semibold text-foreground cursor-pointer"
-              >
-                Tentar novamente
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {!isConnected ? (
-          <div className="space-y-3.5">
-            <div className="space-y-1">
-              <h4 className="text-base font-semibold text-foreground tracking-tight">
-                Sincronização na nuvem
-              </h4>
+      {/* Card Principal: Erro / Desconectado / Conectado */}
+      {syncError ? (
+        <div className="rounded-2xl border border-border/80 bg-card/60 p-4 space-y-4 animate-in fade-in-50 duration-200">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="size-5 text-red-400 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0 space-y-1">
+              <p className="text-sm font-semibold text-foreground">Não foi possível sincronizar</p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Sincronize entre celular e computador com segurança.
+                {syncError}
               </p>
             </div>
+          </div>
+          <div className="flex items-center gap-2 pt-1">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setSyncError(null)}
+              className="flex-1 h-11 min-h-[44px] px-4 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-border/60 cursor-pointer transition-colors"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={isConnected ? handleSyncNow : handleConnect}
+              className="flex-1 h-11 min-h-[44px] px-4 rounded-xl text-sm font-semibold text-foreground hover:bg-muted/40 border-border/80 cursor-pointer transition-colors"
+            >
+              Tentar novamente
+            </Button>
+          </div>
+        </div>
+      ) : !isConnected ? (
+        <div className="rounded-2xl border border-border/80 bg-card/60 p-4 space-y-4">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Google Drive</p>
+            <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+              Sincronize suas sessões entre celular e computador com segurança.
+            </p>
+          </div>
 
-            {isSyncing ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled
-                  className="flex-1 h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2 bg-background text-foreground border-border/90"
-                >
-                  <RefreshCw className="size-4 animate-spin text-muted-foreground" />
-                  <span>Conectando...</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleCancelSync}
-                  className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            ) : (
+          {isSyncing ? (
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleConnect}
-                className="w-full h-11 min-h-[44px] rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-background hover:bg-muted/50 text-foreground border-border/90 shadow-none transition-all active:scale-[0.99]"
+                disabled
+                className="flex-1 h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2 bg-background text-foreground border-border/90"
               >
-                <GoogleDriveLogo className="size-4.5 shrink-0" />
-                <span>Conectar com Google Drive</span>
+                <RefreshCw className="size-4 animate-spin text-muted-foreground" />
+                <span>Conectando...</span>
               </Button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-3.5">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                {user?.picture ? (
-                  <img
-                    src={user.picture}
-                    alt={user.name}
-                    className="size-9 rounded-full border border-border/80 object-cover shrink-0"
-                  />
-                ) : (
-                  <div className="size-9 rounded-full bg-muted text-foreground flex items-center justify-center font-bold text-sm shrink-0">
-                    {user?.name?.charAt(0) || 'G'}
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
-                    <span className="inline-block size-1.5 rounded-full bg-emerald-500 shrink-0" />
-                  </div>
-                  <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleCancelSync}
+                className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
+              >
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleConnect}
+              className="w-full h-11 min-h-[44px] rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-background hover:bg-muted/50 text-foreground border-border/90 shadow-none transition-all active:scale-[0.99]"
+            >
+              <GoogleDriveLogo className="size-4.5 shrink-0" />
+              <span>Conectar com Google Drive</span>
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-border/80 bg-card/60 p-4 space-y-4">
+          {/* Topo: Avatar + Nome + Filled Check + E-mail em 14px + Timestamp */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              {user?.picture ? (
+                <img
+                  src={user.picture}
+                  alt={user.name}
+                  className="size-10 rounded-full border border-border/80 object-cover shrink-0"
+                />
+              ) : (
+                <div className="size-10 rounded-full bg-muted text-foreground flex items-center justify-center font-bold text-sm shrink-0">
+                  {user?.name?.charAt(0) || 'G'}
                 </div>
-              </div>
-
-              <div className="text-right shrink-0">
-                <p className="text-sm font-medium text-foreground">Sincronizado</p>
-                <p className="text-xs text-muted-foreground tabular-nums">{formatLastSync(lastSync)}</p>
+              )}
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
+                  {/* Filled Check Circle oficial verde esmeralda */}
+                  <svg className="size-4 text-emerald-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>
 
-            {/* Ações Táticas Rápidas (44px min-height real em ambos) */}
-            {isSyncing ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled
-                  className="flex-1 h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2 border-border/80"
-                >
-                  <RefreshCw className="size-4 animate-spin text-foreground" />
-                  <span>Sincronizando...</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleCancelSync}
-                  className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleSyncNow}
-                  className="flex-1 h-11 min-h-[44px] rounded-xl font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/40 transition-colors"
-                >
-                  <RefreshCw className="size-4 text-muted-foreground" />
-                  <span>Sincronizar agora</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={handleDisconnect}
-                  className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer border border-border/60 transition-colors"
-                >
-                  Desconectar
-                </Button>
-              </div>
-            )}
+            <div className="text-right shrink-0">
+              <span className="text-xs text-muted-foreground tabular-nums block">{formatLastSync(lastSync)}</span>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Botões Táticos com respiro superior confortável (44px min-h) */}
+          {isSyncing ? (
+            <div className="flex items-center gap-2 pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                disabled
+                className="flex-1 h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2 border-border/80"
+              >
+                <RefreshCw className="size-4 animate-spin text-foreground" />
+                <span>Sincronizando...</span>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleCancelSync}
+                className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
+              >
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSyncNow}
+                className="flex-1 h-11 min-h-[44px] rounded-xl font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/40 transition-colors"
+              >
+                <RefreshCw className="size-4 text-muted-foreground" />
+                <span>Sincronizar agora</span>
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleDisconnect}
+                className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer border border-border/60 transition-colors"
+              >
+                Desconectar
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal explicativa do (i) */}
       <Dialog open={isInfoOpen} onOpenChange={setIsInfoOpen}>
