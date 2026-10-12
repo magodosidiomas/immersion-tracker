@@ -28,7 +28,7 @@ export function App() {
 
   return (
     <>
-      <Toaster richColors position="top-center" />
+      <Toaster richColors />
       {currentView === 'design-lab' ? (
         <DesignLabView
           currentTheme={theme}

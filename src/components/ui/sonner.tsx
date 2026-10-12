@@ -1,27 +1,43 @@
+import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme()
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 640)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      position="bottom-center"
-      closeButton
+      position={isMobile ? "bottom-center" : "bottom-right"}
+      offset={isMobile ? { bottom: 84 } : 24}
+      mobileOffset={{ bottom: 84 }}
+      swipeDirections={["bottom", "right", "left"]}
+      duration={2400}
+      visibleToasts={1}
       className="toaster group"
       toastOptions={{
         style: {
-          border: "none",
-          borderRadius: "12px",
-          padding: "10px 14px",
+          border: "1px solid var(--border)",
+          borderRadius: "14px",
+          padding: "10px 16px",
           fontSize: "14px",
           fontWeight: "500",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+          cursor: "grab",
+          userSelect: "none",
         },
         classNames: {
-          toast: "cn-toast !bg-popover !text-popover-foreground !border-border !shadow-md !pr-8",
-          closeButton: "!bg-muted !text-muted-foreground hover:!bg-accent hover:!text-accent-foreground !border-none !rounded-full !size-5 !top-3 !right-3 !left-auto !transform-none !flex !items-center !justify-center !transition-all !cursor-pointer [&_svg]:!size-3",
+          toast: "cn-toast !bg-popover !text-popover-foreground !border-border !shadow-lg active:cursor-grabbing",
+          description: "!text-muted-foreground !text-xs",
         },
       }}
       {...props}
