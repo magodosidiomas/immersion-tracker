@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Switch } from '@/components/ui/switch'
 import {
   Drawer,
   DrawerClose,
@@ -29,7 +28,6 @@ import {
   Check,
   Sun,
   Moon,
-  Layers,
   Timer as TimerIcon,
   Calendar as CalendarIcon,
   Award,
@@ -38,18 +36,13 @@ import {
   AlertCircle,
   Lock,
   Settings,
-  Download,
-  Upload,
-  ShieldCheck
 } from 'lucide-react'
 import { StatsView } from '@/components/StatsView'
 import { AddLanguageView } from '@/components/AddLanguageView'
 import { ManageLanguagesView } from '@/components/ManageLanguagesView'
+import { SettingsView } from '@/components/SettingsView'
 import { LanguageFlag, preloadFlags } from '@/components/LanguageFlag'
 import { ScrollAreaFade } from '@/components/ui/scroll-area-fade'
-import { GoogleDriveSync } from '@/components/GoogleDriveSync'
-import { PrivacyPolicyDialog } from '@/components/PrivacyPolicyDialog'
-import { APP_VERSION } from '@/version'
 import {
   PRACTICES,
   type SessionRecord,
@@ -65,8 +58,6 @@ import {
   saveSessionRecord,
   deleteSessionRecord,
   deleteSessionsForLanguage,
-  exportBackupJSON,
-  importBackupJSON,
 } from '@/lib/storage'
 import { syncSilentlyIfConnected } from '@/lib/google-drive'
 
@@ -84,7 +75,7 @@ type TimerState = 'idle' | 'running' | 'paused'
 export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppProps) {
   // Navigation
   const [activeTab, setActiveTab] = useState<TabKey>('timer')
-  const [currentScreen, setCurrentScreen] = useState<'main' | 'add-language' | 'manage-languages'>('main')
+  const [currentScreen, setCurrentScreen] = useState<'main' | 'add-language' | 'manage-languages' | 'settings'>('main')
   const [addLanguageOrigin, setAddLanguageOrigin] = useState<'sheet' | 'manage'>('sheet')
   const [highlightedDayKey, _setHighlightedDayKey] = useState<string | null>(null)
   const [selectedDateFilter, setSelectedDateFilter] = useState<string | null>(null)
@@ -95,32 +86,6 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const [languages, setLanguages] = useState<LanguageProfile[]>(getStoredLanguages)
   const [currentLangId, setCurrentLangIdState] = useState<string>(getCurrentLanguageId)
   const [isLangDrawerOpen, setIsLangDrawerOpen] = useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const content = event.target?.result as string
-      if (!content) return
-      const res = importBackupJSON(content)
-      if (res.success) {
-        setLanguages(getStoredLanguages())
-        setCurrentLangIdState(getCurrentLanguageId())
-        setSessions(getStoredSessions())
-        toast.success(res.message)
-        setIsSettingsOpen(false)
-      } else {
-        toast.error(res.message)
-      }
-    }
-    reader.readAsText(file)
-    e.target.value = ''
-  }
-
 
   // Preload flags for user languages immediately
   useEffect(() => {
@@ -621,6 +586,20 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
               onDeleteLanguage={handleDeleteLanguage}
             />
           </div>
+        ) : currentScreen === 'settings' ? (
+          <div className="flex-1 min-h-0 flex flex-col px-4 sm:px-5 pt-[max(0.75rem,env(safe-area-inset-top))] sm:pt-5 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5">
+            <SettingsView
+              onBack={() => setCurrentScreen('main')}
+              theme={theme}
+              onToggleTheme={onToggleTheme}
+              onOpenStorybook={onOpenStorybook}
+              onDataChanged={() => {
+                setLanguages(getStoredLanguages())
+                setCurrentLangIdState(getCurrentLanguageId())
+                setSessions(getStoredSessions())
+              }}
+            />
+          </div>
         ) : (
           <>
             {/* Top Bar Geral: Apenas visível quando NÃO estiver no Resumo/Edição */}
@@ -685,7 +664,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setIsSettingsOpen(true)}
+                        onClick={() => setCurrentScreen('settings')}
                         className="size-9 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
                         title="Configurações e Backup"
                       >
@@ -1624,160 +1603,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
         </DialogContent>
       </Dialog>
 
-      {/* DRAWER: CONFIGURAÇÕES E BACKUP */}
-      <Drawer open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DrawerContent className="w-full sm:max-w-[400px] mx-auto p-0 border-t border-border/80">
-          <DrawerHeader className="px-5 pt-4 pb-2 text-left">
-            <DrawerTitle className="text-base font-semibold tracking-tight">Configurações</DrawerTitle>
-            <DrawerDescription className="sr-only">
-              Opções de aparência, dados e backup
-            </DrawerDescription>
-          </DrawerHeader>
-
-          <div className="p-4 space-y-4">
-            {/* Seção 1: Tema */}
-            <div className="space-y-2">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
-                Aparência
-              </span>
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={onToggleTheme}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    onToggleTheme()
-                  }
-                }}
-                className="w-full h-12 min-h-[44px] flex items-center justify-between px-3.5 rounded-xl font-medium text-sm cursor-pointer border border-border/70 bg-card hover:bg-muted/40 transition-colors select-none"
-              >
-                <div className="flex items-center gap-2.5">
-                  {theme === 'light' ? (
-                    <Sun className="size-4.5 text-amber-500" />
-                  ) : (
-                    <Moon className="size-4.5 text-indigo-400" />
-                  )}
-                  <span>Modo {theme === 'light' ? 'claro' : 'escuro'}</span>
-                </div>
-                <div onClick={(e) => e.stopPropagation()}>
-                  <Switch
-                    variant="purple"
-                    checked={theme === 'dark'}
-                    onCheckedChange={onToggleTheme}
-                    aria-label="Alternar modo escuro"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Seção 2: Nuvem Google Drive */}
-            <div className="pt-1">
-              <GoogleDriveSync
-                onSyncComplete={() => {
-                  setLanguages(getStoredLanguages())
-                  setCurrentLangIdState(getCurrentLanguageId())
-                  setSessions(getStoredSessions())
-                }}
-              />
-            </div>
-
-            {/* Seção 3: Backup Local e Dados */}
-            <div className="space-y-2 pt-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
-                Backup Local
-              </span>
-
-              <div className="grid grid-cols-1 gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    exportBackupJSON()
-                    toast.success('Backup exportado')
-                  }}
-                  className="w-full h-12 min-h-[44px] justify-start gap-3 px-3.5 rounded-xl font-medium text-sm cursor-pointer"
-                >
-                  <Download className="size-4.5 text-primary" />
-                  <span>Exportar backup (JSON)</span>
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-12 min-h-[44px] justify-start gap-3 px-3.5 rounded-xl font-medium text-sm cursor-pointer border-border/70"
-                >
-                  <Upload className="size-4.5 text-muted-foreground" />
-                  <span>Importar backup (JSON)</span>
-                </Button>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".json,application/json"
-                  onChange={handleImportFile}
-                  className="sr-only"
-                />
-              </div>
-            </div>
-
-            {/* Seção 3: UI Kit / Dev Tools (Discreto) */}
-            <div className="pt-2 border-t border-border/40">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setIsSettingsOpen(false)
-                  onOpenStorybook()
-                }}
-                className="w-full h-10 min-h-[44px] justify-start gap-2.5 px-3 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/40 cursor-pointer"
-              >
-                <Layers className="size-4 text-muted-foreground" />
-                <span>Ver Storybook / Design System</span>
-              </Button>
-            </div>
-
-            {/* Seção 4: Privacidade e Termos */}
-            <div className="pt-1 border-t border-border/40">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setIsPrivacyOpen(true)
-                }}
-                className="w-full h-10 min-h-[44px] justify-start gap-2.5 px-3 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/40 cursor-pointer"
-              >
-                <ShieldCheck className="size-4 text-emerald-500" />
-                <span>Privacidade & Dados (LGPD)</span>
-              </Button>
-            </div>
-          </div>
-
-          <div className="p-4 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4 space-y-2">
-            <DrawerClose asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm text-foreground/80 hover:text-foreground hover:bg-muted/50 cursor-pointer flex items-center justify-center transition-colors"
-              >
-                Fechar
-              </Button>
-            </DrawerClose>
-            <div className="text-center pt-0.5">
-              <span className="text-[11px] text-muted-foreground/50 font-mono tracking-wider">
-                Imerso v{APP_VERSION}
-              </span>
-            </div>
-          </div>
-        </DrawerContent>
-      </Drawer>
-
-      {/* DIÁLOGO: POLÍTICA DE PRIVACIDADE E DADOS */}
-      <PrivacyPolicyDialog
-        open={isPrivacyOpen}
-        onOpenChange={setIsPrivacyOpen}
-      />
+      {/* FIM DA APLICAÇÃO */}
     </div>
   )
 }

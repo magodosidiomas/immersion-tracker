@@ -4,14 +4,18 @@ import {
   CloudCheck,
   RefreshCw,
   LogOut,
-  AlertCircle,
-  HelpCircle,
-  FolderLock,
-  ExternalLink,
+  Info,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
-  isGoogleDriveConfigured,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
   getStoredAccessToken,
   getStoredDriveUser,
   getLastSyncTime,
@@ -22,17 +26,30 @@ import {
 import type { GoogleDriveUser } from '@/types/google-drive'
 import { toast } from 'sonner'
 
+// Ícone oficial Google Drive em SVG vetorial limpo
+export function GoogleDriveLogo({ className = 'size-4.5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 87.3 78" fill="none">
+      <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H6.6c0 1.55.4 3.1 1.2 4.45l-1.2 9.4Z" fill="#0066DA"/>
+      <path d="M43.65 25 29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.5c-.8 1.35-1.2 2.9-1.2 4.45h27.5L43.65 25Z" fill="#00AC47"/>
+      <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.3c.8-1.35 1.2-2.9 1.2-4.45H59.8l5.85 11.2 7.9 12.6Z" fill="#EA4335"/>
+      <path d="M43.65 25h27.5c0-1.55-.4-3.1-1.2-4.45L56.2 3.3C54.85 1.2 52.4 0 49.75 0h-12.2L43.65 25Z" fill="#00832D"/>
+      <path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.45 1.2h50.9c1.55 0 3.1-.4 4.45-1.2L59.8 53Z" fill="#2684FC"/>
+      <path d="M73.4 20.55 59.65 44.35 43.65 25 56.2 3.3c-1.35-.8-2.9-1.2-4.45-1.2h12.2c2.65 0 5.1 1.2 6.45 3.3l3 5.2 6.2 10.75c.8 1.4 1.2 2.95 1.2 4.5-.4-2.15-1.9-4.1-4.4-5.3Z" fill="#FFBA00"/>
+    </svg>
+  )
+}
+
 interface GoogleDriveSyncProps {
   onSyncComplete?: () => void
 }
 
 export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
-  const isConfigured = isGoogleDriveConfigured()
   const [user, setUser] = useState<GoogleDriveUser | null>(() => getStoredDriveUser())
   const [isConnected, setIsConnected] = useState<boolean>(() => Boolean(getStoredAccessToken() && getStoredDriveUser()))
   const [isSyncing, setIsSyncing] = useState<boolean>(false)
   const [lastSync, setLastSync] = useState<number | null>(() => getLastSyncTime())
-  const [showConfigHelp, setShowConfigHelp] = useState<boolean>(false)
+  const [isInfoOpen, setIsInfoOpen] = useState(false)
 
   const formatLastSync = (ts: number | null) => {
     if (!ts) return 'Nunca sincronizado'
@@ -45,11 +62,6 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
   }
 
   const handleConnect = async () => {
-    if (!isConfigured) {
-      setShowConfigHelp(true)
-      return
-    }
-
     try {
       setIsSyncing(true)
       const res = await connectGoogleDrive()
@@ -57,7 +69,6 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
       setIsConnected(true)
       toast.success('Conectado ao Google Drive')
 
-      // Immediate first sync
       try {
         const syncRes = await syncWithGoogleDrive()
         setLastSync(getLastSyncTime())
@@ -65,7 +76,6 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
         onSyncComplete?.()
       } catch (syncErr: any) {
         console.error('Falha na sincronização inicial:', syncErr)
-        toast.error('Conectado, mas falhou ao sincronizar dados')
       }
     } catch (err: any) {
       console.error('Falha ao conectar:', err)
@@ -102,99 +112,69 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
+      {/* Header do Card com Ícone de Info (i) */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-1.5">
-          <Cloud className="size-3.5 text-primary" />
+          <Cloud className="size-3.5 text-muted-foreground" />
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-            Nuvem & Google Drive
+            Google Drive
           </span>
+          <button
+            type="button"
+            onClick={() => setIsInfoOpen(true)}
+            className="text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer p-0.5 rounded-sm"
+            title="Como funciona a sincronização e privacidade"
+            aria-label="Informações sobre o Google Drive"
+          >
+            <Info className="size-3.5" />
+          </button>
         </div>
+
         {isConnected && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Conectado
           </span>
         )}
       </div>
 
-      <div className="p-3.5 rounded-2xl border border-border/70 bg-card/60 backdrop-blur-xs space-y-3">
+      {/* Card Principal */}
+      <div className="p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xs space-y-3.5">
         {!isConnected ? (
           <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="size-10 rounded-xl bg-muted/60 border border-border/60 flex items-center justify-center shrink-0 text-foreground">
-                <FolderLock className="size-5 text-muted-foreground" />
-              </div>
-              <div className="min-w-0 flex-1 space-y-0.5">
-                <h4 className="text-sm font-semibold text-foreground tracking-tight">
-                  Sincronização Automática
-                </h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Salva suas sessões no espaço isolado do seu Google Drive (<code className="text-[11px] bg-muted/70 px-1 py-0.5 rounded">appDataFolder</code>). Seus dados ficam 100% sob seu controle.
-                </p>
-              </div>
+            <div>
+              <h4 className="text-sm font-semibold text-foreground tracking-tight">
+                Sincronização na nuvem
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                Sincronize entre celular e computador.
+              </p>
             </div>
 
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={handleConnect}
               disabled={isSyncing}
-              className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-primary/10 hover:bg-primary/20 text-primary border border-primary/25 shadow-none transition-all"
+              className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-background hover:bg-muted/50 text-foreground border-border/90 shadow-none transition-all active:scale-[0.99]"
             >
               {isSyncing ? (
                 <>
-                  <RefreshCw className="size-4 animate-spin text-primary" />
+                  <RefreshCw className="size-4 animate-spin text-muted-foreground" />
                   <span>Conectando...</span>
                 </>
               ) : (
                 <>
-                  <svg className="size-4.5" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                    />
-                  </svg>
+                  <GoogleDriveLogo className="size-4.5 shrink-0" />
                   <span>Conectar com Google Drive</span>
                 </>
               )}
             </Button>
-
-            {!isConfigured && (
-              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1.5">
-                <div className="flex items-center gap-1.5 font-semibold">
-                  <AlertCircle className="size-4 text-amber-400 shrink-0" />
-                  <span>Configuração do Client ID necessária</span>
-                </div>
-                <p className="text-[11px] text-amber-200/80 leading-normal">
-                  Para ativar o login real, adicione o ID do Google no seu arquivo de ambiente ou Cloudflare Pages.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setShowConfigHelp(!showConfigHelp)}
-                  className="text-[11px] font-semibold underline underline-offset-2 hover:text-amber-100 flex items-center gap-1 cursor-pointer"
-                >
-                  <HelpCircle className="size-3.5" />
-                  {showConfigHelp ? 'Ocultar instruções' : 'Ver como configurar em 2 passos'}
-                </button>
-              </div>
-            )}
           </div>
         ) : (
           <div className="space-y-3">
-            {/* Info do usuário conectado */}
+            {/* Usuário Conectado */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
                 {user?.picture ? (
@@ -204,13 +184,13 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
                     className="size-8 rounded-full border border-border/80 object-cover shrink-0"
                   />
                 ) : (
-                  <div className="size-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="size-8 rounded-full bg-muted text-foreground flex items-center justify-center font-bold text-xs shrink-0">
                     {user?.name?.charAt(0) || 'G'}
                   </div>
                 )}
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-foreground truncate">{user?.name}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+                  <p className="text-[11px] text-muted-foreground truncate font-mono">{user?.email}</p>
                 </div>
               </div>
 
@@ -226,54 +206,67 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
               </Button>
             </div>
 
-            {/* Status do último backup */}
-            <div className="flex items-center justify-between text-xs py-1 px-1 text-muted-foreground border-t border-border/40 pt-2">
+            {/* Linha de Status de Sincronização */}
+            <div className="flex items-center justify-between text-xs py-1 px-0.5 text-muted-foreground border-t border-border/40 pt-2">
               <div className="flex items-center gap-1.5">
-                <CloudCheck className="size-3.5 text-muted-foreground" />
+                <CloudCheck className="size-3.5 text-emerald-400" />
                 <span>Último sync:</span>
               </div>
               <span className="font-medium text-foreground">{formatLastSync(lastSync)}</span>
             </div>
 
-            {/* Botão de sincronizar agora */}
+            {/* Ação Sincronizar Agora */}
             <Button
               type="button"
               variant="outline"
               onClick={handleSyncNow}
               disabled={isSyncing}
-              className="w-full h-10 min-h-[44px] rounded-xl font-medium text-xs flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/50 transition-colors"
+              className="w-full h-10 min-h-[44px] rounded-xl font-medium text-xs flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/40 transition-colors"
             >
-              <RefreshCw className={`size-3.5 ${isSyncing ? 'animate-spin text-primary' : 'text-muted-foreground'}`} />
-              <span>{isSyncing ? 'Sincronizando agora...' : 'Sincronizar agora'}</span>
+              <RefreshCw className={`size-3.5 ${isSyncing ? 'animate-spin text-foreground' : 'text-muted-foreground'}`} />
+              <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar agora'}</span>
             </Button>
           </div>
         )}
-
-        {/* Modal/Accordion de Instruções de Configuração */}
-        {showConfigHelp && (
-          <div className="p-3 rounded-xl bg-muted/40 border border-border/80 text-xs text-foreground/90 space-y-2 mt-2">
-            <h5 className="font-semibold text-foreground text-xs flex items-center gap-1.5">
-              <span>Como configurar o Google Drive (Custo $0)</span>
-            </h5>
-            <ol className="list-decimal list-inside space-y-1 text-[11px] text-muted-foreground leading-relaxed">
-              <li>Acesse o <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer" className="underline text-primary inline-flex items-center gap-0.5">Google Cloud Console <ExternalLink className="size-2.5" /></a>.</li>
-              <li>Crie um <strong>OAuth 2.0 Client ID</strong> do tipo <em>Aplicação Web</em>.</li>
-              <li>Em <strong>Origens JavaScript autorizadas</strong>, adicione:
-                <div className="mt-1 font-mono text-[10px] bg-background/80 p-1 rounded border border-border/60">
-                  http://localhost:5173<br />
-                  https://imerso.pages.dev
-                </div>
-              </li>
-              <li>Adicione a variável no seu arquivo <code className="text-foreground">.env</code>:
-                <div className="mt-1 font-mono text-[10px] bg-background/80 p-1 rounded border border-border/60 select-all">
-                  VITE_GOOGLE_CLIENT_ID="seu-client-id.apps.googleusercontent.com"
-                </div>
-              </li>
-              <li>Na Cloudflare Pages, basta adicionar <code className="text-foreground">VITE_GOOGLE_CLIENT_ID</code> nas <em>Environment variables</em> de produção.</li>
-            </ol>
-          </div>
-        )}
       </div>
+
+      {/* Modal explicativa do (i) */}
+      <Dialog open={isInfoOpen} onOpenChange={setIsInfoOpen}>
+        <DialogContent className="max-w-[360px] p-5">
+          <DialogHeader className="text-left gap-1.5">
+            <div className="flex items-center gap-2">
+              <GoogleDriveLogo className="size-5 shrink-0" />
+              <DialogTitle className="text-base font-semibold tracking-tight">
+                Google Drive & Privacidade
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-xs text-muted-foreground leading-relaxed pt-1">
+              A autenticação é feita diretamente com o Google. O Imerso utiliza exclusivamente uma pasta oculta reservada (<code className="text-[10px] bg-muted/80 px-1 py-0.5 rounded text-foreground font-mono">appDataFolder</code>) para guardar suas sessões e perfis.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2 space-y-2 text-xs text-muted-foreground">
+            <div className="flex items-start gap-2">
+              <span className="size-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+              <span>Seus arquivos pessoais (documentos, fotos) <strong>nunca</strong> são acessados.</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="size-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+              <span>Seus dados ficam 100% no seu próprio Drive, sem servidores intermediários.</span>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              className="w-full h-10 rounded-xl text-xs font-semibold cursor-pointer"
+              onClick={() => setIsInfoOpen(false)}
+            >
+              Entendido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
