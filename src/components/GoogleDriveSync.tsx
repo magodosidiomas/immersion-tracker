@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   Cloud,
   CloudCheck,
   RefreshCw,
   LogOut,
   Info,
+  AlertCircle,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +24,7 @@ import {
   connectGoogleDrive,
   disconnectGoogleDrive,
   syncWithGoogleDrive,
+  formatGoogleError,
 } from '@/lib/google-drive'
 import type { GoogleDriveUser } from '@/types/google-drive'
 import { toast } from 'sonner'
@@ -50,6 +53,8 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
   const [isSyncing, setIsSyncing] = useState<boolean>(false)
   const [lastSync, setLastSync] = useState<number | null>(() => getLastSyncTime())
   const [isInfoOpen, setIsInfoOpen] = useState(false)
+  const [syncError, setSyncError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const formatLastSync = (ts: number | null) => {
     if (!ts) return 'Nunca sincronizado'
@@ -61,46 +66,75 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
   }
 
+  const handleCancelSync = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
+    }
+    setIsSyncing(false)
+    setSyncError('Sincronização cancelada por você.')
+    toast.info('Sincronização cancelada')
+  }
+
   const handleConnect = async () => {
+    setSyncError(null)
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     try {
       setIsSyncing(true)
-      const res = await connectGoogleDrive()
+      const res = await connectGoogleDrive(controller.signal)
       setUser(res.user)
       setIsConnected(true)
       toast.success('Conectado ao Google Drive')
 
       try {
-        const syncRes = await syncWithGoogleDrive()
+        const syncRes = await syncWithGoogleDrive(controller.signal)
         setLastSync(getLastSyncTime())
         toast.success(`Sincronizado com a nuvem (${syncRes.sessionsCount} sessões)`)
         onSyncComplete?.()
       } catch (syncErr: any) {
+        if (controller.signal.aborted) return
         console.error('Falha na sincronização inicial:', syncErr)
+        const friendly = formatGoogleError(syncErr)
+        setSyncError(friendly)
       }
     } catch (err: any) {
+      if (controller.signal.aborted) return
       console.error('Falha ao conectar:', err)
-      toast.error(err.message || 'Falha ao conectar com o Google')
+      const friendly = formatGoogleError(err)
+      setSyncError(friendly)
+      toast.error(friendly)
     } finally {
       setIsSyncing(false)
+      abortControllerRef.current = null
     }
   }
 
   const handleSyncNow = async () => {
+    setSyncError(null)
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
     try {
       setIsSyncing(true)
-      const res = await syncWithGoogleDrive()
+      const res = await syncWithGoogleDrive(controller.signal)
       setLastSync(getLastSyncTime())
       toast.success(`Backup sincronizado (${res.sessionsCount} sessões)`)
       onSyncComplete?.()
     } catch (err: any) {
+      if (controller.signal.aborted) return
       console.error('Erro na sincronização:', err)
+      const friendly = formatGoogleError(err)
+      setSyncError(friendly)
       if (err.message?.includes('expirada') || err.message?.includes('401')) {
         setIsConnected(false)
         setUser(null)
       }
-      toast.error(err.message || 'Erro ao sincronizar com o Google Drive')
+      toast.error(friendly)
     } finally {
       setIsSyncing(false)
+      abortControllerRef.current = null
     }
   }
 
@@ -108,6 +142,7 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
     disconnectGoogleDrive()
     setIsConnected(false)
     setUser(null)
+    setSyncError(null)
     toast.success('Desconectado do Google Drive')
   }
 
@@ -141,6 +176,32 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
 
       {/* Card Principal */}
       <div className="p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xs space-y-3.5">
+        {syncError && (
+          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-start gap-2.5 animate-in fade-in-50 duration-200">
+            <AlertCircle className="size-4 shrink-0 mt-0.5 text-destructive" />
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <p className="leading-relaxed text-foreground font-medium">{syncError}</p>
+              <div>
+                <button
+                  type="button"
+                  onClick={isConnected ? handleSyncNow : handleConnect}
+                  className="text-xs font-semibold text-foreground underline hover:no-underline cursor-pointer inline-flex items-center gap-1"
+                >
+                  Tentar novamente
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSyncError(null)}
+              className="p-1 rounded-md text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
+              title="Dispensar aviso"
+            >
+              <X className="size-3.5" />
+            </button>
+          </div>
+        )}
+
         {!isConnected ? (
           <div className="space-y-3">
             <div className="space-y-1">
@@ -152,25 +213,37 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
               </p>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleConnect}
-              disabled={isSyncing}
-              className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-background hover:bg-muted/50 text-foreground border-border/90 shadow-none transition-all active:scale-[0.99]"
-            >
-              {isSyncing ? (
-                <>
+            {isSyncing ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled
+                  className="flex-1 h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2 bg-background text-foreground border-border/90"
+                >
                   <RefreshCw className="size-4 animate-spin text-muted-foreground" />
                   <span>Conectando...</span>
-                </>
-              ) : (
-                <>
-                  <GoogleDriveLogo className="size-4.5 shrink-0" />
-                  <span>Conectar com Google Drive</span>
-                </>
-              )}
-            </Button>
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCancelSync}
+                  className="h-11 min-h-[44px] px-3.5 rounded-xl font-medium text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleConnect}
+                className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-background hover:bg-muted/50 text-foreground border-border/90 shadow-none transition-all active:scale-[0.99]"
+              >
+                <GoogleDriveLogo className="size-4.5 shrink-0" />
+                <span>Conectar com Google Drive</span>
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
@@ -216,16 +289,37 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
             </div>
 
             {/* Ação Sincronizar Agora */}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleSyncNow}
-              disabled={isSyncing}
-              className="w-full h-10 min-h-[44px] rounded-xl font-medium text-xs flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/40 transition-colors"
-            >
-              <RefreshCw className={`size-3.5 ${isSyncing ? 'animate-spin text-foreground' : 'text-muted-foreground'}`} />
-              <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar agora'}</span>
-            </Button>
+            {isSyncing ? (
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled
+                  className="flex-1 h-10 min-h-[44px] rounded-xl font-medium text-xs flex items-center justify-center gap-2 border-border/80"
+                >
+                  <RefreshCw className="size-3.5 animate-spin text-foreground" />
+                  <span>Sincronizando...</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleCancelSync}
+                  className="h-10 min-h-[44px] px-3.5 rounded-xl font-medium text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleSyncNow}
+                className="w-full h-10 min-h-[44px] rounded-xl font-medium text-xs flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/40 transition-colors"
+              >
+                <RefreshCw className="size-3.5 text-muted-foreground" />
+                <span>Sincronizar agora</span>
+              </Button>
+            )}
           </div>
         )}
       </div>

@@ -100,9 +100,43 @@ async function fetchUserProfile(accessToken: string): Promise<GoogleDriveUser | 
   }
 }
 
+export function formatGoogleError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err)
+  if (msg.includes('cancelada por você') || msg.includes('cancelada pelo usuário') || msg.includes('AbortError')) {
+    return 'Sincronização cancelada por você.'
+  }
+  if (msg.includes('popup_closed') || msg.includes('cancelado')) {
+    return 'A janela do Google foi fechada antes de concluir a autorização.'
+  }
+  if (msg.includes('popup_blocked')) {
+    return 'O navegador bloqueou a janela pop-up do Google. Permita pop-ups para este site nas configurações do seu navegador.'
+  }
+  if (msg.includes('access_denied') || msg.includes('verification')) {
+    return 'Acesso não autorizado. Verifique se o seu e-mail foi adicionado à lista de Usuários de Teste no Google Cloud Console.'
+  }
+  if (msg.includes('origin_mismatch') || msg.includes('redirect_uri_mismatch')) {
+    return 'Origem não autorizada. Verifique se https://imerso.pages.dev está cadastrado nas Origens JavaScript Autorizadas do Google Cloud Console.'
+  }
+  if (msg.includes('Tempo esgotado') || msg.includes('timeout')) {
+    return 'Tempo limite esgotado. A conexão com o Google demorou mais que o esperado.'
+  }
+  if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+    return 'Sem conexão com a internet ou bloqueador de rastreadores impedindo a comunicação com a API do Google.'
+  }
+  if (msg.includes('401') || msg.includes('expirada')) {
+    return 'Sua sessão com o Google Drive expirou. Conecte sua conta novamente.'
+  }
+  return msg || 'Ocorreu um erro ao sincronizar com o Google Drive.'
+}
+
 // Request Token via Google Identity Services
-export function requestGoogleAccessToken(): Promise<string> {
+export function requestGoogleAccessToken(signal?: AbortSignal): Promise<string> {
   return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new Error('Sincronização cancelada por você.'))
+      return
+    }
+
     const clientId = getGoogleClientId()
     if (!clientId) {
       reject(new Error('GOOGLE_CLIENT_ID não configurado'))
@@ -117,11 +151,22 @@ export function requestGoogleAccessToken(): Promise<string> {
     try {
       let timeoutId: ReturnType<typeof setTimeout> | null = null
 
+      const onAbort = () => {
+        if (timeoutId) clearTimeout(timeoutId)
+        reject(new Error('Sincronização cancelada por você.'))
+      }
+
+      if (signal) {
+        signal.addEventListener('abort', onAbort, { once: true })
+      }
+
       const client = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
         scope: `${DRIVE_APP_DATA_SCOPE} ${USERINFO_SCOPE}`,
         callback: (resp) => {
           if (timeoutId) clearTimeout(timeoutId)
+          if (signal) signal.removeEventListener('abort', onAbort)
+
           if (resp.error) {
             reject(new Error(resp.error))
             return
@@ -138,12 +183,14 @@ export function requestGoogleAccessToken(): Promise<string> {
         },
         error_callback: (nonOAuthError) => {
           if (timeoutId) clearTimeout(timeoutId)
+          if (signal) signal.removeEventListener('abort', onAbort)
           reject(new Error(nonOAuthError?.message || 'Login cancelado ou bloqueado pelo navegador'))
         },
       })
 
       // Timeout de segurança (45s) para evitar loop de sincronização infinito caso o popup feche sem resposta
       timeoutId = setTimeout(() => {
+        if (signal) signal.removeEventListener('abort', onAbort)
         reject(new Error('Tempo esgotado ao aguardar autenticação do Google'))
       }, 45000)
 
@@ -155,8 +202,8 @@ export function requestGoogleAccessToken(): Promise<string> {
 }
 
 // Connect / Login to Google Drive
-export async function connectGoogleDrive(): Promise<{ user: GoogleDriveUser | null; token: string }> {
-  const token = await requestGoogleAccessToken()
+export async function connectGoogleDrive(signal?: AbortSignal): Promise<{ user: GoogleDriveUser | null; token: string }> {
+  const token = await requestGoogleAccessToken(signal)
   const user = await fetchUserProfile(token)
   if (user) {
     localStorage.setItem(USER_KEY, JSON.stringify(user))
@@ -180,12 +227,13 @@ export function disconnectGoogleDrive() {
 }
 
 // Find existing backup file in Google Drive AppData folder
-async function findAppDataBackupFile(accessToken: string): Promise<string | null> {
+async function findAppDataBackupFile(accessToken: string, signal?: AbortSignal): Promise<string | null> {
   const q = encodeURIComponent(`name = '${BACKUP_FILENAME}' and 'appDataFolder' in parents and trashed = false`)
   const url = `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime)`
 
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
+    signal,
   })
 
   if (!res.ok) {
@@ -204,10 +252,11 @@ async function findAppDataBackupFile(accessToken: string): Promise<string | null
 }
 
 // Download existing backup from Google Drive
-export async function downloadDriveBackup(accessToken: string, fileId: string): Promise<GoogleDriveBackupPayload | null> {
+export async function downloadDriveBackup(accessToken: string, fileId: string, signal?: AbortSignal): Promise<GoogleDriveBackupPayload | null> {
   const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
+    signal,
   })
 
   if (!res.ok) {
@@ -218,8 +267,8 @@ export async function downloadDriveBackup(accessToken: string, fileId: string): 
 }
 
 // Upload / Update backup in Google Drive appDataFolder
-export async function uploadDriveBackup(accessToken: string, payload: GoogleDriveBackupPayload): Promise<void> {
-  const existingFileId = await findAppDataBackupFile(accessToken)
+export async function uploadDriveBackup(accessToken: string, payload: GoogleDriveBackupPayload, signal?: AbortSignal): Promise<void> {
+  const existingFileId = await findAppDataBackupFile(accessToken, signal)
   const jsonContent = JSON.stringify(payload, null, 2)
 
   if (existingFileId) {
@@ -232,6 +281,7 @@ export async function uploadDriveBackup(accessToken: string, payload: GoogleDriv
         'Content-Type': 'application/json',
       },
       body: jsonContent,
+      signal,
     })
 
     if (!res.ok) {
@@ -265,6 +315,7 @@ export async function uploadDriveBackup(accessToken: string, payload: GoogleDriv
         'Content-Type': `multipart/related; boundary=${boundary}`,
       },
       body: multipartRequestBody,
+      signal,
     })
 
     if (!res.ok) {
@@ -286,33 +337,37 @@ export function buildCurrentLocalBackup(): GoogleDriveBackupPayload {
 }
 
 // Smart 2-Way Sync with conflict resolution (union by session ID)
-export async function syncWithGoogleDrive(): Promise<{
+export async function syncWithGoogleDrive(signal?: AbortSignal): Promise<{
   sessionsCount: number
   hasRemoteChanges: boolean
 }> {
   let token = getStoredAccessToken()
   if (!token) {
     // Try requesting interactive token
-    token = await requestGoogleAccessToken()
+    token = await requestGoogleAccessToken(signal)
+  }
+
+  if (signal?.aborted) {
+    throw new Error('Sincronização cancelada por você.')
   }
 
   // 1. Check existing remote backup
-  const fileId = await findAppDataBackupFile(token)
+  const fileId = await findAppDataBackupFile(token, signal)
   const localData = buildCurrentLocalBackup()
 
   if (!fileId) {
     // No remote backup yet -> simply push local to cloud
-    await uploadDriveBackup(token, localData)
+    await uploadDriveBackup(token, localData, signal)
     const now = Date.now()
     setLastSyncTime(now)
     return { sessionsCount: localData.sessions.length, hasRemoteChanges: false }
   }
 
   // 2. Download remote backup
-  const remoteData = await downloadDriveBackup(token, fileId)
+  const remoteData = await downloadDriveBackup(token, fileId, signal)
   if (!remoteData || !Array.isArray(remoteData.sessions)) {
     // Corrupted or empty remote -> overwrite with local
-    await uploadDriveBackup(token, localData)
+    await uploadDriveBackup(token, localData, signal)
     const now = Date.now()
     setLastSyncTime(now)
     return { sessionsCount: localData.sessions.length, hasRemoteChanges: false }
@@ -363,7 +418,7 @@ export async function syncWithGoogleDrive(): Promise<{
     currentLanguageId: mergedCurrentLangId,
     sessions: mergedSessions,
   }
-  await uploadDriveBackup(token, mergedPayload)
+  await uploadDriveBackup(token, mergedPayload, signal)
 
   const now = Date.now()
   setLastSyncTime(now)
