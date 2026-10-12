@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:staging": "npm run build && wrangler pages deploy dist --project-name imerso-staging",
+    "deploy:prod": "npm run build && wrangler pages deploy dist --project-name imerso"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",

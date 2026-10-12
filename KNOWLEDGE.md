@@ -61,28 +61,31 @@ O terminal é apenas uma forma de conversar com seu computador por texto em vez 
 ### 🚀 Publicação na Web (Cloudflare Pages)
 | Comando | O que faz |
 | :--- | :--- |
-| `npx wrangler pages deploy dist --project-name imerso` | Envia o conteúdo da pasta `dist` direto para a Cloudflare. O site no ar se atualiza em ~10 segundos. |
+| `npm run deploy:staging` | Compila (`build`) e publica diretamente no ambiente de **Staging** (`https://imerso-staging.pages.dev`). |
+| `npm run deploy:prod` | Compila (`build`) e publica diretamente no ambiente de **Produção** (`https://imerso.pages.dev`). |
 
 ---
 
 ## 5. Como Publicar Novas Atualizações (Passo a Passo)
 
-Sempre que terminar de fazer melhorias ou correções no código do Imerso:
-
+### Para testar em Staging (ambiente isolado de homologação):
 ```bash
-# 1. Teste o build de produção localmente
-npm run build
+# Compila e envia para o ambiente de staging
+npm run deploy:staging
+```
+* Acesse e teste em: `https://imerso-staging.pages.dev`
 
-# 2. Publique na Cloudflare Pages
-npx wrangler pages deploy dist --project-name imerso
+### Para lançar em Produção (quando tudo estiver validado):
+```bash
+# 1. Publique no ambiente oficial
+npm run deploy:prod
 
-# 3. Salve o histórico no GitHub
+# 2. Salve o histórico no GitHub
 git add .
 git commit -m "feat: descrição da melhoria"
 git push origin dev
 ```
-
-Pronto! Seu site e o repositório no GitHub ficam 100% atualizados e sincronizados.
+* Acesse em: `https://imerso.pages.dev`
 
 ---
 
@@ -134,7 +137,8 @@ Para colocar sua própria chave em produção ou no ambiente local:
    * Escolha **Web application** (Aplicação Web).
 2. **Origens JavaScript Autorizadas (Authorized JavaScript Origins):**
    * Adicione `http://localhost:5173` (para testes no seu PC).
-   * Adicione `https://imerso.pages.dev` (Cloudflare Pages padrão).
+   * Adicione `https://imerso.pages.dev` (Produção oficial).
+   * Adicione `https://imerso-staging.pages.dev` (Staging/Homologação).
    * Se usar domínio próprio no futuro (ex: `https://imerso.app`), adicione-o aqui também.
    *(Nota: Deixe o campo "Authorized redirect URIs" vazio, pois o GIS usa fluxo de popup/token in-page).*
 3. **Configuração de Variáveis de Ambiente:**
