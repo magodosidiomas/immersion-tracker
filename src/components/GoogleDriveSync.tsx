@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Cloud,
   RefreshCw,
@@ -52,6 +52,16 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
   const [isInfoOpen, setIsInfoOpen] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    const currentToken = getStoredAccessToken()
+    const currentUser = getStoredDriveUser()
+    if (currentToken && currentUser) {
+      setUser(currentUser)
+      setIsConnected(true)
+      setLastSync(getLastSyncTime())
+    }
+  }, [])
 
   const formatLastSync = (ts: number | null) => {
     if (!ts) return 'Nunca sincronizado'

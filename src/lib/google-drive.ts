@@ -201,8 +201,82 @@ export function requestGoogleAccessToken(signal?: AbortSignal): Promise<string> 
   })
 }
 
+export function isPwaOrMobile(): boolean {
+  if (typeof window === 'undefined') return false
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true ||
+    document.referrer.includes('android-app://')
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  return isStandalone || isMobile
+}
+
+export function redirectToGoogleOAuth(): void {
+  const clientId = getGoogleClientId()
+  if (!clientId) {
+    throw new Error('GOOGLE_CLIENT_ID não configurado')
+  }
+
+  // Origem sem barra final para coincidir com a configuração da Google Cloud Console
+  const redirectUri = window.location.origin
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: `${DRIVE_APP_DATA_SCOPE} ${USERINFO_SCOPE}`,
+    include_granted_scopes: 'true',
+    prompt: 'select_account',
+  })
+
+  sessionStorage.setItem('google_drive_connecting', 'true')
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
+}
+
+export async function checkAndHandleOAuthRedirect(): Promise<{ user: GoogleDriveUser | null } | null> {
+  if (typeof window === 'undefined') return null
+  const hash = window.location.hash
+  if (!hash || !hash.includes('access_token=')) {
+    return null
+  }
+
+  const hashParams = new URLSearchParams(hash.replace(/^#/, ''))
+  const accessToken = hashParams.get('access_token')
+  const expiresIn = Number(hashParams.get('expires_in') || 3599) * 1000
+
+  if (!accessToken) return null
+
+  // Salva token e expiração
+  localStorage.setItem(TOKEN_KEY, accessToken)
+  localStorage.setItem(TOKEN_EXPIRY_KEY, String(Date.now() + expiresIn))
+
+  // Limpa o hash da barra de endereço para não expor o token
+  window.history.replaceState(null, '', window.location.pathname + window.location.search)
+
+  // Obtém o perfil do usuário
+  const user = await fetchUserProfile(accessToken)
+  if (user) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user))
+  }
+
+  // Dispara sincronização inicial em segundo plano
+  try {
+    await syncWithGoogleDrive()
+  } catch (err) {
+    console.error('Falha na sincronização após redirecionamento OAuth:', err)
+  }
+
+  sessionStorage.removeItem('google_drive_connecting')
+  return { user }
+}
+
 // Connect / Login to Google Drive
 export async function connectGoogleDrive(signal?: AbortSignal): Promise<{ user: GoogleDriveUser | null; token: string }> {
+  // Em ambientes de PWA instalados ou mobile, o fluxo de redirect é infinitamente mais confiável que popups
+  if (isPwaOrMobile()) {
+    redirectToGoogleOAuth()
+    return new Promise(() => {}) // Aguarda redirecionamento do navegador
+  }
+
   const token = await requestGoogleAccessToken(signal)
   const user = await fetchUserProfile(token)
   if (user) {

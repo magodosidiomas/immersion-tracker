@@ -3,7 +3,9 @@ import { ImersoApp } from '@/components/ImersoApp'
 import { StorybookView } from '@/components/StorybookView'
 import { DesignLabView, type DesignDirection } from '@/components/DesignLabView'
 import { Toaster } from '@/components/ui/sonner'
+import { toast } from 'sonner'
 import { useTheme } from '@/hooks/use-theme'
+import { checkAndHandleOAuthRedirect } from '@/lib/google-drive'
 
 export function App() {
   const [currentView, setCurrentView] = useState<'app' | 'storybook' | 'design-lab'>('app')
@@ -20,6 +22,14 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('imerso-direction', direction)
   }, [direction])
+
+  useEffect(() => {
+    checkAndHandleOAuthRedirect().then((res) => {
+      if (res?.user) {
+        toast.success(`Conectado ao Google Drive como ${res.user.name}`)
+      }
+    })
+  }, [])
 
   const handleApplyDirection = (dir: DesignDirection) => {
     setDirection(dir)
