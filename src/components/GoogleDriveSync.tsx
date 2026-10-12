@@ -26,26 +26,16 @@ import {
 import type { GoogleDriveUser } from '@/types/google-drive'
 import { toast } from 'sonner'
 
-// Ícone oficial Google Drive (triângulo com 3 barras coloridas: amarelo, verde e azul)
-export function GoogleDriveLogo({ className = 'size-4.5' }: { className?: string }) {
+// Ícone oficial Google Drive (Wikimedia Commons Oficial)
+export function GoogleDriveLogo({ className = 'size-5' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none">
-      <path
-        d="M8.09 3.5 13.9 13.5H2.29L8.09 3.5Z"
-        fill="#FFBA00"
-      />
-      <path
-        d="M15.91 3.5H8.09L13.9 13.5h7.82L15.91 3.5Z"
-        fill="#00AC47"
-      />
-      <path
-        d="M13.9 13.5 8.09 23.5h11.63l5.81-10H13.9Z"
-        fill="#2684FC"
-      />
-      <path
-        d="M2.29 13.5 8.09 23.5 13.9 13.5H2.29Z"
-        fill="#EA4335"
-      />
+    <svg className={className} viewBox="0 0 87.3 78" fill="none">
+      <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066DA" />
+      <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00AC47" />
+      <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#EA4335" />
+      <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832D" />
+      <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684FC" />
+      <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 28h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#FFBA00" />
     </svg>
   )
 }
@@ -142,7 +132,7 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
         </div>
 
         {isConnected && (
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <span className="size-1.5 rounded-full bg-emerald-400" />
             Conectado
           </span>
@@ -153,11 +143,11 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
       <div className="p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xs space-y-3.5">
         {!isConnected ? (
           <div className="space-y-3">
-            <div>
-              <h4 className="text-sm font-semibold text-foreground tracking-tight">
+            <div className="space-y-1">
+              <h4 className="text-base font-semibold text-foreground tracking-tight">
                 Sincronização na nuvem
               </h4>
-              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Sincronize entre celular e computador.
               </p>
             </div>
