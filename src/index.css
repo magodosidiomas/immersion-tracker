@@ -191,16 +191,12 @@
   font-feature-settings: 'tnum' on, 'lnum' on;
 }
 
+.scrollbar-subtle {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 .scrollbar-subtle::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-subtle::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-subtle::-webkit-scrollbar-thumb {
-  background: oklch(0.5 0 0 / 0.18);
-  border-radius: 9999px;
-}
-.scrollbar-subtle::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.5 0 0 / 0.35);
+  display: none;
+  width: 0px;
+  height: 0px;
 }

@@ -83,8 +83,8 @@ export function SettingsView({
       <ScrollAreaFade className="flex-1 px-1 py-1 space-y-5">
         
         {/* GRUPO 1: APARÊNCIA */}
-        <div className="space-y-1.5">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
+        <div className="space-y-2">
+          <span className="text-sm font-semibold text-muted-foreground block px-1">
             Aparência
           </span>
           <div
@@ -122,8 +122,8 @@ export function SettingsView({
         <GoogleDriveSync onSyncComplete={onDataChanged} />
 
         {/* GRUPO 3: BACKUP LOCAL (GRUPO NATIVO ESTILO LINEAR) */}
-        <div className="space-y-1.5">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
+        <div className="space-y-2">
+          <span className="text-sm font-semibold text-muted-foreground block px-1">
             Backup Local
           </span>
           <div className="rounded-2xl border border-border/80 bg-card/60 divide-y divide-border/50 overflow-hidden">
@@ -165,8 +165,8 @@ export function SettingsView({
         </div>
 
         {/* GRUPO 4: SOBRE & DESENVOLVIMENTO (LISTA NATIVA LIMPA) */}
-        <div className="space-y-1.5">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block px-1">
+        <div className="space-y-2">
+          <span className="text-sm font-semibold text-muted-foreground block px-1">
             Sobre o App
           </span>
           <div className="rounded-2xl border border-border/80 bg-card/60 divide-y divide-border/50 overflow-hidden">
