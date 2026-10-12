@@ -17,11 +17,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      position={isMobile ? "bottom-center" : "bottom-right"}
-      offset={isMobile ? { bottom: 84 } : 24}
-      mobileOffset={{ bottom: 84 }}
-      swipeDirections={["bottom", "right", "left"]}
-      duration={2400}
+      position={isMobile ? "top-center" : "bottom-right"}
+      offset={isMobile ? { top: 16 } : 24}
+      mobileOffset={{ top: 16 }}
+      swipeDirections={isMobile ? ["top", "right", "left"] : ["bottom", "right", "left"]}
+      duration={2200}
       visibleToasts={1}
       className="toaster group"
       toastOptions={{
