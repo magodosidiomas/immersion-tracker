@@ -194,7 +194,7 @@ export function requestGoogleAccessToken(signal?: AbortSignal): Promise<string> 
         reject(new Error('Tempo esgotado ao aguardar autenticação do Google'))
       }, 45000)
 
-      client.requestAccessToken({ prompt: 'select_account' })
+      client.requestAccessToken()
     } catch (err) {
       reject(err)
     }
