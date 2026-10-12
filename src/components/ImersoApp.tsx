@@ -39,7 +39,8 @@ import {
   Lock,
   Settings,
   Download,
-  Upload
+  Upload,
+  ShieldCheck
 } from 'lucide-react'
 import { StatsView } from '@/components/StatsView'
 import { AddLanguageView } from '@/components/AddLanguageView'
@@ -47,6 +48,7 @@ import { ManageLanguagesView } from '@/components/ManageLanguagesView'
 import { LanguageFlag, preloadFlags } from '@/components/LanguageFlag'
 import { ScrollAreaFade } from '@/components/ui/scroll-area-fade'
 import { GoogleDriveSync } from '@/components/GoogleDriveSync'
+import { PrivacyPolicyDialog } from '@/components/PrivacyPolicyDialog'
 import { APP_VERSION } from '@/version'
 import {
   PRACTICES,
@@ -94,6 +96,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const [currentLangId, setCurrentLangIdState] = useState<string>(getCurrentLanguageId)
   const [isLangDrawerOpen, setIsLangDrawerOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1734,6 +1737,21 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                 <span>Ver Storybook / Design System</span>
               </Button>
             </div>
+
+            {/* Seção 4: Privacidade e Termos */}
+            <div className="pt-1 border-t border-border/40">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setIsPrivacyOpen(true)
+                }}
+                className="w-full h-10 min-h-[44px] justify-start gap-2.5 px-3 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/40 cursor-pointer"
+              >
+                <ShieldCheck className="size-4 text-emerald-500" />
+                <span>Privacidade & Dados (LGPD)</span>
+              </Button>
+            </div>
           </div>
 
           <div className="p-4 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-4 space-y-2">
@@ -1754,6 +1772,12 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* DIÁLOGO: POLÍTICA DE PRIVACIDADE E DADOS */}
+      <PrivacyPolicyDialog
+        open={isPrivacyOpen}
+        onOpenChange={setIsPrivacyOpen}
+      />
     </div>
   )
 }

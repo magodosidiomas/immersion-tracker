@@ -103,6 +103,12 @@
       "skillPath": "skills/sandbox-stable/SKILL.md",
       "computedHash": "ea5794e07e20086db7f40ddf6766af798b712b9a8ad6d0bc5700c5161ac465e4"
     },
+    "security-and-hardening": {
+      "source": "addyosmani/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/security-and-hardening/SKILL.md",
+      "computedHash": "32a1243d6eb45fd342c1f4e9f9ee5f1651a1e9fdccb86dcbbbee5d6f455ed362"
+    },
     "shadcn": {
       "source": "shadcn-ui/ui",
       "sourceType": "github",
