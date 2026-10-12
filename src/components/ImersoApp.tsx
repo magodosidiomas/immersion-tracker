@@ -1237,7 +1237,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
                       return (
                         <div key={g.dayKey} id={`day-group-${g.dayKey}`} className="space-y-2 scroll-mt-6">
                           {showMonthHeader && (
-                            <div className="py-2 px-1 text-sm font-semibold text-muted-foreground capitalize">
+                            <div className="py-2 px-1 text-sm font-semibold text-muted-foreground">
                               {m}
                             </div>
                           )}

@@ -127,20 +127,28 @@ Para colocar sua própria chave em produção ou no ambiente local:
 
 1. **Acesse o Google Cloud Console:**
    * Vá em [APIs & Services > Credentials](https://console.cloud.google.com/apis/credentials).
-   * Crie um projeto (ex: `Imerso`).
-   * Em **OAuth consent screen**, selecione `External`, defina o nome "Imerso" e adicione seu e-mail.
+   * Crie ou selecione o projeto `Imerso`.
+   * Em **Enabled APIs & Services**, ative a **Google Drive API**.
+   * Em **OAuth consent screen**, selecione `External`, defina o nome "Imerso", adicione seu e-mail de suporte e adicione o escopo `https://www.googleapis.com/auth/drive.appdata`.
    * Em **Credentials**, clique em `Create Credentials` > `OAuth Client ID`.
    * Escolha **Web application** (Aplicação Web).
-2. **Origens JavaScript Autorizadas:**
+2. **Origens JavaScript Autorizadas (Authorized JavaScript Origins):**
    * Adicione `http://localhost:5173` (para testes no seu PC).
-   * Adicione `https://imerso.pages.dev` (ou seu domínio de produção).
+   * Adicione `https://imerso.pages.dev` (Cloudflare Pages padrão).
+   * Se usar domínio próprio no futuro (ex: `https://imerso.app`), adicione-o aqui também.
+   *(Nota: Deixe o campo "Authorized redirect URIs" vazio, pois o GIS usa fluxo de popup/token in-page).*
 3. **Configuração de Variáveis de Ambiente:**
    * No arquivo `.env` local:
      ```env
-     VITE_GOOGLE_CLIENT_ID="seu-id-aqui.apps.googleusercontent.com"
+     VITE_GOOGLE_CLIENT_ID="505234964962-ovbn77n5rjq402p8qodec6i85ilgph9i.apps.googleusercontent.com"
      ```
    * Na Cloudflare Pages (Deploy):
      * Vá no painel da Cloudflare > **Workers & Pages** > **imerso** > **Settings** > **Environment variables**.
      * Adicione a variável `VITE_GOOGLE_CLIENT_ID` com o mesmo valor para os builds de produção.
+4. **Headers de Segurança e CSP (`public/_headers`):**
+   * O projeto já conta com o arquivo `public/_headers` que configura Content-Security-Policy (CSP) permitindo scripts de `accounts.google.com` e conexões a `apis.google.com` e `www.googleapis.com`, mantendo proteção estrita contra XSS, clickjacking e MIME-sniffing.
+5. **Documentação Completa de Arquitetura & LGPD:**
+   * Para detalhes técnicos de merge, escopos, conformidade com a LGPD e testes de QA, consulte o arquivo dedicado [`docs/GOOGLE_DRIVE.md`](file:///c:/Users/vitor/Desktop/Imerso/docs/GOOGLE_DRIVE.md).
+
 
 

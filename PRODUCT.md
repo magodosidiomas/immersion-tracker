@@ -38,14 +38,16 @@ Imerso is a zero-friction language immersion tracking application.
 - Sessões que cruzam a meia-noite pertencem ao dia de início (`startedAt`).
 - Campo de duração no resumo/registro manual utiliza deslocamento de dígitos da direita para a esquerda (estilo relógio Samsung).
 
-## 6. Data & Backup Strategy
-- **Local Storage & Backup:** All profiles and session records are stored in browser `localStorage`.
-- **JSON Export / Import:** Users can export a complete `.json` backup file (`imerso-backup-YYYY-MM-DD.json`) and import it at any time via the Settings menu (`Configurações`).
+## 6. Data, Settings & Backup Strategy
+- **Settings View Dedicada:** As opções do sistema (aparência, sincronização na nuvem, backup local e sobre o app) residem em uma tela completa com navegação e header próprios (`SettingsView.tsx`), substituindo gavetas/drawers comprimidos.
+- **Local Storage (Offline-First):** Todos os perfis de idiomas e registros de sessões são salvos prioritariamente no `localStorage` do navegador. O aplicativo é 100% funcional sem internet.
+- **JSON Export / Import:** Exportação e importação manual de arquivo `.json` (`imerso-backup-YYYY-MM-DD.json`) via página de Configurações, garantindo portabilidade entre navegadores e dispositivos.
 - **Google Drive Sync (Custo Zero & Privacidade Total):**
-  - Integração client-side via Google Identity Services e Google Drive REST API v3.
-  - Armazenamento no `appDataFolder` (pasta isolada e invisível do app, sem acesso aos arquivos pessoais do Google Drive do usuário).
-  - Sincronização inteligente bidirecional (union por ID de sessão e perfis de idiomas).
-  - Auto-sync em background sempre que uma sessão é salva ou excluída caso o usuário esteja autenticado.
+  - **Client-Side OAuth:** Integração direta com Google Identity Services (GIS) e Google Drive REST API v3 sem necessidade de backend, banco de dados ou servidor intermediário.
+  - **Isolamento via `appDataFolder`:** O escopo restrito `drive.appdata` isola os dados do Imerso em uma pasta interna oculta do Google Drive da conta do usuário. O app tem **zero acesso** a pastas, fotos ou arquivos pessoais do usuário.
+  - **Sincronização Bidirecional Inteligente:** O algoritmo faz merge por união de IDs de sessões e preserva os timestamps mais recentes de alteração de idiomas, impedindo perda de dados mesmo se o usuário usar o app simultaneamente no celular e no computador.
+  - **Auto-Sync Silencioso:** Sincroniza automaticamente em background após salvar ou excluir sessões quando a conta estiver conectada.
+  - **Privacidade & Conformidade (LGPD/GDPR):** O usuário possui soberania total dos seus dados, podendo desconectar a conta, limpar os registros locais ou exportar seu histórico a qualquer momento.
 
 ## 7. Copy Guidelines
 - Buttons: Imperative verbs (`Iniciar`, `Pausar`, `Retomar`, `Encerrar`, `Pronto`, `Salvar sessão`, `Salvar alterações`).

@@ -13,7 +13,7 @@
   - ❌ **Evitar fontes clichê de IA:** Não usar `Outfit` ou presets default de IA sem curadoria.
   - Strict **Font Floor:** Minimum 12px (`text-xs`) across the entire app. No tiny text below 12px.
   - Tabular Numbers (`tabular-nums` / `font-feature-settings: 'tnum' on, 'lnum' on`) aplicados globalmente para timers, durações e metas.
-  - **Section Titles & Subheaders:** Estritamente **Sentence case** (`text-sm font-semibold text-muted-foreground`), nunca ALL CAPS com tracking artificial. Exemplos: `Aparência`, `Google Drive`, `Backup local`, `Sobre o app`, `Por atividade`.
+  - **Section Titles & Subheaders (Sentence Case):** Estritamente **Sentence case** (`text-sm font-semibold text-muted-foreground`), nunca ALL CAPS com tracking artificial e **NUNCA** usar a classe CSS `capitalize` em strings em português (pois ela transforma preposições em maiúsculas indevidamente, gerando anomalias como *"Outubro De 2026"*). Preposições e artigos devem permanecer minúsculos. Exemplos canônicos: `Outubro de 2026`, `Tempo total`, `Por atividade`, `Privacidade & dados`, `Backup local`.
 
 ## 2. Component & Layout Rules
 - **Interactive Targets:** Minimum 44px height for buttons, bottom sheets, list items, and inputs.
