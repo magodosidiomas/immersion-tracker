@@ -3,6 +3,47 @@ import { DEFAULT_LANGUAGES, type SessionRecord, type LanguageProfile } from '@/t
 const SESSIONS_KEY = 'imerso_sessions_v1'
 const CURRENT_LANG_KEY = 'imerso_current_lang_v1'
 const LANGUAGES_KEY = 'imerso_languages_v1'
+const ACTIVE_TIMER_KEY = 'imerso_active_timer_v1'
+
+export interface ActiveTimerData {
+  state: 'running' | 'paused' | 'summary'
+  languageId: string
+  sessionStartedAt: number
+  segmentStartedAt: number | null
+  accumulatedSeconds: number
+  summarySeconds?: number
+}
+
+export function getActiveTimer(): ActiveTimerData | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_TIMER_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as ActiveTimerData
+      if (parsed && (parsed.state === 'running' || parsed.state === 'paused' || parsed.state === 'summary')) {
+        return parsed
+      }
+    }
+  } catch (e) {
+    console.error('Erro ao ler timer ativo salvo:', e)
+  }
+  return null
+}
+
+export function saveActiveTimer(data: ActiveTimerData) {
+  try {
+    localStorage.setItem(ACTIVE_TIMER_KEY, JSON.stringify(data))
+  } catch (e) {
+    console.error('Erro ao salvar timer ativo:', e)
+  }
+}
+
+export function clearActiveTimer() {
+  try {
+    localStorage.removeItem(ACTIVE_TIMER_KEY)
+  } catch (e) {
+    console.error('Erro ao limpar timer ativo:', e)
+  }
+}
 
 export function getStoredLanguages(): LanguageProfile[] {
   try {

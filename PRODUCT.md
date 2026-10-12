@@ -15,6 +15,8 @@ Imerso is a zero-friction language immersion tracking application.
 ## 3. Session & Timer Logic
 - States: Idle (`00:00:00`), Running, Paused.
 - Measured via **timestamp comparison** (not simple setInterval) so app minimize/screen lock doesn't affect accuracy.
+- **Persistência do Timer Ativo (`localStorage`):** O estado do timer (`running`, `paused` ou `summary`), o idioma ativo e os timestamps de início são salvos continuamente no navegador. Se o usuário recarregar a página (F5), fechar o navegador ou se o sistema operacional suspender a aba no celular por falta de RAM, ao reabrir o app o timer continua correndo exatamente do ponto em que deveria estar, sem perda de tempo.
+- **Proteção contra Fechamento Acidental (`beforeunload`):** O navegador exibe aviso nativo de confirmação caso o usuário tente fechar a aba enquanto houver um timer ou resumo em andamento.
 - Practice is chosen **after** clicking "Encerrar" (never before/during).
 - **Ajuste Pós-Sessão & Esquecimento (Zero Fricção):** Sem interrupções de modais durante a contagem. Caso o usuário esqueça o timer aberto, o editor de tempo estilo Samsung na tela de encerramento permite corrigir ou descartar o registro com agilidade.
 

@@ -58,6 +58,9 @@ import {
   saveSessionRecord,
   deleteSessionRecord,
   deleteSessionsForLanguage,
+  getActiveTimer,
+  saveActiveTimer,
+  clearActiveTimer,
 } from '@/lib/storage'
 import { syncSilentlyIfConnected } from '@/lib/google-drive'
 
@@ -82,50 +85,7 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const [manualEntryDate, setManualEntryDate] = useState<number | null>(null)
   const dateInputRef = useRef<HTMLInputElement>(null)
 
-  // Languages
-  const [languages, setLanguages] = useState<LanguageProfile[]>(getStoredLanguages)
-  const [currentLangId, setCurrentLangIdState] = useState<string>(getCurrentLanguageId)
-  const [isLangDrawerOpen, setIsLangDrawerOpen] = useState(false)
-
-  // Preload flags for user languages immediately
-  useEffect(() => {
-    if (languages.length > 0) {
-      preloadFlags(languages.map(l => l.id))
-    }
-  }, [languages])
-
-  // Timer State
-  const [timerState, setTimerState] = useState<TimerState>('idle')
-  const [elapsedSeconds, setElapsedSeconds] = useState(0)
-  const startTimeRef = useRef<number | null>(null)
-  const accumulatedRef = useRef<number>(0)
-  const timerIntervalRef = useRef<number | null>(null)
-
-  // Tipografia Global Travada em Satoshi (Neo-grotesca independente, anti-slop, zeros tabulares nítidos)
-  const fontClass = 'font-satoshi'
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-app-font', 'satoshi')
-  }, [])
-
-  // Summary State (After Encerrar)
-  const [isSummaryOpen, setIsSummaryOpen] = useState(false)
-  const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
-  const [summarySeconds, setSummarySeconds] = useState(0)
-  const [selectedPractice, setSelectedPractice] = useState<string>('')
-  const [selectedStyle, setSelectedStyle] = useState<ImmersionStyle | null>(null)
-  const [isPracticeDrawerOpen, setIsPracticeDrawerOpen] = useState(false)
-  const [practiceDrawerStep, setPracticeDrawerStep] = useState<1 | 2>(1)
-  const [tempPractice, setTempPractice] = useState<string>('')
-  const [inlineErrors, setInlineErrors] = useState<{ time?: string; practice?: string; style?: string }>({})
-  const [entrySource, setEntrySource] = useState<'timer' | 'manual'>('timer')
-
-  // Time Editor State (Estilo Samsung: digitação da direita para a esquerda via input nativo)
-  const [isEditingTime, setIsEditingTime] = useState(false)
-  const digitBufferRef = useRef('000000')
-  const isFreshEditRef = useRef(true)
-  const timeInputRef = useRef<HTMLInputElement>(null)
-
+  // Helper de formatação de dígitos para o buffer do editor
   const getDigitsFromSeconds = (totalSecs: number) => {
     const hrs = Math.floor(totalSecs / 3600)
     const mins = Math.floor((totalSecs % 3600) / 60)
@@ -141,6 +101,102 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
     const secs = parseInt(padded.slice(4, 6), 10) || 0
     return Math.min(24 * 3600, hrs * 3600 + mins * 60 + secs)
   }
+
+  // Leitura única na inicialização para recuperar qualquer sessão ativa persistida no localStorage
+  const initialTimer = getActiveTimer()
+
+  // Languages
+  const [languages, setLanguages] = useState<LanguageProfile[]>(getStoredLanguages)
+  const [currentLangId, setCurrentLangIdState] = useState<string>(() => {
+    if (initialTimer?.languageId) {
+      return initialTimer.languageId
+    }
+    return getCurrentLanguageId()
+  })
+  const [isLangDrawerOpen, setIsLangDrawerOpen] = useState(false)
+
+  // Preload flags for user languages immediately
+  useEffect(() => {
+    if (languages.length > 0) {
+      preloadFlags(languages.map(l => l.id))
+    }
+  }, [languages])
+
+  // Timer State inicializado já com a persistência recuperada de forma síncrona
+  const [timerState, setTimerState] = useState<TimerState>(() => {
+    if (initialTimer?.state === 'running') return 'running'
+    if (initialTimer?.state === 'paused') return 'paused'
+    return 'idle'
+  })
+
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(() => {
+    if (!initialTimer) return 0
+    if (initialTimer.state === 'running') {
+      const now = Date.now()
+      const delta = initialTimer.segmentStartedAt ? Math.floor((now - initialTimer.segmentStartedAt) / 1000) : 0
+      return Math.min(24 * 3600, Math.max(0, initialTimer.accumulatedSeconds + delta))
+    }
+    if (initialTimer.state === 'paused') {
+      return Math.min(24 * 3600, Math.max(0, initialTimer.accumulatedSeconds))
+    }
+    return 0
+  })
+
+  const startTimeRef = useRef<number | null>(
+    initialTimer?.state === 'running'
+      ? initialTimer.segmentStartedAt || Date.now()
+      : null
+  )
+  const accumulatedRef = useRef<number>(initialTimer?.accumulatedSeconds || 0)
+  const sessionStartedAtRef = useRef<number | null>(initialTimer?.sessionStartedAt || null)
+  const timerIntervalRef = useRef<number | null>(null)
+
+  // Tipografia Global Travada em Satoshi (Neo-grotesca independente, anti-slop, zeros tabulares nítidos)
+  const fontClass = 'font-satoshi'
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-app-font', 'satoshi')
+  }, [])
+
+  // Summary State (After Encerrar)
+  const [isSummaryOpen, setIsSummaryOpen] = useState<boolean>(() => {
+    return initialTimer?.state === 'summary'
+  })
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null)
+  const [summarySeconds, setSummarySeconds] = useState<number>(() => {
+    return initialTimer?.state === 'summary'
+      ? (initialTimer.summarySeconds || initialTimer.accumulatedSeconds || 0)
+      : 0
+  })
+  const [selectedPractice, setSelectedPractice] = useState<string>('')
+  const [selectedStyle, setSelectedStyle] = useState<ImmersionStyle | null>(null)
+  const [isPracticeDrawerOpen, setIsPracticeDrawerOpen] = useState(false)
+  const [practiceDrawerStep, setPracticeDrawerStep] = useState<1 | 2>(1)
+  const [tempPractice, setTempPractice] = useState<string>('')
+  const [inlineErrors, setInlineErrors] = useState<{ time?: string; practice?: string; style?: string }>({})
+  const [entrySource, setEntrySource] = useState<'timer' | 'manual'>('timer')
+
+  // Time Editor State (Estilo Samsung: digitação da direita para a esquerda via input nativo)
+  const [isEditingTime, setIsEditingTime] = useState(false)
+  const digitBufferRef = useRef(
+    initialTimer?.state === 'summary'
+      ? getDigitsFromSeconds(initialTimer.summarySeconds || initialTimer.accumulatedSeconds || 0)
+      : '000000'
+  )
+  const isFreshEditRef = useRef(true)
+  const timeInputRef = useRef<HTMLInputElement>(null)
+
+  // Alerta nativo de confirmação ao tentar fechar/atualizar aba com timer ou resumo em andamento
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (timerState !== 'idle' || isSummaryOpen) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [timerState, isSummaryOpen])
 
   const handleStartEditTime = () => {
     setIsEditingTime(true)
@@ -240,11 +296,14 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   // Timer calculation loop based on Date.now() timestamp
   useEffect(() => {
     if (timerState === 'running') {
-      startTimeRef.current = Date.now()
+      if (!startTimeRef.current) {
+        startTimeRef.current = Date.now()
+      }
       timerIntervalRef.current = window.setInterval(() => {
         if (startTimeRef.current) {
           const delta = Math.floor((Date.now() - startTimeRef.current) / 1000)
-          setElapsedSeconds(accumulatedRef.current + delta)
+          const total = Math.min(24 * 3600, accumulatedRef.current + Math.max(0, delta))
+          setElapsedSeconds(total)
         }
       }, 250)
     } else {
@@ -299,32 +358,62 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
 
   // Timer Actions
   const handleStart = () => {
+    const now = Date.now()
+    sessionStartedAtRef.current = now
+    startTimeRef.current = now
     accumulatedRef.current = 0
     setElapsedSeconds(0)
     setTimerState('running')
+    saveActiveTimer({
+      state: 'running',
+      languageId: currentLangId,
+      sessionStartedAt: now,
+      segmentStartedAt: now,
+      accumulatedSeconds: 0,
+    })
   }
 
   const handlePause = () => {
+    const now = Date.now()
     if (startTimeRef.current) {
-      accumulatedRef.current += Math.floor((Date.now() - startTimeRef.current) / 1000)
+      accumulatedRef.current = Math.min(24 * 3600, accumulatedRef.current + Math.floor((now - startTimeRef.current) / 1000))
     }
+    startTimeRef.current = null
     setTimerState('paused')
+    saveActiveTimer({
+      state: 'paused',
+      languageId: currentLangId,
+      sessionStartedAt: sessionStartedAtRef.current || now,
+      segmentStartedAt: null,
+      accumulatedSeconds: accumulatedRef.current,
+    })
   }
 
   const handleResume = () => {
+    const now = Date.now()
+    startTimeRef.current = now
     setTimerState('running')
+    saveActiveTimer({
+      state: 'running',
+      languageId: currentLangId,
+      sessionStartedAt: sessionStartedAtRef.current || now,
+      segmentStartedAt: now,
+      accumulatedSeconds: accumulatedRef.current,
+    })
   }
 
   const handleStop = () => {
     let finalSecs = elapsedSeconds
     if (timerState === 'running' && startTimeRef.current) {
-      finalSecs = accumulatedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000)
+      finalSecs = Math.min(24 * 3600, accumulatedRef.current + Math.floor((Date.now() - startTimeRef.current) / 1000))
     }
+    const startedAt = sessionStartedAtRef.current || (Date.now() - finalSecs * 1000)
     setTimerState('idle')
     setElapsedSeconds(0)
     accumulatedRef.current = 0
+    startTimeRef.current = null
 
-    // Open Summary View
+    // Open Summary View & preserve summary state in localStorage
     setSummarySeconds(finalSecs)
     setEntrySource('timer')
     const initialDigits = getDigitsFromSeconds(finalSecs)
@@ -335,6 +424,15 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
     setSelectedStyle(null)
     setInlineErrors({})
     setIsSummaryOpen(true)
+
+    saveActiveTimer({
+      state: 'summary',
+      languageId: currentLangId,
+      sessionStartedAt: startedAt,
+      segmentStartedAt: null,
+      accumulatedSeconds: finalSecs,
+      summarySeconds: finalSecs,
+    })
   }
 
   // Language Selector clicked
@@ -417,6 +515,8 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
   const handleRequestDiscard = () => {
     if (summarySeconds <= 10) {
       // Discard directly if under 10 seconds (SPEC rule)
+      clearActiveTimer()
+      sessionStartedAtRef.current = null
       setIsSummaryOpen(false)
       setIsEditingTime(false)
       setTimerState('idle')
@@ -436,12 +536,23 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
       accumulatedRef.current = summarySeconds
       setElapsedSeconds(summarySeconds)
       setTimerState('paused')
+      saveActiveTimer({
+        state: 'paused',
+        languageId: currentLangId,
+        sessionStartedAt: sessionStartedAtRef.current || (Date.now() - summarySeconds * 1000),
+        segmentStartedAt: null,
+        accumulatedSeconds: summarySeconds,
+      })
     } else {
+      clearActiveTimer()
+      sessionStartedAtRef.current = null
       setTimerState('idle')
     }
   }
 
   const handleConfirmDiscard = () => {
+    clearActiveTimer()
+    sessionStartedAtRef.current = null
     setIsDiscardDialogOpen(false)
     setIsSummaryOpen(false)
     setIsEditingTime(false)
@@ -510,13 +621,15 @@ export function ImersoApp({ onOpenStorybook, theme, onToggleTheme }: ImersoAppPr
       language: existingSession?.language || currentLangId,
       startedAt: existingSession
         ? existingSession.startedAt
-        : manualEntryDate || (Date.now() - summarySeconds * 1000),
+        : manualEntryDate || sessionStartedAtRef.current || (Date.now() - summarySeconds * 1000),
       duration: summarySeconds,
       practice: selectedPractice,
       style: selectedStyle || undefined,
       source: existingSession ? existingSession.source : entrySource,
     }
 
+    clearActiveTimer()
+    sessionStartedAtRef.current = null
     saveSessionRecord(newRecord)
     setSessions(getStoredSessions())
     setIsSummaryOpen(false)
