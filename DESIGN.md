@@ -11,7 +11,7 @@
   - Fonte Oficial: **Satoshi Variable** (Indian Type Foundry · 300 a 900 · Self-hosted em `/fonts/satoshi/`).
   - Identidade: Neo-grotesca independente e autoral, fora dos clichês de IA/shadcn/Vercel templates.
   - ❌ **Evitar fontes clichê de IA:** Não usar `Outfit` ou presets default de IA sem curadoria.
-  - Strict **Font Floor:** Minimum 12px (`text-xs`) across the entire app. No tiny text below 12px.
+  - **Tipografia Padrão (Base 14px & Piso 12px):** Começar sempre textos secundários, descrições, labels e botões em 14px (`text-sm`). Reservar 12px (`text-xs`) exclusivamente para micro-metadados pontuais (timestamps curtos como *"Há 2 min"*, tags mínimas). Piso absoluto é 12px; banido qualquer valor menor (`text-[10px]`, `text-[11px]`).
   - Tabular Numbers (`tabular-nums` / `font-feature-settings: 'tnum' on, 'lnum' on`) aplicados globalmente para timers, durações e metas.
   - **Section Titles & Subheaders (Sentence Case):** Estritamente **Sentence case** (`text-sm font-semibold text-muted-foreground`), nunca ALL CAPS com tracking artificial e **NUNCA** usar a classe CSS `capitalize` em strings em português (pois ela transforma preposições em maiúsculas indevidamente, gerando anomalias como *"Outubro De 2026"*). Preposições e artigos devem permanecer minúsculos. Exemplos canônicos: `Outubro de 2026`, `Tempo total`, `Por atividade`, `Privacidade & dados`, `Backup local`.
 
@@ -31,10 +31,14 @@
   - Highlight field with warning border and present clear Portuguese inline error text below field.
 
 ## 3. Anti-Patterns & Strict Exclusions (Zero AI-Slop Bar)
-- ❌ **Zero AI-Slop:** Proibido gradientes coloridos aleatórios, sombras coloridas difusas (`shadow-purple-500/50`), bordas iluminadas ("glows") ou estética genérica de landing page de IA.
+- ❌ **Zero AI-Slop:** Proibido gradientes coloridos aleatórios, sombras coloridas difusas (`shadow-purple-500/50`), bordas iluminadas ("glows"), banners vermelhos neon espalhafatosos ou estética genérica de landing page de IA.
 - ❌ **Zero shadcn clichê:** Não aplicar estilos padrão não refinados do shadcn sem adaptar para a paleta tática/sóbria do Imerso.
+- ❌ **Piso estrito de 12px:** Proibido fontes menores que 12px (`text-[10px]`, `text-[11px]`, etc.) no app e em qualquer arquivo de preview. Piso absoluto é `text-xs` (12px).
+- ❌ **Zero ALL CAPS & Tracking artificial:** Proibido `uppercase` ou `capitalize` em títulos, seções e badges. Usar estritamente **Sentence case** em português.
+- ❌ **Zero termos em inglês:** Microcopy 100% em português brasileiro autêntico. Banido "Sync", "Retry", "Login", etc.
+- ❌ **Zero setas/adereços em botões:** Proibido adereços clichê como `→`, `>>` em botões de ação.
+- ❌ **Zero touch targets < 44px:** Todo botão ou controle interativo deve ter altura real de no mínimo 44px (`h-11`).
 - ❌ NO generic vibrant rainbow colors unless explicitly representing macro-pillars (Imerso macro-pilares use subtle grayscale scale: Imersão `#ededed`, Produção `#8b8b85`, Fundamentos `#50504d`).
 - ❌ NO unstyled native scrollbars or missing scroll masks.
 - ❌ NO layout shift when switching states or opening/closing keyboard.
-- ❌ NO fonts smaller than 12px.
 - ❌ NO redundant labels like "Total em Inglês" when screen context is already scoped.

@@ -1,11 +1,8 @@
 import { useState, useRef } from 'react'
 import {
   Cloud,
-  CloudCheck,
   RefreshCw,
-  LogOut,
   Info,
-  AlertCircle,
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -177,39 +174,45 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
       {/* Card Principal */}
       <div className="p-4 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-xs space-y-3.5">
         {syncError && (
-          <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-start gap-2.5 animate-in fade-in-50 duration-200">
-            <AlertCircle className="size-4 shrink-0 mt-0.5 text-destructive" />
-            <div className="flex-1 min-w-0 space-y-1.5">
-              <p className="leading-relaxed text-foreground font-medium">{syncError}</p>
-              <div>
-                <button
-                  type="button"
-                  onClick={isConnected ? handleSyncNow : handleConnect}
-                  className="text-xs font-semibold text-foreground underline hover:no-underline cursor-pointer inline-flex items-center gap-1"
-                >
-                  Tentar novamente
-                </button>
+          <div className="p-4 rounded-2xl bg-muted/60 border border-border space-y-3 animate-in fade-in-50 duration-200">
+            <div className="flex items-start gap-3">
+              <div className="size-2 rounded-full bg-amber-400 mt-2 shrink-0" />
+              <div className="flex-1 min-w-0 space-y-1">
+                <p className="text-sm font-semibold text-foreground">Não foi possível sincronizar</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {syncError}
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => setSyncError(null)}
+                className="text-muted-foreground hover:text-foreground p-1 cursor-pointer shrink-0"
+                title="Dispensar aviso"
+              >
+                <X className="size-4" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setSyncError(null)}
-              className="p-1 rounded-md text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
-              title="Dispensar aviso"
-            >
-              <X className="size-3.5" />
-            </button>
+            <div className="flex items-center justify-end pt-1 border-t border-border/40">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={isConnected ? handleSyncNow : handleConnect}
+                className="h-11 min-h-[44px] px-4 rounded-xl text-sm font-semibold text-foreground cursor-pointer"
+              >
+                Tentar novamente
+              </Button>
+            </div>
           </div>
         )}
 
         {!isConnected ? (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             <div className="space-y-1">
               <h4 className="text-base font-semibold text-foreground tracking-tight">
                 Sincronização na nuvem
               </h4>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Sincronize entre celular e computador.
+                Sincronize entre celular e computador com segurança.
               </p>
             </div>
 
@@ -228,7 +231,7 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
                   type="button"
                   variant="ghost"
                   onClick={handleCancelSync}
-                  className="h-11 min-h-[44px] px-3.5 rounded-xl font-medium text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
+                  className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
                 >
                   Cancelar
                 </Button>
@@ -238,7 +241,7 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
                 type="button"
                 variant="outline"
                 onClick={handleConnect}
-                className="w-full h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-background hover:bg-muted/50 text-foreground border-border/90 shadow-none transition-all active:scale-[0.99]"
+                className="w-full h-11 min-h-[44px] rounded-xl font-semibold text-sm flex items-center justify-center gap-2.5 cursor-pointer bg-background hover:bg-muted/50 text-foreground border-border/90 shadow-none transition-all active:scale-[0.99]"
               >
                 <GoogleDriveLogo className="size-4.5 shrink-0" />
                 <span>Conectar com Google Drive</span>
@@ -246,79 +249,76 @@ export function GoogleDriveSync({ onSyncComplete }: GoogleDriveSyncProps) {
             )}
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Usuário Conectado */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5 min-w-0">
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 {user?.picture ? (
                   <img
                     src={user.picture}
                     alt={user.name}
-                    className="size-8 rounded-full border border-border/80 object-cover shrink-0"
+                    className="size-9 rounded-full border border-border/80 object-cover shrink-0"
                   />
                 ) : (
-                  <div className="size-8 rounded-full bg-muted text-foreground flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="size-9 rounded-full bg-muted text-foreground flex items-center justify-center font-bold text-sm shrink-0">
                     {user?.name?.charAt(0) || 'G'}
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-foreground truncate">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground truncate font-mono">{user?.email}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
+                    <span className="inline-block size-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  </div>
+                  <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
                 </div>
               </div>
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handleDisconnect}
-                title="Desconectar"
-                className="size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer shrink-0"
-              >
-                <LogOut className="size-4" />
-              </Button>
-            </div>
-
-            {/* Linha de Status de Sincronização */}
-            <div className="flex items-center justify-between text-xs py-1 px-0.5 text-muted-foreground border-t border-border/40 pt-2">
-              <div className="flex items-center gap-1.5">
-                <CloudCheck className="size-4 text-emerald-400" />
-                <span>Último sync:</span>
+              <div className="text-right shrink-0">
+                <p className="text-sm font-medium text-foreground">Sincronizado</p>
+                <p className="text-xs text-muted-foreground tabular-nums">{formatLastSync(lastSync)}</p>
               </div>
-              <span className="font-medium text-foreground">{formatLastSync(lastSync)}</span>
             </div>
 
-            {/* Ação Sincronizar Agora */}
+            {/* Ações Táticas Rápidas (44px min-height real em ambos) */}
             {isSyncing ? (
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   disabled
-                  className="flex-1 h-10 min-h-[44px] rounded-xl font-medium text-xs flex items-center justify-center gap-2 border-border/80"
+                  className="flex-1 h-11 min-h-[44px] rounded-xl font-medium text-sm flex items-center justify-center gap-2 border-border/80"
                 >
-                  <RefreshCw className="size-3.5 animate-spin text-foreground" />
+                  <RefreshCw className="size-4 animate-spin text-foreground" />
                   <span>Sincronizando...</span>
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={handleCancelSync}
-                  className="h-10 min-h-[44px] px-3.5 rounded-xl font-medium text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
+                  className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer border border-border/60"
                 >
                   Cancelar
                 </Button>
               </div>
             ) : (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSyncNow}
-                className="w-full h-10 min-h-[44px] rounded-xl font-medium text-xs flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/40 transition-colors"
-              >
-                <RefreshCw className="size-3.5 text-muted-foreground" />
-                <span>Sincronizar agora</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSyncNow}
+                  className="flex-1 h-11 min-h-[44px] rounded-xl font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer border-border/80 hover:bg-muted/40 transition-colors"
+                >
+                  <RefreshCw className="size-4 text-muted-foreground" />
+                  <span>Sincronizar agora</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleDisconnect}
+                  className="h-11 min-h-[44px] px-4 rounded-xl font-medium text-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 cursor-pointer border border-border/60 transition-colors"
+                >
+                  Desconectar
+                </Button>
+              </div>
             )}
           </div>
         )}

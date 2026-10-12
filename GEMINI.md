@@ -9,12 +9,13 @@
 
 ## 2. Front-End Impeccable Quality Bar (Zero Basic Mistakes & Anti-AI-Slop)
 - **Design Alignment:** Read `DESIGN.md` before performing UI edits.
-- **Visual & Layout Floor:**
-  - Minimum touch target 44px.
-  - Minimum font size 12px (`text-xs`).
-  - Single action bar sticky/fixed with primary submit buttons.
-  - Portuguese microcopy with imperative buttons and past-tense toasts.
-  - **Zero AI-Slop:** Banido o uso de gradientes coloridos aleatórios, sombras coloridas difusas ("glows") e estética genérica de IA. Priorizar tons sólidos, materiais escuros arquiteturais foscos e contraste real WCAG.
+- **Zero Tolerance UI Gates (Must Be Self-Audited Before Presenting ANY UI / Preview):**
+  - 🚫 **Tipografia Padrão (Base 14px & Piso 12px):** Todo texto descritivo, label, botão e conteúdo secundário deve **começar por padrão em 14px (`text-sm`)**. O tamanho 12px (`text-xs`) é estritamente reservado para micro-metadados pontuais (ex.: timestamps como *"Há 2 min"*, tags minúsculas). Banido terminantemente qualquer tamanho abaixo de 12px (`text-[10px]`, `text-[11px]`).
+  - 🚫 **Sentence Case Obrigatório:** Banido `uppercase`, `capitalize` e tracking artificial (`tracking-widest`, `tracking-wider`). Títulos, seções, subtítulos e badges devem ser escritos em **Sentence case** natural em português, preservando preposições e artigos minúsculos.
+  - 🚫 **Touch Target Real (≥ 44px):** Todo botão, trigger ou elemento clicável deve ter altura real de no mínimo 44px (`h-11`). Proibido usar `h-8` ou `h-9` em botões de ação.
+  - 🚫 **Zero AI-Slop & Paleta Sóbria:** Banido o uso de gradientes coloridos aleatórios, sombras coloridas difusas ("glows"), banners vermelhos neon genéricos e estética de template de IA. Priorizar tons sólidos, materiais escuros arquiteturais foscos (`zinc-900`/`zinc-800`), acentos sóbrios e contraste real WCAG.
+  - 🚫 **Microcopy 100% em Português & Anti-Adorno:** Proibido usar termos em inglês ("Sync", "Retry", "Login", etc.) e adereços visuais clichê (ex.: `→`, `>>`). Botões no imperativo ("Sincronizar", "Desconectar", "Tentar novamente"), toasts no particípio passado ("Sincronizado", "Salvo").
+  - 🚫 **Paridade Estrita em Previews:** Previews (arquivos `.html`, widgets, telas temporárias de exploração) **DEVEM** respeitar 100% das regras acima com a mesma disciplina do código de produção.
 - **Visual Exploration & Preview Protocol:**
   - Quando o usuário pedir exploração de design, fontes ou estilo: **NUNCA** alterar o código global diretamente às cegas.
   - **Sempre gerar um preview interativo rápido (HTML/widget ou preview dedicado)** para aprovação prévia do usuário antes de comitar mudanças na UI.
