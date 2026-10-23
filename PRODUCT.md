@@ -57,11 +57,12 @@ Imerso is a zero-friction language immersion tracking application.
 - Case: Sentence case throughout. Never use generic labels like "OK".
 
 ## 8. Backlog & Future Tasks
-- [ ] **Verificação Oficial do Aplicativo no Google Cloud (OAuth Consent Screen):**
-  - **Objetivo:** Eliminar a tela de aviso *"O Google não verificou este app"* para novos usuários.
-  - **Pré-requisitos necessários:**
-    1. Apontar domínio próprio customizado no Cloudflare Pages (Google não verifica subdomínios compartilhados `pages.dev`).
+- [ ] 🔥 **[ALTA PRIORIDADE] Verificação Oficial do Aplicativo no Google Cloud (OAuth Consent Screen):**
+  - **Status atual temporário:** App mantido em modo *Testing* no Google Cloud Console com inclusão manual dos e-mails dos usuários ativos na lista de *Test users*.
+  - **Objetivo da task:** Fazer a homologação definitiva e liberação pública geral do Google Drive sem tela de aviso de segurança nem necessidade de cadastrar e-mails individualmente.
+  - **Plano de ação quando executado:**
+    1. Apontar domínio próprio customizado no Cloudflare Pages (Google não verifica subdomínios compartilhados `*.pages.dev`).
     2. Confirmar propriedade do domínio no [Google Search Console](https://search.google.com/search-console).
     3. Gravar vídeo de demonstração curto (1-2 min) no YouTube (não listado) mostrando: Client ID visível na URL, tela de consentimento e sincronização com sucesso.
-    4. Submeter formalmente na [Tela de consentimento OAuth](https://console.cloud.google.com/apis/credentials/consent) e aguardar aprovação da equipe Google Trust & Safety (3 a 7 dias úteis).
+    4. Submeter formalmente na [Tela de consentimento OAuth](https://console.cloud.google.com/apis/credentials/consent) e acompanhar aprovação da equipe Google Trust & Safety (3 a 7 dias úteis).
 
